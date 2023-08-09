@@ -17,7 +17,7 @@ public class GptTests
 
     private ServiceStackHost CreateAppHost()
     {
-        var appHost = new BasicAppHost(typeof(GptServices).Assembly)
+        var appHost = new BasicAppHost(typeof(CoffeeShopServices).Assembly)
             {
                 ConfigureAppHost = host =>
                 {
@@ -56,7 +56,7 @@ public class GptTests
         //json.Print();
 
         var appHost = CreateAppHost();
-        var service = appHost.Resolve<GptServices>();
+        var service = appHost.Resolve<CoffeeShopServices>();
         var prompt = (string) await service.Any(new CoffeeShopPrompt
         {
             Request = request,
@@ -97,7 +97,7 @@ public class GptTests
         var request = "i'd like a latte that's it";
         var appHost = CreateAppHost();
 
-        var service = appHost.Resolve<GptServices>();
+        var service = appHost.Resolve<CoffeeShopServices>();
         // var schema = (string) await service.Any(new CoffeeShopSchema());
         // schema.Print();
         var prompt = (string) await service.Any(new CoffeeShopPrompt

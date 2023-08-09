@@ -23,7 +23,7 @@ public class GptMethods : ScriptMethods
     }
 }
 
-public class GptServices : Service
+public class CoffeeShopServices : Service
 {
     public IKernel Kernel { get; set; }
     

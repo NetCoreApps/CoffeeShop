@@ -1,7 +1,6 @@
 using Funq;
 using CoffeeShop.ServiceInterface;
-using ServiceStack.DataAnnotations;
-using ServiceStack.NativeTypes;
+using ServiceStack.IO;
 
 [assembly: HostingStartup(typeof(CoffeeShop.AppHost))]
 
@@ -25,5 +24,9 @@ public class AppHost : AppHostBase, IHostingStartup
             "http://localhost:5173", //vite dev
         }, allowCredentials:true));
 
+        var wwwrootVfs = GetVirtualFileSource<FileSystemVirtualFiles>();
+        Plugins.Add(new FilesUploadFeature(
+            new UploadLocation("products", wwwrootVfs, allowExtensions:FileExt.WebImages,
+                resolvePath: ctx => $"/products/{ctx.FileName}")));
     }
 }

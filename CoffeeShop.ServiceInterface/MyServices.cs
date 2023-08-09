@@ -1,22 +1,20 @@
 using ServiceStack;
 using CoffeeShop.ServiceModel;
+using Microsoft.Extensions.Options;
 using ServiceStack.OrmLite;
 
 namespace CoffeeShop.ServiceInterface;
 
 public class MyServices : Service
 {
-    public object Any(Hello request)
-    {
-        return new HelloResponse { Result = $"Hello, {request.Name}!" };
-    }
-
     public async Task<object> Any(AdminData request)
     {
         var tables = new (string Label, Type Type)[] 
         {
-            ("Bookings", typeof(Booking)),
-            ("Coupons",  typeof(Coupon)),
+            ("Skus",              typeof(Product)),
+            ("Categories",        typeof(Category)),
+            ("Options",           typeof(Options)),
+            ("Option Quantities", typeof(OptionQuantity)),
         };
         var dialect = Db.GetDialectProvider();
         var totalSql = tables.Map(x => $"SELECT '{x.Label}', COUNT(*) FROM {dialect.GetQuotedTableName(x.Type.GetModelMetadata())}")
