@@ -11,14 +11,15 @@ public class Migration1000 : MigrationBase
         public int Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public List<string>? Temperature { get; set; }
-        public List<string>? Size { get; set; }
+        public List<string>? Temperatures { get; set; }
+        public string? DefaultTemperature { get; set; }
+        public List<string>? Sizes { get; set; }
         public string? DefaultSize { get; set; }
         public string? ImageUrl { get; set; }
     
         [Reference]
-        public List<Product> Skus { get; set; }
-    
+        public List<Product> Products { get; set; }
+
         [Reference]
         public List<CategoryOption> CategoryOptions { get; set; }
     }
@@ -30,6 +31,7 @@ public class Migration1000 : MigrationBase
         public string Type { get; set; }
         public List<string> Names { get; set; }
         public bool? AllowQuantity { get; set; }
+        public string? QuantityLabel { get; set; }
     }
 
     public class OptionQuantity
@@ -67,6 +69,8 @@ public class Migration1000 : MigrationBase
         public decimal Cost { get; set; }
 
         public string? ImageUrl { get; set; }
+        
+        public bool? AllowShots { get; set; }
     }
 
     public override void Up()
@@ -84,13 +88,14 @@ public class Migration1000 : MigrationBase
             });
         Db.SaveAll(optionQuantities);
         
-        void AddOptions(string type, string[] names, bool? allowQuantity = false)
+        void AddOptions(string type, string[] names, bool? allowQuantity = false, string? quantityLabel = null)
         {
             var item = new Option
             {
                 Type = type,
                 Names = new(names),
                 AllowQuantity = allowQuantity,
+                QuantityLabel = quantityLabel,
             };
             Db.Save(item);
             options.Add(item);
@@ -100,6 +105,7 @@ public class Migration1000 : MigrationBase
             (string name, decimal cost)[] productInfos, 
             string[]? optionTypes = null,
             string[]? temperatures = null,
+            string? defaultTemperature = null,
             string[]? sizes = null,
             string? defaultSize = null)
         {
@@ -107,8 +113,9 @@ public class Migration1000 : MigrationBase
             {
                 Name = category,
                 Description = category.SplitCamelCase(),
-                Temperature = temperatures != null ? new(temperatures) : null,
-                Size = sizes != null ? new(sizes) : null,
+                Temperatures = temperatures != null ? new(temperatures) : null,
+                DefaultTemperature = defaultTemperature,
+                Sizes = sizes != null ? new(sizes) : null,
                 DefaultSize = defaultSize,
                 ImageUrl = $"/products/{category.SplitCamelCase().GenerateSlug()}.jpg",
             };
@@ -164,8 +171,7 @@ public class Migration1000 : MigrationBase
             "Sugar",
             "Sugar in the Raw",
             "Sweet n Low",
-            "Espresso Shot", 
-        }, allowQuantity:true);
+        }, allowQuantity:true, quantityLabel:"packets");
         AddOptions("Syrups", new[] {
             "Almond Syrup",
             "Buttered rum Syrup",
@@ -177,7 +183,7 @@ public class Migration1000 : MigrationBase
             "Raspberry Syrup",
             "Toffee Syrup",
             "Vanilla Syrup",
-        }, allowQuantity:true);
+        }, allowQuantity:true, quantityLabel:"pumps");
         AddOptions("Toppings", new[] {
             "Cinnamon",
             "Foam",
@@ -185,14 +191,14 @@ public class Migration1000 : MigrationBase
             "Nutmeg",
             "Whipped Cream",
             "Water", 
-        }, allowQuantity:true);
+        });
         AddOptions("Caffeines", new[] {
             "Regular",
             "Two Thirds Caf",
             "Half Caf",
             "One Third Caf",
             "Decaf", 
-        });
+        }, allowQuantity:true, quantityLabel:"shots");
         AddOptions("LattePreparations", new[] {
             "For Here Cup",
             "Lid",
@@ -230,7 +236,7 @@ public class Migration1000 : MigrationBase
             ("Mocha", 4.5m),
             ("Chai Latte", 4),
         }, new[] { "Milks", "Sweeteners", "Syrups", "Toppings", "Caffeines", "LattePreparations" },
-           new[] { "Hot", "Extra Hot", "Warm", "Iced" },
+           new[] { "Iced", "Warm", "Hot", "Extra Hot" }, defaultTemperature:"Hot",
            new[] { "Short", "Tall", "Grande", "Venti" }, defaultSize:"Grande");
 
         AddCategoryProducts("EspressoDrinks", new[] {
@@ -239,14 +245,14 @@ public class Migration1000 : MigrationBase
             ("Ristretto", 5),
             ("Macchiato", 5),
         }, new[] { "Creamers", "Sweeteners", "Syrups", "Toppings", "Caffeines", "LattePreparations" },
-           new[] { "Hot", "Extra Hot", "Warm", "Iced" },
+           new[] { "Iced", "Warm", "Hot", "Extra Hot" }, defaultTemperature:"Hot",
            new[] { "Solo", "Doppio", "Triple", "Quad" }, defaultSize:"Doppio");
         
         AddCategoryProducts("CoffeeDrinks", new[] {
                 ("Americano", 4.5m),
                 ("Coffee", 5),
             }, new[] { "Creamers", "Sweeteners", "Syrups", "Toppings", "Caffeines", "LattePreparations" },
-            new[] { "Hot", "Extra Hot", "Warm", "Iced" },
+            new[] { "Iced", "Warm", "Hot", "Extra Hot" }, defaultTemperature:"Hot",
             new[] { "Short", "Tall", "Grande", "Venti" }, defaultSize:"Grande");
     }
 

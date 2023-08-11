@@ -1,6 +1,6 @@
 /* Options:
-Date: 2023-05-25 16:12:17
-Version: 6.81
+Date: 2023-08-11 15:41:26
+Version: 6.101
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: https://localhost:5001
 
@@ -32,77 +32,115 @@ export class QueryBase {
     meta;
 }
 /** @typedef T {any} */
-export class QueryData extends QueryBase {
-    /** @param {{skip?:number,take?:number,orderBy?:string,orderByDesc?:string,include?:string,fields?:string,meta?:{ [index: string]: string; }}} [init] */
-    constructor(init) { super(init); Object.assign(this, init) }
-}
-/** @typedef T {any} */
 export class QueryDb extends QueryBase {
     /** @param {{skip?:number,take?:number,orderBy?:string,orderByDesc?:string,include?:string,fields?:string,meta?:{ [index: string]: string; }}} [init] */
     constructor(init) { super(init); Object.assign(this, init) }
 }
-export class AuditBase {
-    /** @param {{createdDate?:string,createdBy?:string,modifiedDate?:string,modifiedBy?:string,deletedDate?:string,deletedBy?:string}} [init] */
+export class CategoryOption {
+    /** @param {{id?:number,categoryId?:number,optionId?:number}} [init] */
     constructor(init) { Object.assign(this, init) }
-    /** @type {string} */
-    createdDate;
-    /** @type {string} */
-    createdBy;
-    /** @type {string} */
-    modifiedDate;
-    /** @type {string} */
-    modifiedBy;
-    /** @type {?string} */
-    deletedDate;
-    /** @type {string} */
-    deletedBy;
-}
-/** @typedef {'Single'|'Double'|'Queen'|'Twin'|'Suite'} */
-export var RoomType;
-(function (RoomType) {
-    RoomType["Single"] = "Single"
-    RoomType["Double"] = "Double"
-    RoomType["Queen"] = "Queen"
-    RoomType["Twin"] = "Twin"
-    RoomType["Suite"] = "Suite"
-})(RoomType || (RoomType = {}));
-export class Coupon {
-    /** @param {{id?:string,description?:string,discount?:number,expiryDate?:string}} [init] */
-    constructor(init) { Object.assign(this, init) }
-    /** @type {string} */
-    id;
-    /** @type {string} */
-    description;
     /** @type {number} */
-    discount;
-    /** @type {string} */
-    expiryDate;
+    id;
+    /** @type {number} */
+    categoryId;
+    /** @type {number} */
+    optionId;
 }
-export class Booking extends AuditBase {
-    /** @param {{id?:number,name?:string,roomType?:RoomType,roomNumber?:number,bookingStartDate?:string,bookingEndDate?:string,cost?:number,couponId?:string,discount?:Coupon,notes?:string,cancelled?:boolean,createdDate?:string,createdBy?:string,modifiedDate?:string,modifiedBy?:string,deletedDate?:string,deletedBy?:string}} [init] */
-    constructor(init) { super(init); Object.assign(this, init) }
+export class Category {
+    /** @param {{id?:number,name?:string,description?:string,temperature?:string[],size?:string[],defaultSize?:string,imageUrl?:string,products?:Product[],categoryOptions?:CategoryOption[]}} [init] */
+    constructor(init) { Object.assign(this, init) }
     /** @type {number} */
     id;
     /** @type {string} */
     name;
-    /** @type {RoomType} */
-    roomType;
-    /** @type {number} */
-    roomNumber;
     /** @type {string} */
-    bookingStartDate;
+    description;
+    /** @type {?string[]} */
+    temperature;
+    /** @type {?string[]} */
+    size;
     /** @type {?string} */
-    bookingEndDate;
+    defaultSize;
+    /** @type {?string} */
+    imageUrl;
+    /** @type {Product[]} */
+    products;
+    /** @type {CategoryOption[]} */
+    categoryOptions;
+}
+export class Product {
+    /** @param {{id?:number,categoryId?:number,name?:string,category?:Category,cost?:number,imageUrl?:string}} [init] */
+    constructor(init) { Object.assign(this, init) }
+    /** @type {number} */
+    id;
+    /** @type {number} */
+    categoryId;
+    /** @type {string} */
+    name;
+    /** @type {Category} */
+    category;
     /** @type {number} */
     cost;
     /** @type {?string} */
-    couponId;
-    /** @type {Coupon} */
-    discount;
-    /** @type {?string} */
-    notes;
+    imageUrl;
+}
+export class Option {
+    /** @param {{id?:number,type?:string,names?:string[],allowQuantity?:boolean,quantityLabel?:string}} [init] */
+    constructor(init) { Object.assign(this, init) }
+    /** @type {number} */
+    id;
+    /** @type {string} */
+    type;
+    /** @type {string[]} */
+    names;
     /** @type {?boolean} */
-    cancelled;
+    allowQuantity;
+    /** @type {?string} */
+    quantityLabel;
+}
+export class OptionQuantity {
+    /** @param {{id?:number,name?:string}} [init] */
+    constructor(init) { Object.assign(this, init) }
+    /** @type {number} */
+    id;
+    /** @type {string} */
+    name;
+}
+export class ProductOption {
+    /** @param {{type?:string,name?:string,temperature?:string,size?:string,optionQuantity?:string}} [init] */
+    constructor(init) { Object.assign(this, init) }
+    /** @type {string} */
+    type;
+    /** @type {string} */
+    name;
+    /** @type {string} */
+    temperature;
+    /** @type {string} */
+    size;
+    /** @type {string} */
+    optionQuantity;
+}
+export class ProductItem {
+    /** @param {{type?:string,name?:string,options?:ProductOption[]}} [init] */
+    constructor(init) { Object.assign(this, init) }
+    /** @type {string} */
+    type;
+    /** @type {string} */
+    name;
+    /** @type {ProductOption[]} */
+    options;
+}
+export class LineItem {
+    /** @param {{type?:string,product?:ProductItem,text?:string,quantity?:number}} [init] */
+    constructor(init) { Object.assign(this, init) }
+    /** @type {string} */
+    type;
+    /** @type {ProductItem} */
+    product;
+    /** @type {string} */
+    text;
+    /** @type {number} */
+    quantity;
 }
 export class PageStats {
     /** @param {{label?:string,total?:number}} [init] */
@@ -138,42 +176,17 @@ export class ResponseStatus {
     /** @type {{ [index: string]: string; }} */
     meta;
 }
-export class HelloResponse {
-    /** @param {{result?:string}} [init] */
+export class Cart {
+    /** @param {{items?:LineItem[]}} [init] */
     constructor(init) { Object.assign(this, init) }
-    /** @type {string} */
-    result;
+    /** @type {LineItem[]} */
+    items;
 }
 export class AdminDataResponse {
     /** @param {{pageStats?:PageStats[]}} [init] */
     constructor(init) { Object.assign(this, init) }
     /** @type {PageStats[]} */
     pageStats;
-}
-export class Todo {
-    /** @param {{id?:number,text?:string,isFinished?:boolean}} [init] */
-    constructor(init) { Object.assign(this, init) }
-    /** @type {number} */
-    id;
-    /** @type {string} */
-    text;
-    /** @type {boolean} */
-    isFinished;
-}
-/** @typedef T {any} */
-export class QueryResponse {
-    /** @param {{offset?:number,total?:number,results?:T[],meta?:{ [index: string]: string; },responseStatus?:ResponseStatus}} [init] */
-    constructor(init) { Object.assign(this, init) }
-    /** @type {number} */
-    offset;
-    /** @type {number} */
-    total;
-    /** @type {T[]} */
-    results;
-    /** @type {{ [index: string]: string; }} */
-    meta;
-    /** @type {ResponseStatus} */
-    responseStatus;
 }
 export class AuthenticateResponse {
     /** @param {{userId?:string,sessionId?:string,userName?:string,displayName?:string,referrerUrl?:string,bearerToken?:string,refreshToken?:string,profileUrl?:string,roles?:string[],permissions?:string[],responseStatus?:ResponseStatus,meta?:{ [index: string]: string; }}} [init] */
@@ -251,22 +264,52 @@ export class RegisterResponse {
     /** @type {{ [index: string]: string; }} */
     meta;
 }
-export class IdResponse {
-    /** @param {{id?:string,responseStatus?:ResponseStatus}} [init] */
+/** @typedef T {any} */
+export class QueryResponse {
+    /** @param {{offset?:number,total?:number,results?:T[],meta?:{ [index: string]: string; },responseStatus?:ResponseStatus}} [init] */
     constructor(init) { Object.assign(this, init) }
-    /** @type {string} */
-    id;
+    /** @type {number} */
+    offset;
+    /** @type {number} */
+    total;
+    /** @type {T[]} */
+    results;
+    /** @type {{ [index: string]: string; }} */
+    meta;
     /** @type {ResponseStatus} */
     responseStatus;
 }
-export class Hello {
-    /** @param {{name?:string}} [init] */
+export class CoffeeShopSchema {
     constructor(init) { Object.assign(this, init) }
-    /** @type {?string} */
-    name;
-    getTypeName() { return 'Hello' }
+    getTypeName() { return 'CoffeeShopSchema' }
     getMethod() { return 'POST' }
-    createResponse() { return new HelloResponse() }
+    createResponse() { return '' }
+}
+export class CoffeeShopPrompt {
+    /** @param {{request?:string,execute?:boolean}} [init] */
+    constructor(init) { Object.assign(this, init) }
+    /** @type {string} */
+    request;
+    /** @type {boolean} */
+    execute;
+    getTypeName() { return 'CoffeeShopPrompt' }
+    getMethod() { return 'POST' }
+    createResponse() { return '' }
+}
+export class SaveCart {
+    /** @param {{cart?:Cart}} [init] */
+    constructor(init) { Object.assign(this, init) }
+    /** @type {Cart} */
+    cart;
+    getTypeName() { return 'SaveCart' }
+    getMethod() { return 'PUT' }
+    createResponse() { }
+}
+export class GetCart {
+    constructor(init) { Object.assign(this, init) }
+    getTypeName() { return 'GetCart' }
+    getMethod() { return 'GET' }
+    createResponse() { return new Cart() }
 }
 export class AdminData {
     constructor(init) { Object.assign(this, init) }
@@ -274,52 +317,8 @@ export class AdminData {
     getMethod() { return 'GET' }
     createResponse() { return new AdminDataResponse() }
 }
-export class QueryTodos extends QueryData {
-    /** @param {{id?:number,ids?:number[],textContains?:string,skip?:number,take?:number,orderBy?:string,orderByDesc?:string,include?:string,fields?:string,meta?:{ [index: string]: string; }}} [init] */
-    constructor(init) { super(init); Object.assign(this, init) }
-    /** @type {?number} */
-    id;
-    /** @type {?number[]} */
-    ids;
-    /** @type {?string} */
-    textContains;
-    getTypeName() { return 'QueryTodos' }
-    getMethod() { return 'GET' }
-    createResponse() { return new QueryResponse() }
-}
-export class CreateTodo {
-    /** @param {{text?:string}} [init] */
-    constructor(init) { Object.assign(this, init) }
-    /** @type {string} */
-    text;
-    getTypeName() { return 'CreateTodo' }
-    getMethod() { return 'POST' }
-    createResponse() { return new Todo() }
-}
-export class UpdateTodo {
-    /** @param {{id?:number,text?:string,isFinished?:boolean}} [init] */
-    constructor(init) { Object.assign(this, init) }
-    /** @type {number} */
-    id;
-    /** @type {string} */
-    text;
-    /** @type {boolean} */
-    isFinished;
-    getTypeName() { return 'UpdateTodo' }
-    getMethod() { return 'PUT' }
-    createResponse() { return new Todo() }
-}
-export class DeleteTodos {
-    /** @param {{ids?:number[]}} [init] */
-    constructor(init) { Object.assign(this, init) }
-    /** @type {number[]} */
-    ids;
-    getTypeName() { return 'DeleteTodos' }
-    getMethod() { return 'DELETE' }
-    createResponse() { }
-}
 export class Authenticate {
-    /** @param {{provider?:string,state?:string,oauth_token?:string,oauth_verifier?:string,userName?:string,password?:string,rememberMe?:boolean,errorView?:string,nonce?:string,uri?:string,response?:string,qop?:string,nc?:string,cnonce?:string,accessToken?:string,accessTokenSecret?:string,scope?:string,meta?:{ [index: string]: string; }}} [init] */
+    /** @param {{provider?:string,state?:string,oauth_token?:string,oauth_verifier?:string,userName?:string,password?:string,rememberMe?:boolean,errorView?:string,nonce?:string,uri?:string,response?:string,qop?:string,nc?:string,cnonce?:string,accessToken?:string,accessTokenSecret?:string,scope?:string,returnUrl?:string,meta?:{ [index: string]: string; }}} [init] */
     constructor(init) { Object.assign(this, init) }
     /**
      * @type {string}
@@ -357,6 +356,8 @@ export class Authenticate {
     accessTokenSecret;
     /** @type {string} */
     scope;
+    /** @type {string} */
+    returnUrl;
     /** @type {{ [index: string]: string; }} */
     meta;
     getTypeName() { return 'Authenticate' }
@@ -420,119 +421,191 @@ export class Register {
     getMethod() { return 'POST' }
     createResponse() { return new RegisterResponse() }
 }
-export class QueryBookings extends QueryDb {
-    /** @param {{id?:number,skip?:number,take?:number,orderBy?:string,orderByDesc?:string,include?:string,fields?:string,meta?:{ [index: string]: string; }}} [init] */
+export class QueryCategories extends QueryDb {
+    /** @param {{skip?:number,take?:number,orderBy?:string,orderByDesc?:string,include?:string,fields?:string,meta?:{ [index: string]: string; }}} [init] */
     constructor(init) { super(init); Object.assign(this, init) }
-    /** @type {?number} */
-    id;
-    getTypeName() { return 'QueryBookings' }
+    getTypeName() { return 'QueryCategories' }
     getMethod() { return 'GET' }
     createResponse() { return new QueryResponse() }
 }
-export class QueryCoupons extends QueryDb {
-    /** @param {{id?:string,skip?:number,take?:number,orderBy?:string,orderByDesc?:string,include?:string,fields?:string,meta?:{ [index: string]: string; }}} [init] */
+export class QueryProducts extends QueryDb {
+    /** @param {{skip?:number,take?:number,orderBy?:string,orderByDesc?:string,include?:string,fields?:string,meta?:{ [index: string]: string; }}} [init] */
     constructor(init) { super(init); Object.assign(this, init) }
-    /** @type {string} */
-    id;
-    getTypeName() { return 'QueryCoupons' }
+    getTypeName() { return 'QueryProducts' }
     getMethod() { return 'GET' }
     createResponse() { return new QueryResponse() }
 }
-export class CreateBooking {
-    /** @param {{name?:string,roomType?:RoomType,roomNumber?:number,cost?:number,bookingStartDate?:string,bookingEndDate?:string,notes?:string,couponId?:string}} [init] */
+export class QueryOptions extends QueryDb {
+    /** @param {{skip?:number,take?:number,orderBy?:string,orderByDesc?:string,include?:string,fields?:string,meta?:{ [index: string]: string; }}} [init] */
+    constructor(init) { super(init); Object.assign(this, init) }
+    getTypeName() { return 'QueryOptions' }
+    getMethod() { return 'GET' }
+    createResponse() { return new QueryResponse() }
+}
+export class QueryOptionQuantities extends QueryDb {
+    /** @param {{skip?:number,take?:number,orderBy?:string,orderByDesc?:string,include?:string,fields?:string,meta?:{ [index: string]: string; }}} [init] */
+    constructor(init) { super(init); Object.assign(this, init) }
+    getTypeName() { return 'QueryOptionQuantities' }
+    getMethod() { return 'GET' }
+    createResponse() { return new QueryResponse() }
+}
+export class CreateCategory {
+    /** @param {{name?:string,description?:string,defaultSize?:string,size?:string[],temperature?:string[],imageUrl?:string}} [init] */
     constructor(init) { Object.assign(this, init) }
-    /**
-     * @type {string}
-     * @description Name this Booking is for */
-    name;
-    /** @type {RoomType} */
-    roomType;
-    /** @type {number} */
-    roomNumber;
-    /** @type {number} */
-    cost;
     /** @type {string} */
-    bookingStartDate;
+    name;
+    /** @type {string} */
+    description;
     /** @type {?string} */
-    bookingEndDate;
+    defaultSize;
+    /** @type {?string[]} */
+    size;
+    /** @type {?string[]} */
+    temperature;
     /** @type {?string} */
-    notes;
-    /** @type {?string} */
-    couponId;
-    getTypeName() { return 'CreateBooking' }
+    imageUrl;
+    getTypeName() { return 'CreateCategory' }
     getMethod() { return 'POST' }
-    createResponse() { return new IdResponse() }
+    createResponse() { return new Category() }
 }
-export class UpdateBooking {
-    /** @param {{id?:number,name?:string,roomType?:RoomType,roomNumber?:number,cost?:number,bookingStartDate?:string,bookingEndDate?:string,notes?:string,couponId?:string,cancelled?:boolean}} [init] */
+export class UpdateCategory {
+    /** @param {{id?:number,name?:string,description?:string,defaultSize?:string,size?:string[],temperature?:string[],imageUrl?:string}} [init] */
     constructor(init) { Object.assign(this, init) }
     /** @type {number} */
     id;
     /** @type {?string} */
     name;
-    /** @type {?RoomType} */
-    roomType;
-    /** @type {?number} */
-    roomNumber;
-    /** @type {?number} */
-    cost;
     /** @type {?string} */
-    bookingStartDate;
+    description;
     /** @type {?string} */
-    bookingEndDate;
+    defaultSize;
+    /** @type {?string[]} */
+    size;
+    /** @type {?string[]} */
+    temperature;
     /** @type {?string} */
-    notes;
-    /** @type {?string} */
-    couponId;
-    /** @type {?boolean} */
-    cancelled;
-    getTypeName() { return 'UpdateBooking' }
+    imageUrl;
+    getTypeName() { return 'UpdateCategory' }
     getMethod() { return 'PATCH' }
-    createResponse() { return new IdResponse() }
+    createResponse() { return new Category() }
 }
-export class DeleteBooking {
+export class DeleteCategory {
     /** @param {{id?:number}} [init] */
     constructor(init) { Object.assign(this, init) }
     /** @type {number} */
     id;
-    getTypeName() { return 'DeleteBooking' }
+    getTypeName() { return 'DeleteCategory' }
     getMethod() { return 'DELETE' }
     createResponse() { }
 }
-export class CreateCoupon {
-    /** @param {{description?:string,discount?:number,expiryDate?:string}} [init] */
+export class CreateProduct {
+    /** @param {{categoryId?:number,name?:string,cost?:number,imageUrl?:string}} [init] */
     constructor(init) { Object.assign(this, init) }
-    /** @type {string} */
-    description;
     /** @type {number} */
-    discount;
+    categoryId;
     /** @type {string} */
-    expiryDate;
-    getTypeName() { return 'CreateCoupon' }
+    name;
+    /** @type {number} */
+    cost;
+    /** @type {?string} */
+    imageUrl;
+    getTypeName() { return 'CreateProduct' }
     getMethod() { return 'POST' }
-    createResponse() { return new IdResponse() }
+    createResponse() { return new Product() }
 }
-export class UpdateCoupon {
-    /** @param {{id?:string,description?:string,discount?:number,expiryDate?:string}} [init] */
+export class UpdateProduct {
+    /** @param {{id?:number,categoryId?:number,name?:string,cost?:number,imageUrl?:string}} [init] */
     constructor(init) { Object.assign(this, init) }
-    /** @type {string} */
-    id;
-    /** @type {string} */
-    description;
     /** @type {number} */
-    discount;
-    /** @type {string} */
-    expiryDate;
-    getTypeName() { return 'UpdateCoupon' }
+    id;
+    /** @type {?number} */
+    categoryId;
+    /** @type {?string} */
+    name;
+    /** @type {?number} */
+    cost;
+    /** @type {?string} */
+    imageUrl;
+    getTypeName() { return 'UpdateProduct' }
     getMethod() { return 'PATCH' }
-    createResponse() { return new IdResponse() }
+    createResponse() { return new Product() }
 }
-export class DeleteCoupon {
-    /** @param {{id?:string}} [init] */
+export class DeleteProduct {
+    /** @param {{id?:number}} [init] */
+    constructor(init) { Object.assign(this, init) }
+    /** @type {number} */
+    id;
+    getTypeName() { return 'DeleteProduct' }
+    getMethod() { return 'DELETE' }
+    createResponse() { }
+}
+export class CreateOption {
+    /** @param {{type?:string,names?:string[],allowQuantity?:boolean,quantityLabel?:string}} [init] */
     constructor(init) { Object.assign(this, init) }
     /** @type {string} */
+    type;
+    /** @type {string[]} */
+    names;
+    /** @type {?boolean} */
+    allowQuantity;
+    /** @type {?string} */
+    quantityLabel;
+    getTypeName() { return 'CreateOption' }
+    getMethod() { return 'POST' }
+    createResponse() { return new Option() }
+}
+export class UpdateOption {
+    /** @param {{id?:number,type?:string,names?:string[],allowQuantity?:boolean,quantityLabel?:string}} [init] */
+    constructor(init) { Object.assign(this, init) }
+    /** @type {number} */
     id;
-    getTypeName() { return 'DeleteCoupon' }
+    /** @type {string} */
+    type;
+    /** @type {string[]} */
+    names;
+    /** @type {?boolean} */
+    allowQuantity;
+    /** @type {?string} */
+    quantityLabel;
+    getTypeName() { return 'UpdateOption' }
+    getMethod() { return 'PATCH' }
+    createResponse() { return new Option() }
+}
+export class DeleteOption {
+    /** @param {{id?:number}} [init] */
+    constructor(init) { Object.assign(this, init) }
+    /** @type {number} */
+    id;
+    getTypeName() { return 'DeleteOption' }
+    getMethod() { return 'DELETE' }
+    createResponse() { }
+}
+export class CreateOptionQuantity {
+    /** @param {{name?:string}} [init] */
+    constructor(init) { Object.assign(this, init) }
+    /** @type {string} */
+    name;
+    getTypeName() { return 'CreateOptionQuantity' }
+    getMethod() { return 'POST' }
+    createResponse() { return new OptionQuantity() }
+}
+export class UpdateOptionQuantity {
+    /** @param {{id?:number,name?:string}} [init] */
+    constructor(init) { Object.assign(this, init) }
+    /** @type {number} */
+    id;
+    /** @type {?string} */
+    name;
+    getTypeName() { return 'UpdateOptionQuantity' }
+    getMethod() { return 'PATCH' }
+    createResponse() { return new OptionQuantity() }
+}
+export class DeleteOptionQuantity {
+    /** @param {{id?:number}} [init] */
+    constructor(init) { Object.assign(this, init) }
+    /** @type {number} */
+    id;
+    getTypeName() { return 'DeleteOptionQuantity' }
     getMethod() { return 'DELETE' }
     createResponse() { }
 }

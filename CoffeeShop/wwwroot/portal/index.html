@@ -21,7 +21,7 @@
         <div class="flex h-16 shrink-0 items-center">
             <a href="/portal/" class="text-2xl whitespace-nowrap overflow-x-hidden flex items-center">
                 <img class="mr-1 h-8 w-auto text-indigo-600" src="/img/logo.svg" alt="Logo">
-                <span class="hidden sm:block text-2xl font-semibold">Client Admin</span>
+                <span class="hidden sm:block text-2xl font-semibold">Coffee Shop</span>
             </a>
         </div>
         <nav class="flex flex-1 flex-col">
@@ -71,9 +71,10 @@
 <script type="module">
 import { createApp, ref, onMounted, shallowRef } from "vue"
 import { JsonApiClient, leftPart, rightPart, appendQueryString, humanize } from "@servicestack/client"
-import ServiceStackVue, { useClient, useAuth, useMetadata } from "@servicestack/vue"
+import ServiceStackVue, { useClient, useAuth, useMetadata, useFormatters } from "@servicestack/vue"
 import { Authenticate, AdminData } from "dtos.mjs"
 
+const { Formats } = useFormatters()
 const { loadMetadata, metadataApi, typeOf } = useMetadata()
 await loadMetadata({
     olderThan: window.Server ? null : location.search.includes('clear=metadata') ? 0 : 60 * 60 * 1000, //1hr
@@ -92,7 +93,7 @@ const sections = {
                 </div>
               </dl>
               <p class="mt-8 text-sm font-semibold leading-6">
-                Go to <a href="/admin/" class="text-indigo-600">Server Rendered Admin <span aria-hidden="true">&rarr;</span></a>    
+                Go to <a href="/" class="text-indigo-600">Menu <span aria-hidden="true">&rarr;</span></a>    
               </p>
             </div>`,
             setup() {
@@ -104,29 +105,74 @@ const sections = {
             }
         },
     },
-    Bookings: {
-        type: 'Booking',
+    Categories: {
+        type: 'Category',
         component: {
-            template:`<AutoQueryGrid :type="type" 
-                selected-columns="id,name,roomType,roomNumber,bookingStartDate,bookingEndDate,cost,couponId,discount"
-                :header-titles="{ roomNumber:'Room No', bookingStartDate:'Start Date', bookingEndDate:'End Date', couponId:'Coupon' }"
-                :visible-from="{ roomNumber:'lg', bookingEndDate:'xl', cost:'md', couponId:'xl', discount:'never' }" />`,
+            template:`
+            <AutoQueryGrid :type="type" selectedColumns="imageUrl,id,name,defaultSize,products"
+                    :headerTitles="{ imageUrl: ' ' }" :canFilter="x => x != 'ImageUrl'">
+                <template #imageUrl="{ imageUrl }">
+                    <Icon :src="imageUrl" class="w-8 h-8 rounded-full" />
+                </template>
+                <template #id="{ id }">{{id}}</template>
+                <template #name="{ name }">{{name}}</template>
+                <template #description="{ description }">{{description}}</template>
+                <template #defaultSize="{ defaultSize }">{{defaultSize}}</template>
+                <template #products="{ products }">{{ products.map(x => x.name).join(', ') }}</template>
+            </AutoQueryGrid>`,
+            setup() {
+                return { Formats }
+            }
         },
     },
-    Coupons: {
-        type: 'Coupon',
+    Products: {
+        type: 'Product',
+        component: {
+            template:`
+            <AutoQueryGrid :type="type" selectedColumns="imageUrl,category,id,name,cost"
+                    :headerTitles="{ imageUrl: ' ' }" :canFilter="x => x != 'ImageUrl'">
+                <template #imageUrl="{ imageUrl }">
+                    <Icon :src="imageUrl" class="w-8 h-8 rounded-full" />
+                </template>
+                <template #category="{ category }">
+                    <a :href="'#Categories?edit=' + category.id" class="flex text-indigo-600 hover:underline">
+                        <icon :svg="getIcon('Categories')" class="w-5 h-5 mr-1 shrink-0 text-indigo-600"></icon>
+                        {{category.name}}
+                    </a>
+                </template>
+                <template #id="{ id }">{{id}}</template>
+                <template #name="{ name }">{{name}}</template>
+                <template #cost="{ cost }">{{cost}}</template>
+            </AutoQueryGrid>`,
+            setup() {
+                return { getIcon }
+            }
+        },
+    },
+    Options: {
+        type: 'Option',
+        component: {
+            template:`<AutoQueryGrid :type="type" />`,
+        },
+    },
+    OptionQuantities: {
+        type: 'OptionQuantity',
         component: {
             template:`<AutoQueryGrid :type="type" />`,
         },
     },
 }
+function getIcon(id) {
+    const section = sections[id]
+    return section.icon  || typeOf(section.type)?.icon?.svg ||
+        `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2M3 8v6m0-6h6m12 0v6m0-6H9m12 6v4a2 2 0 0 1-2 2H9m12-6H9m-6 0v4a2 2 0 0 0 2 2h4m-6-6h6m0-6v6m0 0v6m6-12v12"></path></svg>`
+} 
 Object.keys(sections).map(id => {
     const section = sections[id]
     section.id = id
     section.label = section.label || humanize(id)
     section.title = section.title || section.label
-    section.icon  = section.icon  || typeOf(section.type)?.icon?.svg || 
-        `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2M3 8v6m0-6h6m12 0v6m0-6H9m12 6v4a2 2 0 0 1-2 2H9m12-6H9m-6 0v4a2 2 0 0 0 2 2h4m-6-6h6m0-6v6m0 0v6m6-12v12"></path></svg>`
+    section.icon  = getIcon(id)
     section.component.props = section.component.props || ['type']
     section.component.emits = section.component.emits || ['nav']
 })
@@ -139,7 +185,8 @@ const App = {
         const refreshKey = ref(1)
         const showUserMenu = ref(false)
         const init = ref(false)
-        const activeSection = shallowRef(sections[rightPart(leftPart(location.hash,'?'), '#')] || sections.Dashboard)
+        const getSection = () => rightPart(leftPart(location.hash,'?'), '#')
+        const activeSection = shallowRef(sections[getSection()] || sections.Dashboard)
 
         function navTo(section, args, pushState=true) {
             if (!args) args = {}
@@ -151,7 +198,7 @@ const App = {
 
         onMounted(async () => {
             window.addEventListener('popstate', event => {
-                navTo(event.state?.section, {}, false)
+                navTo(event.state?.section || getSection(), {}, false)
             })
             
             const api = await client.api(new Authenticate())

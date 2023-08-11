@@ -11,10 +11,10 @@ public class MyServices : Service
     {
         var tables = new (string Label, Type Type)[] 
         {
-            ("Skus",              typeof(Product)),
-            ("Categories",        typeof(Category)),
-            ("Options",           typeof(Options)),
-            ("Option Quantities", typeof(OptionQuantity)),
+            ("Categories",       typeof(Category)),
+            ("Products",         typeof(Product)),
+            ("Options",          typeof(Option)),
+            ("OptionQuantities", typeof(OptionQuantity)),
         };
         var dialect = Db.GetDialectProvider();
         var totalSql = tables.Map(x => $"SELECT '{x.Label}', COUNT(*) FROM {dialect.GetQuotedTableName(x.Type.GetModelMetadata())}")

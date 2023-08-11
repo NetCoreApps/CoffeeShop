@@ -101,5 +101,14 @@ public class CoffeeShopServices : Service
 
        return prompt;
     }
-    
+
+    public void Any(SaveCart request)
+    {
+        SessionBag.Set(nameof(Cart), request.Cart);
+    }
+
+    public object Any(GetCart request)
+    {
+        return SessionBag.Get<Cart>(nameof(Cart));
+    }
 }

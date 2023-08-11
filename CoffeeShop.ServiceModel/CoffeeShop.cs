@@ -11,14 +11,15 @@ public class Category
     public int Id { get; set; }
     public string Name { get; set; }
     public string Description { get; set; }
-    public List<string>? Temperature { get; set; }
-    public List<string>? Size { get; set; }
+    public List<string>? Temperatures { get; set; }
+    public string? DefaultTemperature { get; set; }
+    public List<string>? Sizes { get; set; }
     public string? DefaultSize { get; set; }
     public string? ImageUrl { get; set; }
     
     [Reference]
-    public List<Product> Skus { get; set; }
-    
+    public List<Product> Products { get; set; }
+
     [Reference]
     public List<CategoryOption> CategoryOptions { get; set; }
 }
@@ -31,6 +32,7 @@ public class Option
     public string Type { get; set; }
     public List<string> Names { get; set; }
     public bool? AllowQuantity { get; set; }
+    public string? QuantityLabel { get; set; }
 }
 
 [Icon(Svg = Icons.OptionQuantity)]
@@ -75,31 +77,36 @@ public class Product
 [Tag(Tags.CoffeeShop)]
 [Route("/categories")]
 public class QueryCategories : QueryDb<Category> {}
+[Tag(Tags.CoffeeShop)]
 public class CreateCategory : ICreateDb<Category>, IReturn<Category>
 {
     public string Name { get; set; }
     public string Description { get; set; }
+    [Input(Type = "tag"), FieldCss(Field = "col-span-12")]
+    public List<string>? Sizes { get; set; }
+    [Input(Type = "tag"), FieldCss(Field = "col-span-12")]
+    public List<string>? Temperatures { get; set; }
     public string? DefaultSize { get; set; }
-    [Input(Type = "tag"), FieldCss(Field = "col-span-12")]
-    public List<string>? Size { get; set; }
-    [Input(Type = "tag"), FieldCss(Field = "col-span-12")]
-    public List<string>? Temperature { get; set; }
+    public string? DefaultTemperature { get; set; }
     [Input(Type = "file"), UploadTo("products")]
     public string? ImageUrl { get; set; }
 }
+[Tag(Tags.CoffeeShop)]
 public class UpdateCategory : IPatchDb<Category>, IReturn<Category>
 {
     public int Id { get; set; }
-    public string? Name { get; set; }
-    public string? Description { get; set; }
+    public string Name { get; set; }
+    public string Description { get; set; }
+    [Input(Type = "tag"), FieldCss(Field = "col-span-12")]
+    public List<string>? Sizes { get; set; }
+    [Input(Type = "tag"), FieldCss(Field = "col-span-12")]
+    public List<string>? Temperatures { get; set; }
     public string? DefaultSize { get; set; }
-    [Input(Type = "tag"), FieldCss(Field = "col-span-12")]
-    public List<string>? Size { get; set; }
-    [Input(Type = "tag"), FieldCss(Field = "col-span-12")]
-    public List<string>? Temperature { get; set; }
+    public string? DefaultTemperature { get; set; }
     [Input(Type = "file"), UploadTo("products")]
     public string? ImageUrl { get; set; }
 }
+[Tag(Tags.CoffeeShop)]
 public class DeleteCategory : IDeleteDb<Category>, IReturnVoid
 {
     public int Id { get; set; }
@@ -109,6 +116,7 @@ public class DeleteCategory : IDeleteDb<Category>, IReturnVoid
 [Tag(Tags.CoffeeShop)]
 [Route("/products")]
 public class QueryProducts : QueryDb<Product> {}
+[Tag(Tags.CoffeeShop)]
 public class CreateProduct : ICreateDb<Product>, IReturn<Product>
 {
     public int CategoryId { get; set; }
@@ -120,6 +128,7 @@ public class CreateProduct : ICreateDb<Product>, IReturn<Product>
     [Input(Type = "file"), UploadTo("products")]
     public string? ImageUrl { get; set; }
 }
+[Tag(Tags.CoffeeShop)]
 public class UpdateProduct : IPatchDb<Product>, IReturn<Product>
 {
     public int Id { get; set; }
@@ -133,6 +142,7 @@ public class UpdateProduct : IPatchDb<Product>, IReturn<Product>
     [Input(Type = "file"), UploadTo("products")]
     public string? ImageUrl { get; set; }
 }
+[Tag(Tags.CoffeeShop)]
 public class DeleteProduct : IDeleteDb<Product>, IReturnVoid
 {
     public int Id { get; set; }
@@ -141,13 +151,16 @@ public class DeleteProduct : IDeleteDb<Product>, IReturnVoid
 [Tag(Tags.CoffeeShop)]
 [Route("/options")]
 public class QueryOptions : QueryDb<Option> {}
+[Tag(Tags.CoffeeShop)]
 public class CreateOption : ICreateDb<Option>, IReturn<Option>
 {
     public string Type { get; set; }
     [Input(Type = "tag"), FieldCss(Field = "col-span-12")]
     public List<string> Names { get; set; }
     public bool? AllowQuantity { get; set; }
+    public string? QuantityLabel { get; set; }
 }
+[Tag(Tags.CoffeeShop)]
 public class UpdateOption : IPatchDb<Option>, IReturn<Option>
 {
     public int Id { get; set; }
@@ -155,7 +168,9 @@ public class UpdateOption : IPatchDb<Option>, IReturn<Option>
     [Input(Type = "tag"), FieldCss(Field = "col-span-12")]
     public List<string> Names { get; set; }
     public bool? AllowQuantity { get; set; }
+    public string? QuantityLabel { get; set; }
 }
+[Tag(Tags.CoffeeShop)]
 public class DeleteOption : IDeleteDb<Option>, IReturnVoid
 {
     public int Id { get; set; }
@@ -164,29 +179,53 @@ public class DeleteOption : IDeleteDb<Option>, IReturnVoid
 [Tag(Tags.CoffeeShop)]
 [Route("/option-quantities")]
 public class QueryOptionQuantities : QueryDb<OptionQuantity> {}
+[Tag(Tags.CoffeeShop)]
 public class CreateOptionQuantity : ICreateDb<OptionQuantity>, IReturn<OptionQuantity>
 {
     public string Name { get; set; }
 }
+[Tag(Tags.CoffeeShop)]
 public class UpdateOptionQuantity : IPatchDb<OptionQuantity>, IReturn<OptionQuantity>
 {
     public int Id { get; set; }
     public string? Name { get; set; }
 }
+[Tag(Tags.CoffeeShop)]
 public class DeleteOptionQuantity : IDeleteDb<OptionQuantity>, IReturnVoid
 {
     public int Id { get; set; }
 }
 
+[Tag(Tags.CoffeeShop)]
+public class ModifyCategoryOptions
+{
+    public int CategoryId { get; set; }
+    public List<int>? AddOptionIds { get; set; }
+    public List<int>? RemoveOptionIds { get; set; }
+}
+
+[Tag(Tags.CoffeeShop)]
 [Route("/coffeeshop/schema")]
 public class CoffeeShopSchema : IReturn<string> {}
 
+[Tag(Tags.CoffeeShop)]
 [Route("/coffeeshop/prompt")]
 public class CoffeeShopPrompt : IReturn<string>
 {
     public string Request { get; set; }
     public bool Execute { get; set; }
 }
+
+[Tag(Tags.CoffeeShop)]
+[Route("/cart", "PUT")]
+public class SaveCart : IReturnVoid
+{
+    public Cart Cart { get; set; }
+}
+
+[Tag(Tags.CoffeeShop)]
+[Route("/cart", "GET")]
+public class GetCart : IReturn<Cart> {}
 
 /* GPT Models */
 public class Cart

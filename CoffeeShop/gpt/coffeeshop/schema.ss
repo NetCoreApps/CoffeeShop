@@ -22,12 +22,12 @@ export type Product = {{categories.map(x => x.name) |> tsUnionTypes}};
 {{ var options = category.categoryOptions.map(x => optionsMap[x.optionId]) }}
 export interface {{category.name}} {
     type: '{{category.name}}';
-    name: {{ category.skus.map(x => x.name.lower()) |> tsUnionStrings }};
-{{#if !category.temperature.isEmpty() }}
-    temperature?: {{category.temperature.map(x => x.lower()) |> tsUnionStrings}};
+    name: {{ category.products.map(x => x.name.lower()) |> tsUnionStrings }};
+{{#if !category.temperatures.isEmpty() }}
+    temperature?: {{category.temperatures.map(x => x.lower()) |> tsUnionStrings}};{{category.defaultTemperature ? ` // The default is '${category.defaultTemperature.lower()}'`.raw() : ''}}
 {{/if}}
-{{#if !category.size.isEmpty() }}
-    size?: {{category.size.map(x => x.lower()) |> tsUnionStrings}};{{category.defaultSize ? ` // The default is '${category.defaultSize.lower()}'`.raw() : ''}}
+{{#if !category.sizes.isEmpty() }}
+    size?: {{category.sizes.map(x => x.lower()) |> tsUnionStrings}};{{category.defaultSize ? ` // The default is '${category.defaultSize.lower()}'`.raw() : ''}}
 {{/if}}
 {{#if options.count > 0}}
     options?: ({{ options.map(x => x.type) |> tsUnionTypes }})[];

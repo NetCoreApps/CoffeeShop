@@ -1,162 +1,306 @@
 ﻿@page
 @model IndexModel
-@inject BlogPosts BlogPosts
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Coffee Shop - TypeChat";
+    var categories = await base.Gateway.SendAsync(new QueryCategories());
 }
+<style>
+.bg {
+    position: absolute;
+    width: 100%;
+    height: calc(100% - 850px);
+    left: 0;
+    top: 850px;
+    opacity: .05;
+    background-image: url('/img/bg.png');
+    background-repeat: repeat-x;
+    background-position: 50% 0;
+    z-index: -1;
+}
+</style>
+<div class="bg"></div>
 
-<div class="container mx-auto px-5">
+<div class="container mx-auto">
     <section class="flex-col md:flex-row flex items-center md:justify-between mt-16 mb-16 md:mb-12">
-        <h1 class="text-6xl md:text-8xl font-bold tracking-tighter leading-tight md:pr-8">Vue.mjs</h1>
-        <div class="flex flex-col">
-            <h4 class="text-lg mt-5">A Modern .NET + JS App with 
-                <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules" class="@Css.LinkUnderline">JS modules</a>, 
-                <a href="https://vuejs.org" class="@Css.LinkUnderline">Vue.js</a>,
-                <a href="https://htmx.org" class="@Css.LinkUnderline">htmx</a> &amp; Markdown
-            </h4>
-            <div class="flex justify-between items-center">
-                <div id="hello-api" class="mr-4"></div>
-                @Html.SrcComponent("HelloApi.mjs", size:"w-8 h-8 mt-2")
-            </div>
-        </div>
+        <h1 class="text-6xl md:text-8xl font-bold tracking-tighter leading-tight">Menu</h1>
     </section>
 </div>
 
-<div class="container mx-auto px-5">
-@{
-    var posts = BlogPosts.GetPosts().Take(3).ToList();
-    var post = posts.FirstOrDefault();
-    if (post != null)
-    {
-        <section>
-            <div class="mb-8 md:mb-16">
-                <div class="sm:mx-0">
-                    <a aria-label="@post.Title" href="@BlogPosts.GetPostLink(post)">
-                        <img src="@post.Splash" alt="Cover Image for @post.Title" class="shadow-sm hover:shadow-2xl transition-shadow duration-200">
-                    </a>
-                </div>
-            </div>
-            <div class="md:grid md:grid-cols-2 md:gap-x-16 lg:gap-x-8 mb-20 md:mb-28">
-                <div>
-                    <h3 class="mb-4 text-4xl lg:text-6xl leading-tight">
-                        <a class="hover:underline" href="@BlogPosts.GetPostLink(post)">@post.Title</a>
-                    </h3>
-                    <div class="mb-4 md:mb-0 text-lg">
-                        <time datetime="@BlogPosts.GetDateTimestamp(post.Date)">@BlogPosts.GetDateLabel(post.Date)</time>
-                    </div>
-                </div>
-                <div>
-                    <p class="text-lg leading-relaxed mb-4">@post.Summary</p>
-                    <div class="flex items-center">
-                        <img src="@BlogPosts.GetAuthorProfileUrl(post.Author)" class="w-12 h-12 rounded-full mr-4" alt="Author">
-                        <div class="text-xl font-bold">@post.Author</div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    }
-
-    void RenderPost(MarkdownFileInfo post)
-    {
-        <div>
-            <div class="mb-5">
-                <div class="sm:mx-0">
-                    <a aria-label="@post.Title" href="@BlogPosts.GetPostLink(post)">
-                        <img src="@post.Splash" alt="Cover Image for @post.Title" class="shadow-sm hover:shadow-2xl transition-shadow duration-200">
-                    </a>
-                </div>
-            </div>
-            <h3 class="text-3xl mb-3 leading-snug">
-                <a class="hover:underline" href="@BlogPosts.GetPostLink(post)">@post.Title</a>
-            </h3>
-            <div class="text-lg mb-4">
-                <time datetime="@BlogPosts.GetDateTimestamp(post.Date)">@BlogPosts.GetDateLabel(post.Date)</time>
-            </div>
-            <p class="text-lg leading-relaxed mb-4">@post.Summary</p>
-            <div class="flex items-center">
-                <img src="@BlogPosts.GetAuthorProfileUrl(post.Author)" class="w-12 h-12 rounded-full mr-4" alt="@post.Author">
-                <div class="text-xl font-bold">@post.Author</div>
-            </div>
-        </div>        
-    }
-
-    var morePosts = posts.Skip(1).ToList();
-    if (morePosts.Count == 2)
-    {
-        <section>
-            <h2 class="mb-8 text-6xl md:text-7xl font-bold tracking-tighter leading-tight">More Stories</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 md:gap-x-16 lg:gap-x-32 gap-y-20 md:gap-y-32 mb-32">
-                @{ RenderPost(morePosts[0]); }
-                @{ RenderPost(morePosts[1]); }
-            </div>
-        </section>        
-    }
-}
-</div>
-
-<section>
-    <h2 class="text-4xl md:text-6xl font-bold tracking-tighter leading-tight md:pr-8 whitespace-nowrap text-center pt-8">
-      Getting Started
-    </h2>
-    <div class="mb-8 md:mb-16">
-        <div class="sm:mx-0 sm:px-4 sm:py-8 flex justify-evenly">
-            <div id="getting-started"></div>
-        </div>
-        <div class="flex justify-center">
-            @Html.SrcComponent("GettingStarted.mjs")
-        </div>
-    </div>
-</section>
-
-<section>
-    <div class="mx-auto max-w-xl py-8 sm:py-16">
-        <div class="text-center">
-            <h2 class="py-2 text-3xl font-bold text-gray-900 dark:text-gray-100 sm:text-4xl">
-                Simple, Modern JavaScript Development
-            </h2>
-            <p class="py-2 text-lg text-gray-500 dark:text-gray-400">
-                Leverage Modern Browser features for Simple, Fast App development
-            </p>
-        </div>
-
-        <ul role="list" class="mt-4 divide-y divide-gray-200 dark:divide-gray-800 border-t border-b border-gray-200 dark:border-gray-800">
-        @{
-            void NavListItem(string title, string childContent)
+<div id="app" class="container mx-auto w-full bg-white">
+    
+    <div class="flex justify-between w-full">
+        <div class="pt-12 mt-2 w-40">
+            @foreach (var category in categories.Results)
             {
-                <li class="relative flex items-start space-x-4 py-6">
-                    <div class="min-w-0 flex-1 px-2 sm:px-0">
-                        <h3 class="text-base font-medium text-gray-900 dark:text-gray-100">
-                            <span class="rounded-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2">
-                                <span class="focus:outline-none">
-                                    @title
-                                </span>
-                            </span>
-                        </h3>
-                        <p class="text-base text-gray-500">
-                            @Html.Raw(childContent)
-                        </p>
-                    </div>
-                </li>
+                <a href="#@category.Name" class="block mb-8 cursor-pointer hover:text-indigo-600">
+                    <img src="@category.ImageUrl" alt="" class="w-16 h-16 rounded-full object-cover">
+                    <span class="block mt-2 select-none">
+                        @category.Description
+                    </span>
+                </a>
             }
-            NavListItem("Simple", "No <b>node_modules</b>, no build tools, no client side routing, no heavy client state");
-            NavListItem("Fast", $"Initial SSR HTML &amp; JSON for fast <a href='https://web.dev/fcp/' class='{Css.Link}'>First Contentful Paint (FCP)</a>");
-            NavListItem("Lightweight", "Only load JS each page needs, built-in optimizer for optimal dev &amp; prod bundles");
-            NavListItem("Modern", "Use latest Vue3, htmx or any preferred 3rd Party libraries");
-            NavListItem("Rapid Development", "View code &amp; style changes instantly on Save with <b>dotnet watch</b>");
-            NavListItem("Maintainable", "Logically structure &amp; encapsulate components using native JavaScript Modules");
-            NavListItem("Type Safety", "Use JSDoc and Library TypeScript definitions for IDE static analysis");
-            NavListItem("SEO Friendly", "Use Server Side Rendering for SEO-friendly Markdown and HTML content");
-            NavListItem("Tailwind", "Productive, maintainable, responsive-first styling");
-        }
-        </ul>
+        </div>
+        <div class="flex-grow">
+            <div v-cloak v-if="activeCategory" class="mb-4 text-xl select-none">
+                <a href="#">Menu</a> / 
+                <a :href="`#${activeCategory.name}`" :class="{ 'font-semibold':!activeProduct }">{{activeCategory.description}}</a> 
+                <span v-if="activeProduct" class="font-semibold"> / {{activeProduct.name}}</span>
+            </div>
+            <div v-if="activeProduct">
+                <div class="p-8 bg-stone-50 rounded-md">
+                    <div class="flex items-center">
+                        <img :src="activeProduct.imageUrl" alt="" class="w-40 h-40 object-cover">
+                        <div class="ml-8 text-4xl">
+                            <div>{{activeProduct.name}}</div>
+                            <div class="pt-2" v-html="currency(activeProduct.cost)"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex">
+                    <div v-if="activeCategory.sizes || activeCategory.temperatures" class="w-1/2">
+                        <div class="pl-8">
+                            <div class="pt-8 pr-8" v-if="activeCategory.sizes">
+                                <h3 class="text-2xl border-b pb-2 mb-4">Size Options</h3>
+                                <fieldset class="mt-2">
+                                    <legend class="sr-only">Choose a Size preference</legend>
+                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-1 sm:gap-3">
+                                        <label v-for="size in activeCategory.sizes" 
+                                               :class="['flex items-center justify-center whitespace-nowrap rounded-md py-3 px-3 text-sm font-semibold uppercase sm:flex-1 cursor-pointer focus:outline-none',
+                                                      size == orderItem.size ? 'ring-2 ring-indigo-600 ring-offset-2 bg-indigo-600 text-white hover:bg-indigo-500' : 'ring-1 ring-inset ring-gray-300 bg-white text-gray-900 hover:bg-gray-50']">
+                                            <input v-model="orderItem.size" type="radio" name="temperature" :value="size" class="sr-only">
+                                            <span>{{size}}</span>
+                                        </label>
+                                    </div>
+                                </fieldset>
+                            </div>
+                            <div class="pt-8 pr-8" v-if="activeCategory.temperatures">
+                                <h3 class="text-2xl border-b pb-2 mb-4">Temperature preference</h3>
+                                <fieldset class="mt-2">
+                                    <legend class="sr-only">Choose a Temperature preference</legend>
+                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-1 sm:gap-3">
+                                        <label v-for="temp in activeCategory.temperatures" 
+                                               :class="['flex items-center justify-center whitespace-nowrap rounded-md py-3 px-3 text-sm font-semibold uppercase sm:flex-1 cursor-pointer focus:outline-none',
+                                                      temp == orderItem.temperature ? 'ring-2 ring-red-600 ring-offset-2 bg-red-600 text-white hover:bg-red-500' : 'ring-1 ring-inset ring-gray-300 bg-white text-gray-900 hover:bg-gray-50']">
+                                            <input v-model="orderItem.temperature" type="radio" name="temperature" :value="temp" class="sr-only">
+                                            <span>{{temp}}</span>
+                                        </label>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="w-1/2">
+                        <div class="pl-8 pt-8">
+                            <h3 class="text-2xl border-b pb-2 mb-4">Customize</h3>
+                            <div v-for="option in productOptions" class="pb-8 flex max-w-xs">
+                                <div class="">
+                                    <label for="">{{humanize(option.type)}}</label>
+                                    <select-input class="w-32 md:w-60" class="flex-grow" v-model="orderItem.options[option.type]" :values="option.names"></select-input>
+                                </div>
+                                <div v-if="option.allowQuantity && option.quantityLabel" class="ml-4 select-none">
+                                    <label for="">{{option.quantityLabel}}</label>
+                                    <div class="h-12 flex items-center">
+                                        <svg v-on:click="orderItem.optionSizes[option.type] = Math.max((orderItem.optionSizes[option.type] || 1)-1,1)" class="w-6 h-6 align-middle cursor-pointer text-gray-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12 20c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8m0-18A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2M7 13h10v-2H7"></path></svg>
+                                        <span class="w-6 text-center font-semibold text-gray-600">{{ orderItem.optionSizes[option.type] || 1 }}</span>
+                                        <svg v-on:click="orderItem.optionSizes[option.type] = (orderItem.optionSizes[option.type] || 1) + 1" class="w-6 h-6 align-middle cursor-pointer text-gray-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12 17q.425 0 .713-.288T13 16v-3h3.025q.425 0 .7-.288T17 12q0-.425-.288-.713T16 11h-3V7.975q0-.425-.288-.7T12 7q-.425 0-.713.288T11 8v3H7.975q-.425 0-.7.288T7 12q0 .425.288.713T8 13h3v3.025q0 .425.288.7T12 17Zm0 5q-2.075 0-3.9-.788t-3.175-2.137q-1.35-1.35-2.137-3.175T2 12q0-2.075.788-3.9t2.137-3.175q1.35-1.35 3.175-2.137T12 2q2.075 0 3.9.788t3.175 2.137q1.35 1.35 2.138 3.175T22 12q0 2.075-.788 3.9t-2.137 3.175q-1.35 1.35-3.175 2.138T12 22Zm0-10Zm0 8q3.325 0 5.663-2.337T20 12q0-3.325-2.337-5.663T12 4Q8.675 4 6.337 6.337T4 12q0 3.325 2.337 5.663T12 20Z"></path></svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-8 flex justify-end items-center">
+                    <text-link v-on:click="reset" class="text-lg pr-4">reset</text-link>
+                    <button v-on:click="addToOrder" type="button" class="rounded-full bg-green-600 px-4 py-2.5 text-lg font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600">
+                        Add to Order
+                    </button>
+                </div>
+            </div>
+            <div v-else-if="activeCategory" class="mt-8 grid grid-cols-3">
+                <a v-for="product in activeCategory.products" :href="`#${activeCategory.name}/${product.name}`" class="block mb-8 flex flex-col items-center">
+                    <img :src="product.imageUrl" alt="" class="w-28 h-28 rounded-full object-cover">
+                    <span class="block mt-2 text-lg font-medium">
+                        {{product.name}}
+                    </span>
+                </a>
+            </div>
+            <div v-else class="mt-20 text-center">
+                <span class="text-lg">What can we get for you today?</span>
+                <html-format :values="categories"></html-format>
+            </div>
+        </div>
+        <div v-if="cart && cart.items.length" class="ml-4 w-80">
+            <div>
+                <div v-cloak class="mb-4 text-xl select-none font-medium">
+                    Cart
+                </div>
+                <div v-for="item in cart.items" class="shadow rounded p-4 mb-4">
+                    <div class="flex">
+                        <div>
+                            <img :src="productsMap[item.product].imageUrl" alt="" class="w-16 h-16 rounded-full object-cover">
+                        </div>
+                        <div class="ml-4">
+                            <div class="">
+                                <span class="text-lg font-semibold">{{productsMap[item.product].name}}</span>
+                                <div class="flex mt-1">
+                                    <div v-if="item.size" class="mr-2">
+                                        <span class="inline-flex items-center rounded-full bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10">{{item.size}}</span>
+                                    </div>
+                                    <div v-if="item.temperature">
+                                        <span class="inline-flex items-center rounded-full bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10">{{item.temperature}}</span>
+                                    </div>
+                                </div>
+                                <div class="pt-4">
+                                    <ul v-for="(option,category) in item.options">
+                                        <li>{{map(item.optionSizes[category], x => `${x}x `) || '' }} {{option}}</li>
+                                    </ul>
+                                </div>
+                                <div class="pt-4 flex">
+                                    <svg class="mr-2 w-6 h-6 align-middle cursor-pointer text-gray-500 hover:text-gray-600" v-on:click="editCartItem(item)" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"> <title>Modify Item</title> <path fill="currentColor" d="M16.293 2.293a1 1 0 0 1 1.414 0l4 4a1 1 0 0 1 0 1.414l-13 13A1 1 0 0 1 8 21H4a1 1 0 0 1-1-1v-4a1 1 0 0 1 .293-.707l10-10l3-3zM14 7.414l-9 9V19h2.586l9-9L14 7.414zm4 1.172L19.586 7L17 4.414L15.414 6L18 8.586z"/></svg>
+                                    <svg class="mr-2 w-6 h-6 align-middle cursor-pointer text-gray-500 hover:text-gray-600" v-on:click="removeCartItem(item)" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"> <title>Remove Item</title> <path fill="currentColor" d="M12 20c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8m0-18A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2M7 13h10v-2H7"></path></svg>
+                                    <svg class="mr-2 w-6 h-6 align-middle cursor-pointer text-gray-500 hover:text-gray-600" v-on:click="duplicateCartItem(item)" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"> <title>Duplicate Item</title> <path fill="currentColor" d="M12 17q.425 0 .713-.288T13 16v-3h3.025q.425 0 .7-.288T17 12q0-.425-.288-.713T16 11h-3V7.975q0-.425-.288-.7T12 7q-.425 0-.713.288T11 8v3H7.975q-.425 0-.7.288T7 12q0 .425.288.713T8 13h3v3.025q0 .425.288.7T12 17Zm0 5q-2.075 0-3.9-.788t-3.175-2.137q-1.35-1.35-2.137-3.175T2 12q0-2.075.788-3.9t2.137-3.175q1.35-1.35 3.175-2.137T12 2q2.075 0 3.9.788t3.175 2.137q1.35 1.35 2.138 3.175T22 12q0 2.075-.788 3.9t-2.137 3.175q-1.35 1.35-3.175 2.138T12 22Zm0-10Zm0 8q3.325 0 5.663-2.337T20 12q0-3.325-2.337-5.663T12 4Q8.675 4 6.337 6.337T4 12q0 3.325 2.337 5.663T12 20Z"></path></svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="pt-8 flex justify-end">
+                    <primary-button v-on:click="emptyCart" color="red">Empty Cart</primary-button>
+                </div>
+            </div>
+        </div>
     </div>
-</section>
+</div>
 
 <script type="module">
 import { mount } from "/mjs/app.mjs"
-import HelloApi from "/mjs/components/HelloApi.mjs" 
-import GettingStarted from "/mjs/components/GettingStarted.mjs" 
+import { createApp, ref, computed, onMounted, shallowRef } from "vue"
+import { JsonApiClient, leftPart, rightPart, appendQueryString, omit, map, humanize } from "@@servicestack/client"
+import ServiceStackVue, { useClient, useAuth, useMetadata, useFormatters } from "@@servicestack/vue"
+import { QueryOptions, Authenticate, AdminData } from "/mjs/dtos.mjs" 
 
-mount('#hello-api', HelloApi, { value: 'Vue.mjs' })
-mount('#getting-started', GettingStarted, { template:'vue-mjs' })
+const categories = @Html.Raw(categories.Results.ToJson())
+const productsMap = {}
+categories.forEach(c => c.products.forEach(p => productsMap[p.name] = p))
+
+const App = {
+    setup() {
+        const { user, signIn } = useAuth()
+        const { currency } = useFormatters()
+        const init = ref(false)
+        const refreshKey = ref(1)
+        const getCategory = () => leftPart(rightPart(leftPart(location.hash,'?'), '#'), '/')
+        const getProduct = () => map(rightPart(rightPart(leftPart(location.hash,'?'), '#'), '/'), x => decodeURIComponent(x))
+        const activeCategory = shallowRef(categories.find(x => x.name === getCategory()))
+        const activeProduct = shallowRef(categories.flatMap(x => x.products).find(x => x.name === getProduct()))
+        const categoryOptions = ref()
+        const productOptions = computed(() => (categoryOptions.value && activeCategory.value 
+            ? categoryOptions.value.filter(x => activeCategory.value.categoryOptions.some(y => y.optionId === x.id)) : null) || [])
+        const cart = ref()
+        const cartItems = computed(() => cart.value && cart.value.items || [])
+        const orderItem = ref(createOrderItem())
+        
+        function createOrderItem() {
+            return map(activeCategory.value, c => ({
+                    size:c.defaultSize||'', 
+                    temperature:c.defaultTemperature||'', 
+                    options:{}, optionSizes:{} 
+                })) 
+                || { options:{}, optionSizes:{} }
+        }
+
+        function navTo(category, args, pushState=true) {
+            console.log('navTo', category, args, pushState)
+            if (!args) args = {}
+            refreshKey.value++
+            activeCategory.value = categories.find(x => x.name === category)
+            activeProduct.value = categories.flatMap(x => x.products).find(x => x.name === args.product)
+            orderItem.value = createOrderItem()
+            if (pushState) {
+                history.pushState({ category, ...args }, null, 
+                    appendQueryString(`#${category}` + (args.product ? `/${args.product}` : ''), omit(args,['product'])))
+            }
+        }
+        
+        function addToOrder() {
+            if (!cart.value || !cart.value.items) {
+                cart.value = { items:[] }
+            }
+            orderItem.value.product = activeProduct.value.name
+            cart.value.items.push(orderItem.value)
+            saveCart()
+            reset()
+        }
+        function reset() {
+            orderItem.value = createOrderItem()
+            saveCart()
+        }
+        function saveCart() {
+            if (cart.value && cart.value.items.length)
+                localStorage.setItem('cart', JSON.stringify(cart.value))
+            else
+                localStorage.removeItem('cart')
+        }
+        function editCartItem(item) {
+            const product = productsMap[item.product]
+            const category = categories.find(x => x.id === product.categoryId)
+            orderItem.value = item
+            navTo(category.name, { product:product.name })
+        }
+        function removeCartItem(item) {
+            cart.value.items = cart.value.items.filter(x => x !== item)
+            saveCart() 
+        }
+        function duplicateCartItem(item) {
+            const pos = cart.value.items.findIndex(x => x === item)
+            cart.value.items.splice(pos, 0, Object.assign({}, item))
+            saveCart() 
+        }
+
+        function emptyCart() {
+            cart.value = { items:[] }
+            localStorage.removeItem('cart')
+        }
+
+        onMounted(async () => {
+            cart.value = map(localStorage.getItem('cart'), x => JSON.parse(x)) || null
+            
+            window.addEventListener('popstate', event => {
+                navTo(event.state?.category || getCategory(), { product:event.state?.product || getProduct() }, false)
+            })
+            
+            categoryOptions.value = (await client.api(new QueryOptions())).response.results
+            
+            const api = await client.api(new Authenticate())
+            if (api.succeeded) {
+                signIn(api.response)
+            }
+            init.value = true
+        })
+
+        return {
+            categories,
+            productsMap,
+            refreshKey, 
+            categoryOptions, 
+            productOptions, 
+            activeCategory, 
+            activeProduct, 
+            currency, 
+            cart, 
+            cartItems,
+            orderItem,
+            map, 
+            omit,
+            humanize,
+            addToOrder,
+            reset,
+            emptyCart,
+            editCartItem,
+            removeCartItem,
+            duplicateCartItem,
+        }
+    }
+}
+mount('#app',App)
 </script>
