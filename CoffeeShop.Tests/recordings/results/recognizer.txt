@@ -1,0 +1,107 @@
+﻿=======================================================================
+
+Config = new RecognitionConfig {
+    AutoDecodingConfig = new AutoDetectDecodingConfig(),
+    LanguageCodes = { "en-US" },
+    Model = "latest_short",
+}
+[
+	{
+		Alternatives: 
+		[
+			{
+				Transcript: a cappuccino with Two Sugars please,
+				Confidence: 0.6861593,
+				Words: []
+			}
+		],
+		ChannelTag: 0,
+		ResultEndOffset: 
+		{
+			Seconds: 3,
+			Nanos: 240000000
+		},
+		LanguageCode: en-US
+	}
+]
+
+=======================================================================
+
+Config = new RecognitionConfig {
+    AutoDecodingConfig = new AutoDetectDecodingConfig(),
+    LanguageCodes = { "en-AU" },
+    Model = "latest_short",
+}
+[
+	{
+		Alternatives: 
+		[
+			{
+				Transcript: a cup of chicken with tissues,
+				Confidence: 0.9265659,
+				Words: []
+			}
+		],
+		ChannelTag: 0,
+		ResultEndOffset: 
+		{
+			Seconds: 2,
+			Nanos: 700000000
+		},
+		LanguageCode: en-AU
+	}
+]
+
+=======================================================================
+
+Config = new RecognitionConfig {
+    AutoDecodingConfig = new AutoDetectDecodingConfig(),
+    LanguageCodes = { "en-AU" },
+    Model = "short",
+}
+[
+	{
+		Alternatives: 
+		[
+			{
+				Transcript: a cup of chicken with tissues,
+				Confidence: 0.9265659,
+				Words: []
+			}
+		],
+		ChannelTag: 0,
+		ResultEndOffset: 
+		{
+			Seconds: 2,
+			Nanos: 700000000
+		},
+		LanguageCode: en-AU
+	}
+]
+
+=======================================================================
+
+Config = new RecognitionConfig {
+    AutoDecodingConfig = new AutoDetectDecodingConfig(),
+    LanguageCodes = { "en-AU" },
+    Model = "telephony",
+}
+[
+	{
+		Alternatives: 
+		[
+			{
+				Transcript: a Cup between sugars please,
+				Confidence: 2.2779274e-09,
+				Words: []
+			}
+		],
+		ChannelTag: 0,
+		ResultEndOffset: 
+		{
+			Seconds: 3,
+			Nanos: 220000000
+		},
+		LanguageCode: en-AU
+	}
+]

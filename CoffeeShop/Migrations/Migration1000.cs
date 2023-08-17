@@ -39,6 +39,8 @@ public class Migration1000 : MigrationBase
         [AutoIncrement]
         public int Id { get; set; }
         public string Name { get; set; }
+        
+        public decimal Value { get; set; }
     }
 
     public class CategoryOption
@@ -72,6 +74,38 @@ public class Migration1000 : MigrationBase
         
         public bool? AllowShots { get; set; }
     }
+    
+    public class Recording
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+        public string Path { get; set; }
+        public string? Transcript { get; set; }
+        public float? TranscriptConfidence { get; set; }
+        public string? TranscriptResponse { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public DateTime? TranscribeStart { get; set; }
+        public DateTime? TranscribeEnd { get; set; }
+        public int? TranscribeDurationMs { get; set; }
+        public int DurationMs { get; set; }
+        public string? IpAddress { get; set; }
+        public string? Error { get; set; }
+    }
+    
+    public class Chat
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+        public string Request { get; set; }
+        public string Prompt { get; set; }
+        public string? ChatResponse { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public DateTime? ChatStart { get; set; }
+        public DateTime? ChatEnd { get; set; }
+        public int? ChatDurationMs { get; set; }
+        public string? IpAddress { get; set; }
+        public string? Error { get; set; }
+    }
 
     public override void Up()
     {
@@ -80,13 +114,21 @@ public class Migration1000 : MigrationBase
         Db.CreateTable<OptionQuantity>();
         Db.CreateTable<CategoryOption>();
         Db.CreateTable<Product>();
+        Db.CreateTable<Recording>();
+        Db.CreateTable<Chat>();
         
         var options = new List<Option>();
-        var optionQuantities = new[]{ "no", "light", "regular", "extra", "one", "two", "three", "four", "five" }
+        var optionQuantities = new[]{ "no", "light", "regular", "extra" }
             .Map(x => new OptionQuantity {
                 Name = x
             });
-        Db.SaveAll(optionQuantities);
+        Db.SaveAll(new OptionQuantity[]
+        {
+            new() { Name = "no", Value = 0 },
+            new() { Name = "light", Value = 0.5m },
+            new() { Name = "regular", Value = 1 },
+            new() { Name = "extra", Value = 2 },
+        });
         
         void AddOptions(string type, string[] names, bool? allowQuantity = false, string? quantityLabel = null)
         {
@@ -264,6 +306,8 @@ public class Migration1000 : MigrationBase
         Db.DeleteAll<Option>();
         Db.DeleteAll<Category>();
 
+        Db.DropTable<Chat>();
+        Db.DropTable<Recording>();
         Db.DropTable<Product>();
         Db.DropTable<CategoryOption>();
         Db.DropTable<OptionQuantity>();

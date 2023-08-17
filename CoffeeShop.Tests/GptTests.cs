@@ -43,9 +43,17 @@ public class GptTests
         var dbFactory = ResolveDbFactory();
         using var db = dbFactory.Open();
     
-        //db.LoadSelect(db.From<Category>()).PrintDump();
-        var options = db.Select(db.From<Option>());
-        options.PrintDump();
+        db.LoadSelect(db.From<Category>()).PrintDump();
+    }
+
+    [Test]
+    public async Task Dump_all_phrases()
+    {
+        using var appHost = CreateAppHost();
+        var service = appHost.Resolve<CoffeeShopServices>();
+        var response = await service.Any(new CoffeeShopPhrases());
+        
+        response.Results.PrintDump();
     }
 
     [Test]
@@ -55,7 +63,7 @@ public class GptTests
         //var json = await File.ReadAllTextAsync("../../../request01.json");
         //json.Print();
 
-        var appHost = CreateAppHost();
+        using var appHost = CreateAppHost();
         var service = appHost.Resolve<CoffeeShopServices>();
         var prompt = (string) await service.Any(new CoffeeShopPrompt
         {
@@ -95,15 +103,14 @@ public class GptTests
     public async Task Execute_Prompt()
     {
         var request = "i'd like a latte that's it";
-        var appHost = CreateAppHost();
+        using var appHost = CreateAppHost();
 
         var service = appHost.Resolve<CoffeeShopServices>();
         // var schema = (string) await service.Any(new CoffeeShopSchema());
         // schema.Print();
-        var prompt = (string) await service.Any(new CoffeeShopPrompt
+        var prompt = (string) await service.Any(new CreateCoffeeShopChat
         {
             Request = request,
-            Execute = true,
         });
         prompt.Print();
     }

@@ -18,6 +18,8 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.*" />
     <PackageReference Include="ServiceStack" Version="6.*" />
     <PackageReference Include="ServiceStack.Kestrel" Version="6.*" />
+    <PackageReference Include="Google.Cloud.Storage.V1" Version="4.6.0" />
+    <PackageReference Include="Google.Cloud.Speech.V2" Version="1.0.0-beta06" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,5 +29,6 @@
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
   </ItemGroup>
+
 
 </Project>

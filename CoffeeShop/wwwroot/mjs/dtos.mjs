@@ -1,5 +1,5 @@
 /* Options:
-Date: 2023-08-11 15:41:26
+Date: 2023-08-17 14:08:52
 Version: 6.101
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: https://localhost:5001
@@ -13,6 +13,58 @@ BaseUrl: https://localhost:5001
 */
 
 "use strict";
+export class Recording {
+    /** @param {{id?:number,path?:string,transcript?:string,transcriptConfidence?:number,transcriptResponse?:string,createdDate?:string,transcribeStart?:string,transcribeEnd?:string,transcribeDurationMs?:number,durationMs?:number,ipAddress?:string,error?:string}} [init] */
+    constructor(init) { Object.assign(this, init) }
+    /** @type {number} */
+    id;
+    /** @type {string} */
+    path;
+    /** @type {?string} */
+    transcript;
+    /** @type {?number} */
+    transcriptConfidence;
+    /** @type {?string} */
+    transcriptResponse;
+    /** @type {string} */
+    createdDate;
+    /** @type {?string} */
+    transcribeStart;
+    /** @type {?string} */
+    transcribeEnd;
+    /** @type {?number} */
+    transcribeDurationMs;
+    /** @type {number} */
+    durationMs;
+    /** @type {?string} */
+    ipAddress;
+    /** @type {?string} */
+    error;
+}
+export class Chat {
+    /** @param {{id?:number,request?:string,prompt?:string,chatResponse?:string,createdDate?:string,chatStart?:string,chatEnd?:string,chatDurationMs?:number,ipAddress?:string,error?:string}} [init] */
+    constructor(init) { Object.assign(this, init) }
+    /** @type {number} */
+    id;
+    /** @type {string} */
+    request;
+    /** @type {string} */
+    prompt;
+    /** @type {?string} */
+    chatResponse;
+    /** @type {string} */
+    createdDate;
+    /** @type {?string} */
+    chatStart;
+    /** @type {?string} */
+    chatEnd;
+    /** @type {?number} */
+    chatDurationMs;
+    /** @type {?string} */
+    ipAddress;
+    /** @type {?string} */
+    error;
+}
 export class QueryBase {
     /** @param {{skip?:number,take?:number,orderBy?:string,orderByDesc?:string,include?:string,fields?:string,meta?:{ [index: string]: string; }}} [init] */
     constructor(init) { Object.assign(this, init) }
@@ -47,7 +99,7 @@ export class CategoryOption {
     optionId;
 }
 export class Category {
-    /** @param {{id?:number,name?:string,description?:string,temperature?:string[],size?:string[],defaultSize?:string,imageUrl?:string,products?:Product[],categoryOptions?:CategoryOption[]}} [init] */
+    /** @param {{id?:number,name?:string,description?:string,temperatures?:string[],defaultTemperature?:string,sizes?:string[],defaultSize?:string,imageUrl?:string,products?:Product[],categoryOptions?:CategoryOption[]}} [init] */
     constructor(init) { Object.assign(this, init) }
     /** @type {number} */
     id;
@@ -56,9 +108,11 @@ export class Category {
     /** @type {string} */
     description;
     /** @type {?string[]} */
-    temperature;
+    temperatures;
+    /** @type {?string} */
+    defaultTemperature;
     /** @type {?string[]} */
-    size;
+    sizes;
     /** @type {?string} */
     defaultSize;
     /** @type {?string} */
@@ -106,50 +160,6 @@ export class OptionQuantity {
     /** @type {string} */
     name;
 }
-export class ProductOption {
-    /** @param {{type?:string,name?:string,temperature?:string,size?:string,optionQuantity?:string}} [init] */
-    constructor(init) { Object.assign(this, init) }
-    /** @type {string} */
-    type;
-    /** @type {string} */
-    name;
-    /** @type {string} */
-    temperature;
-    /** @type {string} */
-    size;
-    /** @type {string} */
-    optionQuantity;
-}
-export class ProductItem {
-    /** @param {{type?:string,name?:string,options?:ProductOption[]}} [init] */
-    constructor(init) { Object.assign(this, init) }
-    /** @type {string} */
-    type;
-    /** @type {string} */
-    name;
-    /** @type {ProductOption[]} */
-    options;
-}
-export class LineItem {
-    /** @param {{type?:string,product?:ProductItem,text?:string,quantity?:number}} [init] */
-    constructor(init) { Object.assign(this, init) }
-    /** @type {string} */
-    type;
-    /** @type {ProductItem} */
-    product;
-    /** @type {string} */
-    text;
-    /** @type {number} */
-    quantity;
-}
-export class PageStats {
-    /** @param {{label?:string,total?:number}} [init] */
-    constructor(init) { Object.assign(this, init) }
-    /** @type {string} */
-    label;
-    /** @type {number} */
-    total;
-}
 export class ResponseError {
     /** @param {{errorCode?:string,fieldName?:string,message?:string,meta?:{ [index: string]: string; }}} [init] */
     constructor(init) { Object.assign(this, init) }
@@ -176,11 +186,23 @@ export class ResponseStatus {
     /** @type {{ [index: string]: string; }} */
     meta;
 }
-export class Cart {
-    /** @param {{items?:LineItem[]}} [init] */
+export class PageStats {
+    /** @param {{label?:string,total?:number}} [init] */
     constructor(init) { Object.assign(this, init) }
-    /** @type {LineItem[]} */
-    items;
+    /** @type {string} */
+    label;
+    /** @type {number} */
+    total;
+}
+export class StringsResponse {
+    /** @param {{results?:string[],meta?:{ [index: string]: string; },responseStatus?:ResponseStatus}} [init] */
+    constructor(init) { Object.assign(this, init) }
+    /** @type {string[]} */
+    results;
+    /** @type {{ [index: string]: string; }} */
+    meta;
+    /** @type {ResponseStatus} */
+    responseStatus;
 }
 export class AdminDataResponse {
     /** @param {{pageStats?:PageStats[]}} [init] */
@@ -286,30 +308,49 @@ export class CoffeeShopSchema {
     createResponse() { return '' }
 }
 export class CoffeeShopPrompt {
-    /** @param {{request?:string,execute?:boolean}} [init] */
+    /** @param {{request?:string}} [init] */
     constructor(init) { Object.assign(this, init) }
     /** @type {string} */
     request;
-    /** @type {boolean} */
-    execute;
     getTypeName() { return 'CoffeeShopPrompt' }
     getMethod() { return 'POST' }
     createResponse() { return '' }
 }
-export class SaveCart {
-    /** @param {{cart?:Cart}} [init] */
+export class CoffeeShopPhrases {
     constructor(init) { Object.assign(this, init) }
-    /** @type {Cart} */
-    cart;
-    getTypeName() { return 'SaveCart' }
-    getMethod() { return 'PUT' }
+    getTypeName() { return 'CoffeeShopPhrases' }
+    getMethod() { return 'POST' }
+    createResponse() { return new StringsResponse() }
+}
+export class CreateCoffeeShopPhrases {
+    constructor(init) { Object.assign(this, init) }
+    getTypeName() { return 'CreateCoffeeShopPhrases' }
+    getMethod() { return 'POST' }
     createResponse() { }
 }
-export class GetCart {
+export class CreateCoffeeShopRecognizer {
     constructor(init) { Object.assign(this, init) }
-    getTypeName() { return 'GetCart' }
-    getMethod() { return 'GET' }
-    createResponse() { return new Cart() }
+    getTypeName() { return 'CreateCoffeeShopRecognizer' }
+    getMethod() { return 'POST' }
+    createResponse() { }
+}
+export class CreateRecording {
+    /** @param {{path?:string}} [init] */
+    constructor(init) { Object.assign(this, init) }
+    /** @type {string} */
+    path;
+    getTypeName() { return 'CreateRecording' }
+    getMethod() { return 'POST' }
+    createResponse() { return new Recording() }
+}
+export class CreateChat {
+    /** @param {{request?:string}} [init] */
+    constructor(init) { Object.assign(this, init) }
+    /** @type {string} */
+    request;
+    getTypeName() { return 'CreateChat' }
+    getMethod() { return 'POST' }
+    createResponse() { return new Chat() }
 }
 export class AdminData {
     constructor(init) { Object.assign(this, init) }
@@ -449,19 +490,28 @@ export class QueryOptionQuantities extends QueryDb {
     getMethod() { return 'GET' }
     createResponse() { return new QueryResponse() }
 }
+export class QueryRecordings extends QueryDb {
+    /** @param {{skip?:number,take?:number,orderBy?:string,orderByDesc?:string,include?:string,fields?:string,meta?:{ [index: string]: string; }}} [init] */
+    constructor(init) { super(init); Object.assign(this, init) }
+    getTypeName() { return 'QueryRecordings' }
+    getMethod() { return 'GET' }
+    createResponse() { return new QueryResponse() }
+}
 export class CreateCategory {
-    /** @param {{name?:string,description?:string,defaultSize?:string,size?:string[],temperature?:string[],imageUrl?:string}} [init] */
+    /** @param {{name?:string,description?:string,sizes?:string[],temperatures?:string[],defaultSize?:string,defaultTemperature?:string,imageUrl?:string}} [init] */
     constructor(init) { Object.assign(this, init) }
     /** @type {string} */
     name;
     /** @type {string} */
     description;
+    /** @type {?string[]} */
+    sizes;
+    /** @type {?string[]} */
+    temperatures;
     /** @type {?string} */
     defaultSize;
-    /** @type {?string[]} */
-    size;
-    /** @type {?string[]} */
-    temperature;
+    /** @type {?string} */
+    defaultTemperature;
     /** @type {?string} */
     imageUrl;
     getTypeName() { return 'CreateCategory' }
@@ -469,20 +519,22 @@ export class CreateCategory {
     createResponse() { return new Category() }
 }
 export class UpdateCategory {
-    /** @param {{id?:number,name?:string,description?:string,defaultSize?:string,size?:string[],temperature?:string[],imageUrl?:string}} [init] */
+    /** @param {{id?:number,name?:string,description?:string,sizes?:string[],temperatures?:string[],defaultSize?:string,defaultTemperature?:string,imageUrl?:string}} [init] */
     constructor(init) { Object.assign(this, init) }
     /** @type {number} */
     id;
-    /** @type {?string} */
+    /** @type {string} */
     name;
-    /** @type {?string} */
+    /** @type {string} */
     description;
+    /** @type {?string[]} */
+    sizes;
+    /** @type {?string[]} */
+    temperatures;
     /** @type {?string} */
     defaultSize;
-    /** @type {?string[]} */
-    size;
-    /** @type {?string[]} */
-    temperature;
+    /** @type {?string} */
+    defaultTemperature;
     /** @type {?string} */
     imageUrl;
     getTypeName() { return 'UpdateCategory' }

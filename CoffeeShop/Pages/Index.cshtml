@@ -1,8 +1,10 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Coffee Shop - TypeChat";
+    ViewData["Title"] = "CoffeeShop - TypeChat";
     var categories = await base.Gateway.SendAsync(new QueryCategories());
+    var options = await base.Gateway.SendAsync(new QueryOptions());
+    var optionQuantities = await base.Gateway.SendAsync(new QueryOptionQuantities());
 }
 <style>
 .bg {
@@ -17,6 +19,26 @@
     background-position: 50% 0;
     z-index: -1;
 }
+.animation-pulse {
+    /*box-shadow: 0 0 0 20px rgba(229,62,62, 0.5);
+    transform: scale(0.8);*/
+    animation: pulse 2s infinite;
+}
+@@keyframes pulse {
+    0% {
+        transform: scale(0.8);
+        box-shadow: 0 0 0 0 rgba(229, 62, 62, 1);
+    }
+
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 60px rgba(229, 62, 62, 0);
+    }
+
+    100% {
+        transform: scale(0.8);
+    }
+}
 </style>
 <div class="bg"></div>
 
@@ -27,7 +49,6 @@
 </div>
 
 <div id="app" class="container mx-auto w-full bg-white">
-    
     <div class="flex justify-between w-full">
         <div class="pt-12 mt-2 w-40">
             @foreach (var category in categories.Results)
@@ -42,8 +63,8 @@
         </div>
         <div class="flex-grow">
             <div v-cloak v-if="activeCategory" class="mb-4 text-xl select-none">
-                <a href="#">Menu</a> / 
-                <a :href="`#${activeCategory.name}`" :class="{ 'font-semibold':!activeProduct }">{{activeCategory.description}}</a> 
+                <a href="#">Menu</a> /
+                <a :href="`#${activeCategory.name}`" :class="{ 'font-semibold':!activeProduct }">{{activeCategory.description}}</a>
                 <span v-if="activeProduct" class="font-semibold"> / {{activeProduct.name}}</span>
             </div>
             <div v-if="activeProduct">
@@ -64,7 +85,7 @@
                                 <fieldset class="mt-2">
                                     <legend class="sr-only">Choose a Size preference</legend>
                                     <div class="grid grid-cols-2 md:grid-cols-4 gap-1 sm:gap-3">
-                                        <label v-for="size in activeCategory.sizes" 
+                                        <label v-for="size in activeCategory.sizes"
                                                :class="['flex items-center justify-center whitespace-nowrap rounded-md py-3 px-3 text-sm font-semibold uppercase sm:flex-1 cursor-pointer focus:outline-none',
                                                       size == orderItem.size ? 'ring-2 ring-indigo-600 ring-offset-2 bg-indigo-600 text-white hover:bg-indigo-500' : 'ring-1 ring-inset ring-gray-300 bg-white text-gray-900 hover:bg-gray-50']">
                                             <input v-model="orderItem.size" type="radio" name="temperature" :value="size" class="sr-only">
@@ -78,7 +99,7 @@
                                 <fieldset class="mt-2">
                                     <legend class="sr-only">Choose a Temperature preference</legend>
                                     <div class="grid grid-cols-2 md:grid-cols-4 gap-1 sm:gap-3">
-                                        <label v-for="temp in activeCategory.temperatures" 
+                                        <label v-for="temp in activeCategory.temperatures"
                                                :class="['flex items-center justify-center whitespace-nowrap rounded-md py-3 px-3 text-sm font-semibold uppercase sm:flex-1 cursor-pointer focus:outline-none',
                                                       temp == orderItem.temperature ? 'ring-2 ring-red-600 ring-offset-2 bg-red-600 text-white hover:bg-red-500' : 'ring-1 ring-inset ring-gray-300 bg-white text-gray-900 hover:bg-gray-50']">
                                             <input v-model="orderItem.temperature" type="radio" name="temperature" :value="temp" class="sr-only">
@@ -95,24 +116,30 @@
                             <div v-for="option in productOptions" class="pb-8 flex max-w-xs">
                                 <div class="">
                                     <label for="">{{humanize(option.type)}}</label>
-                                    <select-input class="w-32 md:w-60" class="flex-grow" v-model="orderItem.options[option.type]" :values="option.names"></select-input>
+                                    <select-input class="w-32 md:w-60" class="flex-grow" v-model="orderItem.options[option.type]" :values="['',...option.names]"></select-input>
                                 </div>
                                 <div v-if="option.allowQuantity && option.quantityLabel" class="ml-4 select-none">
                                     <label for="">{{option.quantityLabel}}</label>
                                     <div class="h-12 flex items-center">
-                                        <svg v-on:click="orderItem.optionSizes[option.type] = Math.max((orderItem.optionSizes[option.type] || 1)-1,1)" class="w-6 h-6 align-middle cursor-pointer text-gray-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12 20c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8m0-18A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2M7 13h10v-2H7"></path></svg>
-                                        <span class="w-6 text-center font-semibold text-gray-600">{{ orderItem.optionSizes[option.type] || 1 }}</span>
-                                        <svg v-on:click="orderItem.optionSizes[option.type] = (orderItem.optionSizes[option.type] || 1) + 1" class="w-6 h-6 align-middle cursor-pointer text-gray-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12 17q.425 0 .713-.288T13 16v-3h3.025q.425 0 .7-.288T17 12q0-.425-.288-.713T16 11h-3V7.975q0-.425-.288-.7T12 7q-.425 0-.713.288T11 8v3H7.975q-.425 0-.7.288T7 12q0 .425.288.713T8 13h3v3.025q0 .425.288.7T12 17Zm0 5q-2.075 0-3.9-.788t-3.175-2.137q-1.35-1.35-2.137-3.175T2 12q0-2.075.788-3.9t2.137-3.175q1.35-1.35 3.175-2.137T12 2q2.075 0 3.9.788t3.175 2.137q1.35 1.35 2.138 3.175T22 12q0 2.075-.788 3.9t-2.137 3.175q-1.35 1.35-3.175 2.138T12 22Zm0-10Zm0 8q3.325 0 5.663-2.337T20 12q0-3.325-2.337-5.663T12 4Q8.675 4 6.337 6.337T4 12q0 3.325 2.337 5.663T12 20Z"></path></svg>
+                                        <svg v-on:click="orderItem.optionSizes[option.type] = Math.max((orderItem.optionSizes[option.type] ?? 1)-1,0)" class="w-6 h-6 align-middle cursor-pointer text-gray-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12 20c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8m0-18A10 10 0 0 0 2 12a10 10 0 0 0 10 10a10 10 0 0 0 10-10A10 10 0 0 0 12 2M7 13h10v-2H7"></path></svg>
+                                        <span class="w-6 text-center font-semibold text-gray-600">{{ orderItem.optionSizes[option.type] ?? 1 }}</span>
+                                        <svg v-on:click="orderItem.optionSizes[option.type] = (orderItem.optionSizes[option.type] ?? 1) + 1" class="w-6 h-6 align-middle cursor-pointer text-gray-400" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12 17q.425 0 .713-.288T13 16v-3h3.025q.425 0 .7-.288T17 12q0-.425-.288-.713T16 11h-3V7.975q0-.425-.288-.7T12 7q-.425 0-.713.288T11 8v3H7.975q-.425 0-.7.288T7 12q0 .425.288.713T8 13h3v3.025q0 .425.288.7T12 17Zm0 5q-2.075 0-3.9-.788t-3.175-2.137q-1.35-1.35-2.137-3.175T2 12q0-2.075.788-3.9t2.137-3.175q1.35-1.35 3.175-2.137T12 2q2.075 0 3.9.788t3.175 2.137q1.35 1.35 2.138 3.175T22 12q0 2.075-.788 3.9t-2.137 3.175q-1.35 1.35-3.175 2.138T12 22Zm0-10Zm0 8q3.325 0 5.663-2.337T20 12q0-3.325-2.337-5.663T12 4Q8.675 4 6.337 6.337T4 12q0 3.325 2.337 5.663T12 20Z"></path></svg>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div v-if="!modifyingExistingItem" class="p-8 flex justify-end items-center">
+                <div v-if="modifyingExistingItem" class="p-8 flex justify-end items-center">
+                    <text-link v-on:click="doneEditCartItem(false)" class="text-lg pr-4">cancel</text-link>
+                    <button v-on:click="doneEditCartItem(true)" type="button" class="rounded-full bg-green-600 px-4 py-2.5 text-lg font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600">
+                        Save Order
+                    </button>
+                </div>
+                <div v-else class="p-8 flex justify-end items-center">
                     <text-link v-on:click="reset" class="text-lg pr-4">reset</text-link>
-                    <button v-on:click="addToOrder" type="button" class="rounded-full bg-green-600 px-4 py-2.5 text-lg font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600">
-                        {{modifyingExistingItem ? 'Save Order' : 'Add to Order'}}
+                    <button v-on:click="addToOrder(map(orderItem, x => { x.product = activeProduct.name; return x }))" type="button" class="rounded-full bg-green-600 px-4 py-2.5 text-lg font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600">
+                        Add to Order
                     </button>
                 </div>
             </div>
@@ -125,16 +152,56 @@
                 </a>
             </div>
             <div v-else class="mt-20 text-center">
-                <span class="text-lg">What can we get for you today?</span>
-                <html-format :values="categories"></html-format>
+                <div class="mx-auto max-w-screen-sm flex items-center justify-end">
+                    <div>
+                        <text-input v-if="!(isRecording || isProcessing || apiRecording.response)" class="w-96 text-2xl" placeholder="What can we get for you today?"></text-input>
+                        <div v-else class="text-2xl text-gray-600">
+                            <div v-if="isProcessing" class="pr-20 flex items-center">
+                                <loading></loading>
+                                Working...
+                            </div>
+                            <div v-else-if="apiRecording.response" class="lowercase">
+                                <div class="pb-4">{{ apiRecording.response.transcript }}</div>
+                            </div>
+                            <div class="pr-20" v-else-if="isListening">Listening...</div>
+                            <div class="pr-20" v-else-if="isRecording">Speak Now</div>
+                        </div>
+                    </div>
+                    <div class="ml-8">
+                        <div class="flex justify-center items-center">
+                            <div v-if="!isRecording" v-on:click="toggleRecording" class="h-20 w-20 rounded-full flex justify-center items-center cursor-pointer shadow">
+                                <svg class="w-10 h-10 text-gray-600" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="4"><rect width="14" height="27" x="17" y="4" rx="7"/><path stroke-linecap="round" d="M9 23c0 8.284 6.716 15 15 15c8.284 0 15-6.716 15-15M24 38v6"/></g></svg>
+                            </div>
+                            <div v-else v-on:click="toggleRecording" class="h-20 w-20 bg-red-600 rounded-full flex justify-center items-center cursor-pointer animation-pulse">
+                                <svg class="w-10 h-10 text-white" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="4"><rect width="14" height="27" x="17" y="4" rx="7"/><path stroke-linecap="round" d="M9 23c0 8.284 6.716 15 15 15c8.284 0 15-6.716 15-15M24 38v6"/></g></svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div :class="['ml-4', audio ? '' : 'invisible']">
+                        <svg v-if="!isPlaying" v-on:click="audio.play()" class="w-10 h-10 text-gray-600 hover:text-gray-800 cursor-pointer" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>play</title> <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m14.752 11.168l-3.197-2.132A1 1 0 0 0 10 9.87v4.263a1 1 0 0 0 1.555.832l3.197-2.132a1 1 0 0 0 0-1.664Z"/><path d="M21 12a9 9 0 1 1-18 0a9 9 0 0 1 18 0Z"/></g></svg>
+                        <svg v-else v-on:click="audio.pause()" class="w-10 h-10 text-gray-600 hover:text-gray-800 cursor-pointer" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 1 1-18 0a9 9 0 0 1 18 0Z"/></svg>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 mx-auto max-w-screen-sm text-2xl">
+                <div v-if="apiProcessed.response" class="text-green-600">
+                    {{apiProcessed.response}}
+                </div>
+                <div v-else-if="apiProcessed.error" class="text-red-600">
+                    {{apiProcessed.error.message}}
+                </div>
+                <div v-else-if="isSendingChat" class="text-gray-600 flex items-center">
+                    <loading></loading>
+                    Processing Request...
+                </div>
             </div>
         </div>
-        <div v-if="cart && cart.items.length" class="ml-4 w-80">
+        <div v-if="cartItems.length" class="ml-4 w-80">
             <div>
                 <div v-cloak class="mb-4 text-xl select-none font-medium">
                     Cart
                 </div>
-                <div v-for="item in cart.items" class="shadow rounded p-4 mb-4">
+                <div v-for="item in cartItems" class="shadow rounded p-4 mb-4">
                     <div class="flex">
                         <div>
                             <img :src="productsMap[item.product].imageUrl" alt="" class="w-16 h-16 rounded-full object-cover">
@@ -151,8 +218,10 @@
                                     </div>
                                 </div>
                                 <div class="pt-4">
-                                    <ul v-for="(option,category) in item.options">
-                                        <li>{{map(item.optionSizes[category], x => `${x}x `) || '' }} {{option}}</li>
+                                    <ul v-if="itemOptions(item).length">
+                                        <li v-for="option in itemOptions(item)">
+                                            {{map(option.size, x => `${x}x `) || '' }} {{option.name}}
+                                        </li>
                                     </ul>
                                 </div>
                                 <div class="pt-4 flex">
@@ -175,13 +244,128 @@
 <script type="module">
 import { mount } from "/mjs/app.mjs"
 import { createApp, ref, computed, onMounted, shallowRef } from "vue"
-import { JsonApiClient, leftPart, rightPart, appendQueryString, omit, map, humanize } from "@@servicestack/client"
+import { JsonApiClient, ApiResult, leftPart, rightPart, appendQueryString, omit, map, humanize } from "@@servicestack/client"
 import ServiceStackVue, { useClient, useAuth, useMetadata, useFormatters } from "@@servicestack/vue"
-import { QueryOptions, Authenticate, AdminData } from "/mjs/dtos.mjs" 
+import { QueryOptions, Authenticate, AdminData, CreateRecording, CreateChat } from "/mjs/dtos.mjs" 
 
 const categories = @Html.Raw(categories.Results.ToJson())
+const options = @Html.Raw(options.Results.ToJson())
+const optionQuantities = @Html.Raw(optionQuantities.Results.ToJson())
+const products = categories.flatMap(x => x.products)
 const productsMap = {}
 categories.forEach(c => c.products.forEach(p => productsMap[p.name] = p))
+
+const recording = {
+    "id": 2,
+    "path": "/recordings/2023/08/17/15908819.0714.wav",
+    "transcript": "a hot half decaf cappuccino with three shots and Two Sugars please",
+    "transcriptConfidence": 0.8419254,
+    "createdDate": "/Date(1692217510511-0000)/",
+    "transcribeStart": "/Date(1692217510556-0000)/",
+    "transcribeEnd": "/Date(1692217515876-0000)/",
+    "transcribeDurationMs": 5320,
+    "durationMs": 0,
+    "ipAddress": "::1"
+}
+const chat = {
+    "id": 5,
+    "request": "i want a cold chai latte and a bagel",
+    "chatResponse": "{\r\n  \"items\": [\r\n    {\r\n      \"type\": \"lineitem\",\r\n      \"product\": {\r\n        \"type\": \"LatteDrinks\",\r\n        \"name\": \"chai latte\",\r\n        \"temperature\": \"iced\"\r\n      },\r\n      \"quantity\": 1\r\n    },\r\n    {\r\n      \"type\": \"lineitem\",\r\n      \"product\": {\r\n        \"type\": \"BakeryProducts\",\r\n        \"name\": \"bagel\"\r\n      },\r\n      \"quantity\": 1\r\n    }\r\n  ]\r\n}\r\n",
+    "createdDate": "/Date(1692270242749-0000)/",
+    "chatStart": "/Date(1692270242832-0000)/",
+    "chatEnd": "/Date(1692270272508-0000)/",
+    "chatDurationMs": 29675,
+    "ipAddress": "127.0.0.1"
+}
+
+globalThis.AppData = { 
+    categories, options, optionQuantities, products, productsMap, recording, chat, items: JSON.parse(chat.chatResponse)
+}
+
+class AudioRecorder {
+    /** @@type {Blob[]} */
+    audioPartBlobs = []
+    /** @@type {Blob} */
+    audioBlob = null
+    /** @@type {Audio} */
+    audio = null
+    /** @@type {MediaRecorder} */
+    mediaRecorder = null
+    /** @@type {MediaStream} */
+    streamBeingCaptured = null
+    
+    constructor() {
+        navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia 
+            || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+    }
+    
+    hasAudio() {
+        return !!this.audio
+    }
+    
+    start() {
+        if (!(navigator.mediaDevices && navigator.getUserMedia)) {
+            return Promise.reject(new Error('mediaDevices API or getUserMedia method is not supported in this browser.'));
+        } else {
+            return navigator.mediaDevices.getUserMedia({
+                 audio: {
+                   advanced: [
+                     {
+                       channelCount: 1,
+                       sampleRate: 16000,
+                     },
+                   ],
+                 },
+               })
+                .then(stream => {
+                    this.streamBeingCaptured = stream
+                    this.mediaRecorder = new MediaRecorder(stream)
+                    this.audioPartBlobs = []
+                    this.audioBlob = null
+                    this.audio = null
+                    this.mediaRecorder.addEventListener("dataavailable", event => {
+                        this.audioPartBlobs.push(event.data)
+                    })
+                    this.mediaRecorder.start()
+                })
+        }
+    }
+    
+    stop() {
+        return new Promise(resolve => {
+            let type = this.mediaRecorder.mimeType
+            this.mediaRecorder.addEventListener("stop", () => {
+                this.audioBlob = new Blob(this.audioPartBlobs, { type })
+                
+                let reader = new FileReader()
+                reader.onload = e => {
+                    let base64URL = e.target.result
+                    this.audio = new Audio(base64URL)
+                    this.audio.load()
+                    resolve(this.audio)
+                }
+                reader.readAsDataURL(this.audioBlob)
+            })
+            this.cancel()
+        })
+    }
+    
+    cancel() {
+        this.mediaRecorder.stop()
+        this.stopStream()
+        this.resetRecordingProperties()
+    }
+    
+    stopStream() {
+        this.streamBeingCaptured.getTracks()
+            .forEach(track => track.stop()) //MediaStreamTrack
+    }
+    
+    resetRecordingProperties() {
+        this.mediaRecorder = null
+        this.streamBeingCaptured = null
+    }
+}
 
 const App = {
     setup() {
@@ -198,49 +382,84 @@ const App = {
             ? categoryOptions.value.filter(x => activeCategory.value.categoryOptions.some(y => y.optionId === x.id)) : null) || [])
         const cart = ref()
         const cartItems = computed(() => cart.value && cart.value.items || [])
-        const orderItem = ref(createOrderItem())
-        const modifyingExistingItem = computed(() => cartItems.value.some(x => x === orderItem.value))
+        const orderItem = ref(createOrderItem(activeCategory.value))
+        const modifyingExistingItem = computed(() => cartItems.value.some(x => x === orderItem.value))       
+        const isRecording = ref(false)
+        const isProcessing = ref(false)
+        const isListening = ref(false)
+        const isSendingChat = ref(false)
+        let audioRecorder = new AudioRecorder()
+        window.audioRecorder = audioRecorder
+        const audio = ref()
+        const isPlaying = ref(false)
+        const apiRecording = ref(new ApiResult())
+        const apiChat = ref(new ApiResult())
+        const apiProcessed = ref(new ApiResult())
         
-        function createOrderItem() {
-            return map(activeCategory.value, c => ({
-                    size:c.defaultSize||'', 
-                    temperature:c.defaultTemperature||'', 
-                    options:{}, optionSizes:{} 
-                })) 
-                || { options:{}, optionSizes:{} }
-        }
-
-        function navTo(category, args, pushState=true) {
+        function navTo(category, args={}, pushState=true) {
             console.log('navTo', category, args, pushState)
             if (!args) args = {}
             refreshKey.value++
             activeCategory.value = categories.find(x => x.name === category)
             activeProduct.value = categories.flatMap(x => x.products).find(x => x.name === args.product)
-            orderItem.value = createOrderItem()
+            orderItem.value = createOrderItem(activeCategory.value)
             if (pushState) {
                 history.pushState({ category, ...args }, null, 
                     appendQueryString(`#${category}` + (args.product ? `/${args.product}` : ''), omit(args,['product'])))
             }
         }
         
-        function addToOrder() {
+        function createOrderItem(category) {
+            return map(category, c => ({
+                    size:c.defaultSize||'', 
+                    temperature:c.defaultTemperature||'', 
+                    options:{}, optionSizes:{} 
+                })) 
+                || { options:{}, optionSizes:{} }
+        }
+        
+        function sanitizeItem(item) {
+            const options = {}
+            const optionSizes = {}
+            itemOptions(item).forEach(option => {
+                options[option.category] = option.name
+                optionSizes[option.category] = option.size
+            })            
+            return Object.assign({}, item, { options, optionSizes })
+        }
+        
+        function addToOrder(item) {
             if (!cart.value || !cart.value.items) {
                 cart.value = { items:[] }
             }
-            orderItem.value.product = activeProduct.value.name
-            cart.value.items.push(orderItem.value)
+            
+            cart.value.items.push(sanitizeItem(item))
             saveCart()
             reset()
         }
+        
+        function itemOptions(item) {
+            const results = []
+            Object.keys(item.options).forEach(category => {
+                const name = item.options[category]
+                if (!name) return
+                const size = item.optionSizes[category] ?? 1
+                const to = { category, name, size }
+                results.push(to)
+            })
+            return results
+        }
+        
         function reset() {
-            orderItem.value = createOrderItem()
+            orderItem.value = createOrderItem(activeCategory.value)
             saveCart()
         }
         function saveCart() {
-            if (cart.value && cart.value.items.length)
+            if (cartItems.value.length) {
                 localStorage.setItem('cart', JSON.stringify(cart.value))
-            else
+            } else {
                 localStorage.removeItem('cart')
+            }
         }
         function editCartItem(item) {
             const product = productsMap[item.product]
@@ -257,10 +476,136 @@ const App = {
             cart.value.items.splice(pos, 0, Object.assign({}, item))
             saveCart() 
         }
-
+        function doneEditCartItem(save) {
+            if (save) {
+                saveCart()
+            } else {
+                // reload cart from last save
+                cart.value = map(localStorage.getItem('cart'), x => JSON.parse(x)) || null
+            }
+            reset()
+            navTo(null)
+        }
         function emptyCart() {
             cart.value = { items:[] }
             localStorage.removeItem('cart')
+        }
+        
+        async function toggleRecording() {
+            if (navigator.getUserMedia) {
+                isRecording.value = !isRecording.value
+                isListening.value = false
+                isProcessing.value = false
+                apiRecording.value = new ApiResult()
+                apiProcessed.value = new ApiResult()
+                
+                if (isRecording.value) {
+                    await audioRecorder.start()
+                    setTimeout(() => isListening.value = true, 2000)
+                } else {
+                    isProcessing.value = true
+                    audio.value = await audioRecorder.stop()
+                    audio.value.addEventListener('playing', e => isPlaying.value = true)
+                    audio.value.addEventListener('pause', e => isPlaying.value = false)
+                    audio.value.addEventListener('ended', e => isPlaying.value = false)
+                    
+                    const formData = new FormData()
+                    formData.append('path', audioRecorder.audioBlob, 'file.wav')
+                    //apiRecording.value = await client.apiForm(new CreateRecording(), formData)
+                    setTimeout(async () => {
+                        apiRecording.value = new ApiResult({
+                            response: recording
+                        })
+                        isProcessing.value = false
+                        
+                        isSendingChat.value = true
+                        if ('DEBUG') {
+                            setTimeout(async () => {
+                                apiChat.value = new ApiResult({ response: chat })
+                                isSendingChat.value = false
+    
+                                if (apiChat.value.response) {
+                                    processChatItems(JSON.parse(apiChat.value.response.chatResponse).items)
+                                }
+                            }, 2000)
+                        } else {
+                            apiChat.value = await client.api(new CreateChat({
+                                request: recording.transcript.toLowerCase()
+                            }))
+                            isSendingChat.value = false
+                            if (apiChat.value.response) {
+                                processChatItems(JSON.parse(apiChat.value.response.chatResponse).items)
+                            }
+                        }
+                        
+                    }, recording.transcribeDurationMs)
+                }
+            } else {
+                alert('getUserMedia() is not supported in your browser');
+            }
+        }
+        
+        function processChatItems(items) {
+            console.log('processChatResponse', items)
+            const addedProducts = []
+            items.forEach(item => {
+                if (item.type.toLowerCase() !== "lineitem") {
+                    console.warn(`ignoring unknown lineItem type ${item.type}`)
+                    return
+                }
+                const productLower = item.product?.name?.toLowerCase() ?? ''
+                const product = products.find(x => x.name.toLowerCase() === productLower)
+                if (!product) {
+                    console.warn(`ignoring unknown product ${productLower}`)
+                    return
+                }
+                const category = categories.find(x => x.id === product.categoryId)
+                const categoryOptions = category.options?.map(x => options.find(o => o.id === x.optionId)) ?? []
+                const orderItem = createOrderItem(category)
+                orderItem.product = product.name
+                const temperature = !category.temperatures || !item.temperature
+                    ? null
+                    : category.temperatures.find(x => x.toLowerCase() === item.temperature.toLowerCase())
+                if (temperature) {
+                    orderItem.temperature = temperature
+                }
+                const size = !category.sizes || !item.size
+                    ? null
+                    : category.sizes.find(x => x.toLowerCase() === item.size.toLowerCase())
+                if (size) {
+                    orderItem.size = size
+                }
+                (item.options || []).forEach(itemOption => {
+                    const option = categoryOptions.find(x => x.type.toLowerCase() === itemOption.type.toLowerCase())
+                    if (!option) {
+                        console.warn(`ignoring unknown option '${itemOption.type}' for category ${category.name}`)
+                        return
+                    }
+                    const optionName = option.names.find(x => x.toLowerCase() === itemOption.name)
+                    if (!optionName) {
+                        console.warn(`ignoring unknown option name '${itemOption.name}' for option ${option.type}`)
+                        return
+                    }
+                    orderItem.options[option.type] = optionName
+                    const optionQuantity = Number.isFinite(itemOption.optionQuantity)
+                        ? (Number.isInteger(itemOption.optionQuantity)
+                            ? parseInt(itemOption.optionQuantity)
+                            : parseFloat(itemOption.optionQuantity))
+                        : optionQuantities.find(x => x.name.toLowerCase() === itemOption.optionQuantity)?.value || 1
+                    orderItem.optionSizes[option.type] = optionQuantity
+                })
+                addToOrder(orderItem)
+                addedProducts.push(orderItem.product)
+            })
+            if (addedProducts.length > 0) {
+                const productsList = addedProducts.length === 1
+                    ? addedProducts[0]
+                    : (addedProducts.slice(0, addedProducts.length - 1).join(', ') + " and " + addedProducts[addedProducts.length - 1])
+                
+                apiProcessed.value = new ApiResult({ response: `Your ${productsList} order was added to your cart` })
+            } else {
+                apiProcessed.value = new ApiResult({ error: { message: `I'm sorry we could not understand your order` } })
+            }
         }
 
         onMounted(async () => {
@@ -282,17 +627,19 @@ const App = {
         return {
             categories,
             productsMap,
-            refreshKey, 
-            categoryOptions, 
-            productOptions, 
-            activeCategory, 
-            activeProduct, 
-            currency, 
-            cart, 
+            refreshKey,
+            categoryOptions,
+            productOptions,
+            activeCategory,
+            activeProduct,
+            currency,
+            cart,
             cartItems,
             orderItem,
             modifyingExistingItem,
-            map, 
+            doneEditCartItem,
+            itemOptions,
+            map,
             omit,
             humanize,
             addToOrder,
@@ -301,6 +648,17 @@ const App = {
             editCartItem,
             removeCartItem,
             duplicateCartItem,
+            isRecording,
+            isListening,
+            isProcessing,
+            isSendingChat,
+            toggleRecording,
+            audio,
+            audioRecorder,
+            isPlaying,
+            apiRecording,
+            apiChat,
+            apiProcessed,
         }
     }
 }

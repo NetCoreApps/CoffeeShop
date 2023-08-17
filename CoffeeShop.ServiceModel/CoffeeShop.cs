@@ -41,6 +41,8 @@ public class OptionQuantity
     [AutoIncrement]
     public int Id { get; set; }
     public string Name { get; set; }
+        
+    public decimal Value { get; set; }
 }
 
 public class CategoryOption
@@ -72,6 +74,40 @@ public class Product
     public decimal Cost { get; set; }
 
     public string? ImageUrl { get; set; }
+}
+
+[Icon(Svg = Icons.Recording)]
+public class Recording
+{
+    [AutoIncrement]
+    public int Id { get; set; }
+    public string Path { get; set; }
+    public string? Transcript { get; set; }
+    public float? TranscriptConfidence { get; set; }
+    public string? TranscriptResponse { get; set; }
+    public DateTime CreatedDate { get; set; }
+    public DateTime? TranscribeStart { get; set; }
+    public DateTime? TranscribeEnd { get; set; }
+    public int? TranscribeDurationMs { get; set; }
+    public int DurationMs { get; set; }
+    public string? IpAddress { get; set; }
+    public string? Error { get; set; }
+}
+
+[Icon(Svg = Icons.Chat)]
+public class Chat
+{
+    [AutoIncrement]
+    public int Id { get; set; }
+    public string Request { get; set; }
+    public string Prompt { get; set; }
+    public string? ChatResponse { get; set; }
+    public DateTime CreatedDate { get; set; }
+    public DateTime? ChatStart { get; set; }
+    public DateTime? ChatEnd { get; set; }
+    public int? ChatDurationMs { get; set; }
+    public string? IpAddress { get; set; }
+    public string? Error { get; set; }
 }
 
 [Tag(Tags.CoffeeShop)]
@@ -213,19 +249,46 @@ public class CoffeeShopSchema : IReturn<string> {}
 public class CoffeeShopPrompt : IReturn<string>
 {
     public string Request { get; set; }
-    public bool Execute { get; set; }
 }
 
 [Tag(Tags.CoffeeShop)]
-[Route("/cart", "PUT")]
-public class SaveCart : IReturnVoid
+[Route("/coffeeshop/phrases")]
+public class CoffeeShopPhrases : IReturn<StringsResponse> {}
+
+[ValidateIsAdmin]
+[Tag(Tags.CoffeeShop)]
+[Route("/coffeeshop/phrases")]
+public class CreateCoffeeShopPhrases : IReturnVoid
 {
-    public Cart Cart { get; set; }
+}
+
+[ValidateIsAdmin]
+[Tag(Tags.CoffeeShop)]
+[Route("/coffeeshop/recognizer")]
+public class CreateCoffeeShopRecognizer : IReturnVoid {}
+
+[Tag(Tags.CoffeeShop)]
+public class QueryRecordings : QueryDb<Recording> {}
+
+[Tag(Tags.CoffeeShop)]
+[AutoPopulate(nameof(Recording.CreatedDate),  Eval = "utcNow")]
+[AutoPopulate(nameof(Recording.IpAddress),  Eval = "Request.RemoteIp")]
+public class CreateRecording : ICreateDb<Recording>, IReturn<Recording>
+{
+    [Input(Type="file"), UploadTo("recordings")]
+    public string Path { get; set; }
 }
 
 [Tag(Tags.CoffeeShop)]
-[Route("/cart", "GET")]
-public class GetCart : IReturn<Cart> {}
+public class QueryChats : QueryDb<Chat> {}
+
+[Tag(Tags.CoffeeShop)]
+[AutoPopulate(nameof(Recording.CreatedDate),  Eval = "utcNow")]
+[AutoPopulate(nameof(Recording.IpAddress),  Eval = "Request.RemoteIp")]
+public class CreateChat : ICreateDb<Chat>, IReturn<Chat>
+{
+    public string Request { get; set; }
+}
 
 /* GPT Models */
 public class Cart

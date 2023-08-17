@@ -47,4 +47,4 @@ export interface {{option.type}} {
 
 {{/each}}
 
-export type OptionQuantity = {{optionQuantities.map(x => x.name.lower()) |> tsUnionStrings}};
+export type OptionQuantity = {{optionQuantities.map(x => x.name.lower()) |> tsUnionStrings}} | number;

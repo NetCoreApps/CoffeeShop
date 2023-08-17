@@ -1,6 +1,5 @@
 using ServiceStack;
 using CoffeeShop.ServiceModel;
-using Microsoft.Extensions.Options;
 using ServiceStack.OrmLite;
 
 namespace CoffeeShop.ServiceInterface;
@@ -15,6 +14,8 @@ public class MyServices : Service
             ("Products",         typeof(Product)),
             ("Options",          typeof(Option)),
             ("OptionQuantities", typeof(OptionQuantity)),
+            ("Recordings",       typeof(Recording)),
+            ("Chats",            typeof(Chat)),
         };
         var dialect = Db.GetDialectProvider();
         var totalSql = tables.Map(x => $"SELECT '{x.Label}', COUNT(*) FROM {dialect.GetQuotedTableName(x.Type.GetModelMetadata())}")

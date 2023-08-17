@@ -8,8 +8,11 @@
 
   <ItemGroup>
     <PackageReference Include="ServiceStack" Version="6.*" />
+    <PackageReference Include="ServiceStack.Server" Version="6.*" />
     <PackageReference Include="ServiceStack.Ormlite" Version="6.*" />
     <PackageReference Include="Microsoft.SemanticKernel" Version="0.19.230804.2-preview" />
+    <PackageReference Include="Google.Cloud.Storage.V1" Version="4.6.0" />
+    <PackageReference Include="Google.Cloud.Speech.V2" Version="1.0.0-beta06" />
   </ItemGroup>
 
   <ItemGroup>

@@ -9,5 +9,11 @@
         "migrate": "dotnet run --AppTasks=migrate",
         "revert:last": "dotnet run --AppTasks=migrate.revert:last",
         "revert:all": "dotnet run --AppTasks=migrate.revert:all"
+    },
+    "dependencies": {
+        "typechat": "^0.0.10"
+    },
+    "devDependencies": {
+        "@types/node": "^20.3.3"
     }
 }
