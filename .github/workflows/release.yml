@@ -83,7 +83,7 @@ jobs:
           push: true
           tags: ghcr.io/${{ env.image_repository_name }}:${{ env.TAG_NAME }}
           secrets: |
-            googlecloud_credentials_file=${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_FILE }}
+            googlecloud_credentials_base64=${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_BASE64 }}
 
   deploy_via_ssh:
     needs: push_to_registry

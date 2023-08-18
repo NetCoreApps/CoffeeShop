@@ -7,8 +7,8 @@ RUN dotnet restore
 WORKDIR /app/CoffeeShop
 RUN dotnet publish -c release -o /out --no-restore
 
-RUN --mount=type=secret,id=googlecloud_credentials_file,dst=/etc/secrets/googlecloud-credentials.json \
-    cat /etc/secrets/googlecloud-credentials.json > /out/googlecloud-credentials.json
+RUN --mount=type=secret,id=googlecloud_credentials_base64 \
+    cat /run/secrets/googlecloud_credentials_base64 | base64 -d > /out/googlecloud-credentials.json
 
 FROM mcr.microsoft.com/dotnet/aspnet:6.0-focal AS runtime
 
