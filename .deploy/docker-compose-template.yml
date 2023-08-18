@@ -18,10 +18,6 @@ services:
   ${APP_NAME}-migration:
     image: ghcr.io/${IMAGE_REPO}:${RELEASE_VERSION}
     restart: "no"
-    environment:
-      OPENAI_MODEL: ${OPENAI_MODEL}
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
-      GOOGLE_APPLICATION_CREDENTIALS: "/app/googlecloud-credentials.json"
     profiles:
       - migration
     command: --AppTasks=migrate
