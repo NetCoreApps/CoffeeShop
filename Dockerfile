@@ -4,10 +4,10 @@ WORKDIR /app
 COPY . .
 RUN dotnet restore
 
-RUN --mount=type=secret,id=googlecloud_credentials_file,dst=/app/googlecloud-credentials.json
-
 WORKDIR /app/CoffeeShop
 RUN dotnet publish -c release -o /out --no-restore
+
+RUN --mount=type=secret,id=googlecloud_credentials_file,dst=/out/googlecloud-credentials.json
 
 FROM mcr.microsoft.com/dotnet/aspnet:6.0-focal AS runtime
 
