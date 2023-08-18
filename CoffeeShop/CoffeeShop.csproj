@@ -45,4 +45,10 @@
     <Folder Include="wwwroot\mjs\components\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="typechat.mjs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
