@@ -1,14 +1,13 @@
-﻿using Google.Cloud.Location;
-using Google.Cloud.Speech.V2;
+﻿using Google.Cloud.Speech.V2;
 using Google.Cloud.Storage.V1;
 using Google.Protobuf;
-using Google.Protobuf.WellKnownTypes;
 using NUnit.Framework;
 using ServiceStack;
 using ServiceStack.Text;
 
 namespace CoffeeShop.Tests;
 
+[TestFixture, Explicit("Integration")]
 public class GoogleCloudTests
 {
     const string ServiceUrl = "https://australia-southeast1-speech.googleapis.com/v2";
@@ -243,22 +242,6 @@ public class GoogleCloudTests
                 AutoDecodingConfig = new AutoDetectDecodingConfig(),
                 LanguageCodes = { "en-AU" },
                 Model = "telephony",
-                // Adaptation = new SpeechAdaptation
-                // {
-                //     PhraseSets =
-                //     {
-                //         new SpeechAdaptation.Types.AdaptationPhraseSet[]
-                //         {
-                //             new SpeechAdaptation.Types.AdaptationPhraseSet
-                //             {
-                //                 InlinePhraseSet = new PhraseSet
-                //                 {
-                //                     Phrases = {  }
-                //                 }
-                //             }
-                //         }
-                //     }
-                // }
             },
             Recognizer = "projects/servicestackdemo/locations/global/recognizers/_",
             Content = await ByteString.FromStreamAsync(fileStream),

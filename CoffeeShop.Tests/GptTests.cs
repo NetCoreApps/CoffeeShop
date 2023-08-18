@@ -11,6 +11,7 @@ using ServiceStack.Text;
 
 namespace CoffeeShop.Tests;
 
+[TestFixture, Explicit("Integration")]
 public class GptTests
 {
     IDbConnectionFactory ResolveDbFactory() => new ConfigureDb().ConfigureAndResolve<IDbConnectionFactory>();
