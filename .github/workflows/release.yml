@@ -82,7 +82,9 @@ jobs:
           context: .
           push: true
           tags: ghcr.io/${{ env.image_repository_name }}:${{ env.TAG_NAME }}
-  
+          secrets: |
+            googlecloud_credentials_file=${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_FILE }}
+
   deploy_via_ssh:
     needs: push_to_registry
     runs-on: ubuntu-22.04
@@ -120,6 +122,8 @@ jobs:
           APP_NAME: ${{ github.event.repository.name }}
           HOST_DOMAIN: ${{ secrets.DEPLOY_HOST }}
           LETSENCRYPT_EMAIL: ${{ env.letsencrypt_email }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         with:
           input: .deploy/docker-compose-template.yml
           output: .deploy/${{ github.event.repository.name }}-docker-compose.yml

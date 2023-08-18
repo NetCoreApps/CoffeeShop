@@ -4,6 +4,9 @@ WORKDIR /app
 COPY . .
 RUN dotnet restore
 
+RUN --mount=type=secret,id=googlecloud_credentials_file \
+    echo $(cat /run/secrets/googlecloud_credentials_file) > googlecloud-credentials.json
+
 WORKDIR /app/CoffeeShop
 RUN dotnet publish -c release -o /out --no-restore
 

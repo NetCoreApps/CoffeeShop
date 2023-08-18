@@ -10,6 +10,9 @@ services:
       VIRTUAL_HOST: ${HOST_DOMAIN}
       LETSENCRYPT_HOST: ${HOST_DOMAIN}
       LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
+      OPENAI_MODEL: ${OPENAI_MODEL}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      GOOGLE_APPLICATION_CREDENTIALS: "/app/googlecloud-credentials.json"
     volumes:
       - ${APP_NAME}-mydb:/app/App_Data
   ${APP_NAME}-migration:
