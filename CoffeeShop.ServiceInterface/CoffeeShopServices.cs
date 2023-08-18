@@ -4,7 +4,6 @@ using Google.Cloud.Speech.V2;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.AI.ChatCompletion;
 using ServiceStack;
-using ServiceStack.Configuration;
 using ServiceStack.OrmLite;
 using ServiceStack.Script;
 using ServiceStack.Text;
@@ -29,7 +28,7 @@ public class CoffeeShopServices : Service
     public IKernel Kernel { get; set; }
     public SpeechClient SpeechClient { get; set; }
     public AppConfig Config { get; set; }
-    
+
     [AddHeader(HttpHeaders.ContentType, MimeTypes.PlainText)]
     public async Task<string> Any(CoffeeShopSchema request)
     {
@@ -43,8 +42,10 @@ public class CoffeeShopServices : Service
         var optionQuantities = await Db.SelectAsync<OptionQuantity>();
 
         var tpl = file.ReadAllText();
-        var context = new ScriptContext {
-            ScriptMethods = {
+        var context = new ScriptContext
+        {
+            ScriptMethods =
+            {
                 new GptMethods(),
             }
         }.Init();
@@ -69,28 +70,28 @@ public class CoffeeShopServices : Service
         if (file == null)
             throw HttpError.NotFound("coffeeshop/prompt.ss not found");
 
-       var schema = (string) await Any(new CoffeeShopSchema());
-       var tpl = file.ReadAllText();
-       var context = new ScriptContext
-       {
-           ScriptMethods =
-           {
-               new GptMethods(),
-           }
-       }.Init();
+        var schema = await Any(new CoffeeShopSchema());
+        var tpl = file.ReadAllText();
+        var context = new ScriptContext
+        {
+            ScriptMethods =
+            {
+                new GptMethods(),
+            }
+        }.Init();
 
-       var prompt = await new PageResult(context.OneTimePage(tpl))
-       {
-           Args =
-           {
-               [nameof(schema)] = schema,
-               [nameof(request)] = request.Request,
-           }
-       }.RenderScriptAsync();
+        var prompt = await new PageResult(context.OneTimePage(tpl))
+        {
+            Args =
+            {
+                [nameof(schema)] = schema,
+                [nameof(request)] = request.Request,
+            }
+        }.RenderScriptAsync();
 
-       return prompt;
+        return prompt;
     }
-    
+
     public async Task<StringsResponse> Any(CoffeeShopPhrases request)
     {
         var words = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -145,7 +146,9 @@ public class CoffeeShopServices : Service
                 PhraseSetName = new PhraseSetName(Config.Project, Config.Location, Config.CoffeeShop.PhraseSetId)
             });
         }
-        catch (Exception ignoreNonExistingPhraseSet) {}
+        catch (Exception ignoreNonExistingPhraseSet)
+        {
+        }
 
         await SpeechClient.CreatePhraseSetAsync(new CreatePhraseSetRequest
         {
@@ -170,7 +173,9 @@ public class CoffeeShopServices : Service
                 RecognizerName = new RecognizerName(Config.Project, Config.Location, Config.CoffeeShop.RecognizerId)
             });
         }
-        catch (Exception ignoreNonExistingRecognizer) {}
+        catch (Exception ignoreNonExistingRecognizer)
+        {
+        }
 
         await Any(new CreateCoffeeShopPhrases());
 
@@ -201,10 +206,10 @@ public class CoffeeShopServices : Service
     }
 
     public IAutoQueryDb AutoQuery { get; set; }
-    
-    public async Task<object> Any(CreateRecording request)
+
+    public async Task<object> Any(CreateCoffeeShopRecording request)
     {
-        var recording = (Recording) await AutoQuery.CreateAsync(request, Request);
+        var recording = (Recording)await AutoQuery.CreateAsync(request, Request);
 
         var transcribeStart = DateTime.UtcNow;
         await Db.UpdateOnlyAsync(() => new Recording { TranscribeStart = transcribeStart },
@@ -214,14 +219,16 @@ public class CoffeeShopServices : Service
         {
             var response = await SpeechClient.RecognizeAsync(new RecognizeRequest
             {
-                Recognizer = $"projects/{Config.Project}/locations/{Config.Location}/recognizers/{Config.CoffeeShop.RecognizerId}",
+                Recognizer =
+                    $"projects/{Config.Project}/locations/{Config.Location}/recognizers/{Config.CoffeeShop.RecognizerId}",
                 Uri = $"gs://{Config.CoffeeShop.Bucket}".CombineWith(recording.Path)
             });
 
             var result = response.Results[0].Alternatives[0];
 
             var transcribeEnd = DateTime.UtcNow;
-            await Db.UpdateOnlyAsync(() => new Recording {
+            await Db.UpdateOnlyAsync(() => new Recording
+            {
                 Transcript = result.Transcript,
                 TranscriptConfidence = result.Confidence,
                 TranscriptResponse = response.Results[0].ToJson(),
@@ -236,14 +243,15 @@ public class CoffeeShopServices : Service
         }
 
         recording = await Db.SingleByIdAsync<Recording>(recording.Id);
-        
+
         return recording;
     }
 
     public static ProcessStartInfo ConvertToCmdExec(ProcessStartInfo startInfo)
     {
-        var to = new ProcessStartInfo {
-            FileName = Env.IsWindows 
+        var to = new ProcessStartInfo
+        {
+            FileName = Env.IsWindows
                 ? "cmd.exe"
                 : "/bin/bash",
             WorkingDirectory = startInfo.WorkingDirectory,
@@ -254,10 +262,10 @@ public class CoffeeShopServices : Service
         return to;
     }
 
-    public async Task<object> Any(CreateChat request)
+    public async Task<object> Any(CreateCoffeeShopChat request)
     {
-        var chat = (Chat) await AutoQuery.CreateAsync(request, Request);
-        
+        var chat = (Chat)await AutoQuery.CreateAsync(request, Request);
+
         var chatStart = DateTime.UtcNow;
         await Db.UpdateOnlyAsync(() => new Chat { ChatStart = chatStart },
             where: x => x.Id == chat.Id);
@@ -265,7 +273,7 @@ public class CoffeeShopServices : Service
         try
         {
             string? result = null;
-            
+
             if (Config.UseNodeTypeChat)
             {
                 var schemaPath = "gpt/coffeeshop/schema.ts";
@@ -273,7 +281,8 @@ public class CoffeeShopServices : Service
                 VirtualFiles.WriteFile(schemaPath, schema);
 
                 var shellRequest = request.Request.Replace('"', '\'');
-                var processInfo = new ProcessStartInfo {
+                var processInfo = new ProcessStartInfo
+                {
                     WorkingDirectory = VirtualFiles.RootDirectory.RealPath,
                     FileName = Config.NodePath,
                     Arguments = $"typechat.mjs ./{schemaPath} \"{shellRequest}\"",
@@ -298,13 +307,15 @@ public class CoffeeShopServices : Service
                 var chatHistory = new ChatHistory();
                 chatHistory.AddUserMessage(prompt);
                 var chatCompletionService = Kernel.GetService<IChatCompletion>();
-                result = await chatCompletionService.GenerateMessageAsync(chatHistory, new ChatRequestSettings {
+                result = await chatCompletionService.GenerateMessageAsync(chatHistory, new ChatRequestSettings
+                {
                     Temperature = 0.0,
                 });
             }
 
             var chatEnd = DateTime.UtcNow;
-            await Db.UpdateOnlyAsync(() => new Chat {
+            await Db.UpdateOnlyAsync(() => new Chat
+            {
                 Request = request.Request,
                 ChatResponse = result,
                 ChatEnd = chatEnd,
@@ -318,7 +329,7 @@ public class CoffeeShopServices : Service
         }
 
         chat = await Db.SingleByIdAsync<Chat>(chat.Id);
-        
+
         return chat;
     }
 }

@@ -1,5 +1,5 @@
 /* Options:
-Date: 2023-08-17 14:08:52
+Date: 2023-08-18 12:25:19
 Version: 6.101
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: https://localhost:5001
@@ -34,7 +34,7 @@ export class Recording {
     transcribeEnd;
     /** @type {?number} */
     transcribeDurationMs;
-    /** @type {number} */
+    /** @type {?number} */
     durationMs;
     /** @type {?string} */
     ipAddress;
@@ -153,12 +153,14 @@ export class Option {
     quantityLabel;
 }
 export class OptionQuantity {
-    /** @param {{id?:number,name?:string}} [init] */
+    /** @param {{id?:number,name?:string,value?:number}} [init] */
     constructor(init) { Object.assign(this, init) }
     /** @type {number} */
     id;
     /** @type {string} */
     name;
+    /** @type {number} */
+    value;
 }
 export class ResponseError {
     /** @param {{errorCode?:string,fieldName?:string,message?:string,meta?:{ [index: string]: string; }}} [init] */
@@ -334,21 +336,21 @@ export class CreateCoffeeShopRecognizer {
     getMethod() { return 'POST' }
     createResponse() { }
 }
-export class CreateRecording {
+export class CreateCoffeeShopRecording {
     /** @param {{path?:string}} [init] */
     constructor(init) { Object.assign(this, init) }
     /** @type {string} */
     path;
-    getTypeName() { return 'CreateRecording' }
+    getTypeName() { return 'CreateCoffeeShopRecording' }
     getMethod() { return 'POST' }
     createResponse() { return new Recording() }
 }
-export class CreateChat {
+export class CreateCoffeeShopChat {
     /** @param {{request?:string}} [init] */
     constructor(init) { Object.assign(this, init) }
     /** @type {string} */
     request;
-    getTypeName() { return 'CreateChat' }
+    getTypeName() { return 'CreateCoffeeShopChat' }
     getMethod() { return 'POST' }
     createResponse() { return new Chat() }
 }
@@ -494,6 +496,13 @@ export class QueryRecordings extends QueryDb {
     /** @param {{skip?:number,take?:number,orderBy?:string,orderByDesc?:string,include?:string,fields?:string,meta?:{ [index: string]: string; }}} [init] */
     constructor(init) { super(init); Object.assign(this, init) }
     getTypeName() { return 'QueryRecordings' }
+    getMethod() { return 'GET' }
+    createResponse() { return new QueryResponse() }
+}
+export class QueryChats extends QueryDb {
+    /** @param {{skip?:number,take?:number,orderBy?:string,orderByDesc?:string,include?:string,fields?:string,meta?:{ [index: string]: string; }}} [init] */
+    constructor(init) { super(init); Object.assign(this, init) }
+    getTypeName() { return 'QueryChats' }
     getMethod() { return 'GET' }
     createResponse() { return new QueryResponse() }
 }

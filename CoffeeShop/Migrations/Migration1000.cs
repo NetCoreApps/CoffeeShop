@@ -87,7 +87,7 @@ public class Migration1000 : MigrationBase
         public DateTime? TranscribeStart { get; set; }
         public DateTime? TranscribeEnd { get; set; }
         public int? TranscribeDurationMs { get; set; }
-        public int DurationMs { get; set; }
+        public int? DurationMs { get; set; }
         public string? IpAddress { get; set; }
         public string? Error { get; set; }
     }

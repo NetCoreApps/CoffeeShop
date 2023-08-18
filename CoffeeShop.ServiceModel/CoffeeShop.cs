@@ -89,7 +89,7 @@ public class Recording
     public DateTime? TranscribeStart { get; set; }
     public DateTime? TranscribeEnd { get; set; }
     public int? TranscribeDurationMs { get; set; }
-    public int DurationMs { get; set; }
+    public int? DurationMs { get; set; }
     public string? IpAddress { get; set; }
     public string? Error { get; set; }
 }
@@ -273,7 +273,7 @@ public class QueryRecordings : QueryDb<Recording> {}
 [Tag(Tags.CoffeeShop)]
 [AutoPopulate(nameof(Recording.CreatedDate),  Eval = "utcNow")]
 [AutoPopulate(nameof(Recording.IpAddress),  Eval = "Request.RemoteIp")]
-public class CreateRecording : ICreateDb<Recording>, IReturn<Recording>
+public class CreateCoffeeShopRecording : ICreateDb<Recording>, IReturn<Recording>
 {
     [Input(Type="file"), UploadTo("recordings")]
     public string Path { get; set; }
@@ -285,7 +285,7 @@ public class QueryChats : QueryDb<Chat> {}
 [Tag(Tags.CoffeeShop)]
 [AutoPopulate(nameof(Recording.CreatedDate),  Eval = "utcNow")]
 [AutoPopulate(nameof(Recording.IpAddress),  Eval = "Request.RemoteIp")]
-public class CreateChat : ICreateDb<Chat>, IReturn<Chat>
+public class CreateCoffeeShopChat : ICreateDb<Chat>, IReturn<Chat>
 {
     public string Request { get; set; }
 }

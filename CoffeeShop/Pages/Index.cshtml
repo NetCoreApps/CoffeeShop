@@ -154,14 +154,26 @@
             <div v-else class="mt-20 text-center">
                 <div class="mx-auto max-w-screen-sm flex items-center justify-end">
                     <div>
-                        <text-input v-if="!(isRecording || isProcessing || apiRecording.response)" class="w-96 text-2xl" placeholder="What can we get for you today?"></text-input>
+                        <form v-if="!(isRecording || isTranscribing || transcript)" v-on:submit.prevent="onSubmit">
+                            <text-input v-model="txtOrder" :disabled="isSendingChat" class="w-96 text-2xl" placeholder="What can we get for you today?"></text-input>
+                        </form>
                         <div v-else class="text-2xl text-gray-600">
-                            <div v-if="isProcessing" class="pr-20 flex items-center">
+                            <div v-if="isTranscribing" class="pr-20 flex items-center">
                                 <loading></loading>
-                                Working...
+                                Transcribing...
                             </div>
-                            <div v-else-if="apiRecording.response" class="lowercase">
-                                <div class="pb-4">{{ apiRecording.response.transcript }}</div>
+                            <div v-else-if="apiProcessed.response" class="text-green-600 flex">
+                                {{apiProcessed.response}}
+                                <svg v-on:click="clear" class="w-10 h-10 cursor-pointer hover:text-green-800" xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21 21">
+                                    <title>clear</title>
+                                    <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m7.5 7.5l6 6m0-6l-6 6"/>
+                                </svg>
+                            </div>
+                            <div v-else-if="apiProcessed.error" class="text-red-600 flex">
+                                {{apiProcessed.error.message}}
+                            </div>
+                            <div v-else-if="transcript" class="lowercase">
+                                <div class="pb-4">{{ transcript }}</div>
                             </div>
                             <div class="pr-20" v-else-if="isListening">Listening...</div>
                             <div class="pr-20" v-else-if="isRecording">Speak Now</div>
@@ -183,21 +195,15 @@
                     </div>
                 </div>
             </div>
-            <div class="mt-8 mx-auto max-w-screen-sm text-2xl">
-                <div v-if="apiProcessed.response" class="text-green-600">
-                    {{apiProcessed.response}}
-                </div>
-                <div v-else-if="apiProcessed.error" class="text-red-600">
-                    {{apiProcessed.error.message}}
-                </div>
-                <div v-else-if="isSendingChat" class="text-gray-600 flex items-center">
+            <div class="mt-4 mx-auto max-w-screen-sm text-2xl">
+                <div v-if="!apiProcessed.completed && isSendingChat" class="text-gray-600 flex items-center justify-center">
                     <loading></loading>
-                    Processing Request...
+                    Processing Order...
                 </div>
             </div>
         </div>
-        <div v-if="cartItems.length" class="ml-4 w-80">
-            <div>
+        <div class="ml-4 w-80">
+            <div v-if="cartItems.length">
                 <div v-cloak class="mb-4 text-xl select-none font-medium">
                     Cart
                 </div>
@@ -233,7 +239,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="pt-8 flex justify-end">
+                <div class="p-4 flex justify-end">
                     <primary-button v-on:click="emptyCart" color="red">Empty Cart</primary-button>
                 </div>
             </div>
@@ -243,10 +249,22 @@
 
 <script type="module">
 import { mount } from "/mjs/app.mjs"
-import { createApp, ref, computed, onMounted, shallowRef } from "vue"
-import { JsonApiClient, ApiResult, leftPart, rightPart, appendQueryString, omit, map, humanize } from "@@servicestack/client"
-import ServiceStackVue, { useClient, useAuth, useMetadata, useFormatters } from "@@servicestack/vue"
-import { QueryOptions, Authenticate, AdminData, CreateRecording, CreateChat } from "/mjs/dtos.mjs" 
+import { ref, computed, onMounted, shallowRef } from "vue"
+import { ApiResult, leftPart, rightPart, appendQueryString, omit, map, humanize } from "@@servicestack/client"
+import { useAuth, useFormatters } from "@@servicestack/vue"
+import { QueryOptions, Authenticate, CreateCoffeeShopRecording, CreateCoffeeShopChat } from "/mjs/dtos.mjs" 
+
+const Mock = {
+    transcribing: true,
+    sendingChat: true,
+    wait: 2000,
+    recording: {
+        "transcript": "i want a cold chai latte and a bagel",
+    },
+    chat: {
+        "chatResponse": "{\r\n  \"items\": [\r\n    {\r\n      \"type\": \"lineitem\",\r\n      \"product\": {\r\n        \"type\": \"LatteDrinks\",\r\n        \"name\": \"chai latte\",\r\n        \"temperature\": \"iced\"\r\n      },\r\n      \"quantity\": 1\r\n    },\r\n    {\r\n      \"type\": \"lineitem\",\r\n      \"product\": {\r\n        \"type\": \"BakeryProducts\",\r\n        \"name\": \"bagel\"\r\n      },\r\n      \"quantity\": 1\r\n    }\r\n  ]\r\n}\r\n",
+    }
+}
 
 const categories = @Html.Raw(categories.Results.ToJson())
 const options = @Html.Raw(options.Results.ToJson())
@@ -254,33 +272,6 @@ const optionQuantities = @Html.Raw(optionQuantities.Results.ToJson())
 const products = categories.flatMap(x => x.products)
 const productsMap = {}
 categories.forEach(c => c.products.forEach(p => productsMap[p.name] = p))
-
-const recording = {
-    "id": 2,
-    "path": "/recordings/2023/08/17/15908819.0714.wav",
-    "transcript": "a hot half decaf cappuccino with three shots and Two Sugars please",
-    "transcriptConfidence": 0.8419254,
-    "createdDate": "/Date(1692217510511-0000)/",
-    "transcribeStart": "/Date(1692217510556-0000)/",
-    "transcribeEnd": "/Date(1692217515876-0000)/",
-    "transcribeDurationMs": 5320,
-    "durationMs": 0,
-    "ipAddress": "::1"
-}
-const chat = {
-    "id": 5,
-    "request": "i want a cold chai latte and a bagel",
-    "chatResponse": "{\r\n  \"items\": [\r\n    {\r\n      \"type\": \"lineitem\",\r\n      \"product\": {\r\n        \"type\": \"LatteDrinks\",\r\n        \"name\": \"chai latte\",\r\n        \"temperature\": \"iced\"\r\n      },\r\n      \"quantity\": 1\r\n    },\r\n    {\r\n      \"type\": \"lineitem\",\r\n      \"product\": {\r\n        \"type\": \"BakeryProducts\",\r\n        \"name\": \"bagel\"\r\n      },\r\n      \"quantity\": 1\r\n    }\r\n  ]\r\n}\r\n",
-    "createdDate": "/Date(1692270242749-0000)/",
-    "chatStart": "/Date(1692270242832-0000)/",
-    "chatEnd": "/Date(1692270272508-0000)/",
-    "chatDurationMs": 29675,
-    "ipAddress": "127.0.0.1"
-}
-
-globalThis.AppData = { 
-    categories, options, optionQuantities, products, productsMap, recording, chat, items: JSON.parse(chat.chatResponse)
-}
 
 class AudioRecorder {
     /** @@type {Blob[]} */
@@ -307,6 +298,9 @@ class AudioRecorder {
         if (!(navigator.mediaDevices && navigator.getUserMedia)) {
             return Promise.reject(new Error('mediaDevices API or getUserMedia method is not supported in this browser.'));
         } else {
+            this.audioPartBlobs = []
+            this.audioBlob = null
+            this.audio = null
             return navigator.mediaDevices.getUserMedia({
                  audio: {
                    advanced: [
@@ -320,9 +314,6 @@ class AudioRecorder {
                 .then(stream => {
                     this.streamBeingCaptured = stream
                     this.mediaRecorder = new MediaRecorder(stream)
-                    this.audioPartBlobs = []
-                    this.audioBlob = null
-                    this.audio = null
                     this.mediaRecorder.addEventListener("dataavailable", event => {
                         this.audioPartBlobs.push(event.data)
                     })
@@ -383,16 +374,17 @@ const App = {
         const cart = ref()
         const cartItems = computed(() => cart.value && cart.value.items || [])
         const orderItem = ref(createOrderItem(activeCategory.value))
-        const modifyingExistingItem = computed(() => cartItems.value.some(x => x === orderItem.value))       
+        const modifyingExistingItem = computed(() => cartItems.value.some(x => x === orderItem.value))
+        const txtOrder = ref('')       
         const isRecording = ref(false)
-        const isProcessing = ref(false)
+        const isTranscribing = ref(false)
         const isListening = ref(false)
         const isSendingChat = ref(false)
         let audioRecorder = new AudioRecorder()
         window.audioRecorder = audioRecorder
         const audio = ref()
         const isPlaying = ref(false)
-        const apiRecording = ref(new ApiResult())
+        const transcript = ref('')
         const apiChat = ref(new ApiResult())
         const apiProcessed = ref(new ApiResult())
         
@@ -491,57 +483,75 @@ const App = {
             localStorage.removeItem('cart')
         }
         
+        const timeout = ms => new Promise(resolve => setTimeout(resolve, ms))
+        
+        function clear() {
+            isListening.value = false
+            isTranscribing.value = false
+            transcript.value = ''
+            apiProcessed.value = new ApiResult()
+            txtOrder.value = ''
+            audio.value = null
+        }
+        
         async function toggleRecording() {
-            if (navigator.getUserMedia) {
-                isRecording.value = !isRecording.value
-                isListening.value = false
-                isProcessing.value = false
-                apiRecording.value = new ApiResult()
-                apiProcessed.value = new ApiResult()
+            if (!navigator.getUserMedia) {
+                alert('getUserMedia() is not supported in your browser')
+                return
+            }
+            
+            clear()
+            isRecording.value = !isRecording.value
+            if (isRecording.value) {
+                audio.value = null
+                await audioRecorder.start()
+                setTimeout(() => isListening.value = true, 2000)
+            } else {
+                isTranscribing.value = true
+                audio.value = await audioRecorder.stop()
+                audio.value.addEventListener('playing', e => isPlaying.value = true)
+                audio.value.addEventListener('pause', e => isPlaying.value = false)
+                audio.value.addEventListener('ended', e => isPlaying.value = false)
                 
-                if (isRecording.value) {
-                    await audioRecorder.start()
-                    setTimeout(() => isListening.value = true, 2000)
+                if (Mock.transcribing) {
+                    await timeout(Mock.wait)
+                    transcript.value = Mock.recording.transcript
                 } else {
-                    isProcessing.value = true
-                    audio.value = await audioRecorder.stop()
-                    audio.value.addEventListener('playing', e => isPlaying.value = true)
-                    audio.value.addEventListener('pause', e => isPlaying.value = false)
-                    audio.value.addEventListener('ended', e => isPlaying.value = false)
-                    
                     const formData = new FormData()
                     formData.append('path', audioRecorder.audioBlob, 'file.wav')
-                    //apiRecording.value = await client.apiForm(new CreateRecording(), formData)
-                    setTimeout(async () => {
-                        apiRecording.value = new ApiResult({
-                            response: recording
-                        })
-                        isProcessing.value = false
-                        
-                        isSendingChat.value = true
-                        if ('DEBUG') {
-                            setTimeout(async () => {
-                                apiChat.value = new ApiResult({ response: chat })
-                                isSendingChat.value = false
-    
-                                if (apiChat.value.response) {
-                                    processChatItems(JSON.parse(apiChat.value.response.chatResponse).items)
-                                }
-                            }, 2000)
-                        } else {
-                            apiChat.value = await client.api(new CreateChat({
-                                request: recording.transcript.toLowerCase()
-                            }))
-                            isSendingChat.value = false
-                            if (apiChat.value.response) {
-                                processChatItems(JSON.parse(apiChat.value.response.chatResponse).items)
-                            }
-                        }
-                        
-                    }, recording.transcribeDurationMs)
+                    const api = await client.apiForm(new CreateCoffeeShopRecording(), formData)
+                    if (api.succeeded) {
+                        transcript.value = api.response.transcript
+                    }
                 }
+                isTranscribing.value = false
+                await processOrder(transcript.value)
+            }
+        }
+        
+        async function onSubmit() {
+            const request = txtOrder.value
+            clear()
+            txtOrder.value = request
+            await processOrder(request)
+            txtOrder.value = ''
+        }
+        
+        async function processOrder(request) {
+            if (!request || !request.trim()) return
+            
+            isSendingChat.value = true
+            if (Mock.sendingChat) {
+                await timeout(Mock.wait)
+                apiChat.value = new ApiResult({ response: Mock.chat })
             } else {
-                alert('getUserMedia() is not supported in your browser');
+                apiChat.value = await client.api(new CreateCoffeeShopChat({
+                    request: request.toLowerCase()
+                }))
+            }
+            isSendingChat.value = false
+            if (apiChat.value.response) {
+                processChatItems(JSON.parse(apiChat.value.response.chatResponse).items)
             }
         }
         
@@ -594,8 +604,17 @@ const App = {
                         : optionQuantities.find(x => x.name.toLowerCase() === itemOption.optionQuantity)?.value || 1
                     orderItem.optionSizes[option.type] = optionQuantity
                 })
-                addToOrder(orderItem)
-                addedProducts.push(orderItem.product)
+                
+                const quantity = !isNaN(item.quantity) 
+                    ? item.quantity
+                    : 1
+                
+                for (let i = 0; i<quantity; i++) {
+                    addToOrder(orderItem)
+                    if (!addedProducts.includes(orderItem.product)) {
+                        addedProducts.push(orderItem.product)
+                    }
+                }
             })
             if (addedProducts.length > 0) {
                 const productsList = addedProducts.length === 1
@@ -637,6 +656,8 @@ const App = {
             cartItems,
             orderItem,
             modifyingExistingItem,
+            txtOrder,
+            onSubmit,
             doneEditCartItem,
             itemOptions,
             map,
@@ -650,13 +671,14 @@ const App = {
             duplicateCartItem,
             isRecording,
             isListening,
-            isProcessing,
+            isTranscribing,
             isSendingChat,
             toggleRecording,
+            clear,
             audio,
             audioRecorder,
             isPlaying,
-            apiRecording,
+            transcript,
             apiChat,
             apiProcessed,
         }
