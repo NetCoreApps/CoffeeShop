@@ -60,4 +60,7 @@ public class AppHost : AppHostBase, IHostingStartup
             ));
         }
     }
+    
+    public static void RegisterKey() =>
+        Licensing.RegisterLicense("OSS BSD-3-Clause 2023 https://github.com/NetCoreApps/CoffeeShop TzcMtIEiQGgiyp2liwLwkd73PbIstK+6cFR8fbFNOnX1GEwJXq2TQM8LFP1e3HosMS7KiMNh6i7bktZxEznGq59Fhe1bFvUZkNwu74Y3U5kq5rbxPhVdJ+z//0opOl6rZl4pakkH99gx5LeLADVziEhLoIL7VoZlRcsE1UnpdRQ=");
 }
