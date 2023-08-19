@@ -285,17 +285,12 @@ class AudioRecorder {
     /** @@type {MediaStream} */
     streamBeingCaptured = null
     
-    constructor() {
-        navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia 
-            || navigator.mozGetUserMedia || navigator.msGetUserMedia;
-    }
-    
     hasAudio() {
         return !!this.audio
     }
     
     start() {
-        if (!(navigator.mediaDevices && navigator.getUserMedia)) {
+        if (!navigator.mediaDevices?.getUserMedia) {
             return Promise.reject(new Error('mediaDevices API or getUserMedia method is not supported in this browser.'));
         } else {
             this.audioPartBlobs = []
@@ -495,7 +490,7 @@ const App = {
         }
         
         async function toggleRecording() {
-            if (!navigator.getUserMedia) {
+            if (!navigator.mediaDevices?.getUserMedia) {
                 alert('getUserMedia() is not supported in your browser')
                 return
             }
