@@ -250,7 +250,7 @@ public class CoffeeShopServices : Service
             try
             {
                 var googleCloudVfs = new GoogleCloudVirtualFiles(TryResolve<StorageClient>(), Config.CoffeeShop.Bucket);
-                var path = $"/speech-to-text/{recording.CreatedDate::yyyy/MM/dd}/{recording.CreatedDate.TimeOfDay.TotalMilliseconds}.json";
+                var path = $"/speech-to-text/{recording.CreatedDate:yyyy/MM/dd}/{recording.CreatedDate.TimeOfDay.TotalMilliseconds}.json";
                 googleCloudVfs.WriteFile(path, recording.ToJson());
             }
             catch (Exception ignore) {}
@@ -346,7 +346,7 @@ public class CoffeeShopServices : Service
             try
             {
                 var googleCloudVfs = new GoogleCloudVirtualFiles(TryResolve<StorageClient>(), Config.CoffeeShop.Bucket);
-                var path = $"/chat/{chat.CreatedDate::yyyy/MM/dd}/{chat.CreatedDate.TimeOfDay.TotalMilliseconds}.json";
+                var path = $"/chat/{chat.CreatedDate:yyyy/MM/dd}/{chat.CreatedDate.TimeOfDay.TotalMilliseconds}.json";
                 googleCloudVfs.WriteFile(path, chat.ToJson());
             }
             catch (Exception ignore) {}
