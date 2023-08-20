@@ -61,8 +61,8 @@
                 </a>
             }
         </div>
-        <div class="flex-grow">
-            <div v-cloak v-if="activeCategory" class="mb-4 text-xl select-none">
+        <div v-cloak class="flex-grow">
+            <div v-if="activeCategory" class="mb-4 text-xl select-none">
                 <a href="#">Menu</a> /
                 <a :href="`#${activeCategory.name}`" :class="{ 'font-semibold':!activeProduct }">{{activeCategory.description}}</a>
                 <span v-if="activeProduct" class="font-semibold"> / {{activeProduct.name}}</span>
@@ -202,7 +202,7 @@
                 </div>
             </div>
         </div>
-        <div class="ml-4 w-80">
+        <div v-cloak class="ml-4 w-80">
             <div v-if="cartItems.length">
                 <div v-cloak class="mb-4 text-xl select-none font-medium">
                     Cart
