@@ -81,21 +81,36 @@ public class AppHost : AppHostBase, IHostingStartup
         var tmpMp4 = Path.GetTempPath().CombineWith($"{time}.mp4");
         await using (File.Create(tmpMp4)) {}
         var tmpWebm = Path.GetTempPath().CombineWith($"{time}.webm");
+        
+        var msMp4 = await file.InputStream.CopyToNewMemoryStreamAsync();
         await using (var fsMp4 = File.OpenWrite(tmpMp4))
         {
-            await file.WriteToAsync(fsMp4);
+            await msMp4.WriteToAsync(fsMp4);
         }
         await ProcessUtils.RunShellAsync($"{appConfig.FfmpegPath} -i {tmpMp4} {tmpWebm}");
         File.Delete(tmpMp4);
+        
         HttpFile? to = null;
-        await using (var fsWav = File.OpenRead(tmpWebm))
+        await using (var fsWebm = File.OpenRead(tmpWebm))
         {
             to = new HttpFile(file) {
                 FileName = file.FileName.WithoutExtension() + ".webm",
-                InputStream = await fsWav.CopyToNewMemoryStreamAsync()
+                InputStream = await fsWebm.CopyToNewMemoryStreamAsync()
             };
         }
         File.Delete(tmpWebm);
+                
+        ThreadPool.QueueUserWorkItem(_ => {
+            try
+            {
+                var googleCloudVfs = new GoogleCloudVirtualFiles(Container.Resolve<StorageClient>(), appConfig.CoffeeShop.Bucket);
+                var origPath = $"/recordings/{now:yyyy/MM/dd}/{now.TimeOfDay.TotalMilliseconds}.mp4";
+                msMp4.Position = 0;
+                googleCloudVfs.WriteFile(origPath, msMp4);
+            }
+            catch (Exception ignore) {}
+        });
+
         return to;
     }
     

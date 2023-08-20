@@ -1,9 +1,11 @@
 ﻿using System.Diagnostics;
 using CoffeeShop.ServiceModel;
 using Google.Cloud.Speech.V2;
+using Google.Cloud.Storage.V1;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.AI.ChatCompletion;
 using ServiceStack;
+using ServiceStack.GoogleCloud;
 using ServiceStack.OrmLite;
 using ServiceStack.Script;
 using ServiceStack.Text;
@@ -243,6 +245,16 @@ public class CoffeeShopServices : Service
         }
 
         recording = await Db.SingleByIdAsync<Recording>(recording.Id);
+                
+        ThreadPool.QueueUserWorkItem(_ => {
+            try
+            {
+                var googleCloudVfs = new GoogleCloudVirtualFiles(TryResolve<StorageClient>(), Config.CoffeeShop.Bucket);
+                var path = $"/speech-to-text/{recording.CreatedDate::yyyy/MM/dd}/{recording.CreatedDate.TimeOfDay.TotalMilliseconds}.json";
+                googleCloudVfs.WriteFile(path, recording.ToJson());
+            }
+            catch (Exception ignore) {}
+        });
 
         return recording;
     }
@@ -329,6 +341,16 @@ public class CoffeeShopServices : Service
         }
 
         chat = await Db.SingleByIdAsync<Chat>(chat.Id);
+        
+        ThreadPool.QueueUserWorkItem(_ => {
+            try
+            {
+                var googleCloudVfs = new GoogleCloudVirtualFiles(TryResolve<StorageClient>(), Config.CoffeeShop.Bucket);
+                var path = $"/chat/{chat.CreatedDate::yyyy/MM/dd}/{chat.CreatedDate.TimeOfDay.TotalMilliseconds}.json";
+                googleCloudVfs.WriteFile(path, chat.ToJson());
+            }
+            catch (Exception ignore) {}
+        });
 
         return chat;
     }
