@@ -6,6 +6,7 @@ public class AppConfig
     public string Location { get; set; }
     public SiteConfig CoffeeShop { get; set; }
     public string NodePath { get; set; }
+    public string? FfmpegPath { get; set; }
     public bool UseNodeTypeChat { get; set; } = true;
     public int NodeProcessTimeoutMs { get; set; } = 120 * 1000;
 }

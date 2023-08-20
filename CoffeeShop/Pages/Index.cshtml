@@ -20,8 +20,6 @@
     z-index: -1;
 }
 .animation-pulse {
-    /*box-shadow: 0 0 0 20px rgba(229,62,62, 0.5);
-    transform: scale(0.8);*/
     animation: pulse 2s infinite;
 }
 @@keyframes pulse {
@@ -284,6 +282,14 @@ class AudioRecorder {
     mediaRecorder = null
     /** @@type {MediaStream} */
     streamBeingCaptured = null
+    /** @@type {String} */
+    audioExt = null
+    
+    preferredMimeTypes = {
+        webm: 'audio/webm',
+        mp4: 'audio/mp4;codecs=mp4a',
+    }
+    
     
     hasAudio() {
         return !!this.audio
@@ -296,6 +302,7 @@ class AudioRecorder {
             this.audioPartBlobs = []
             this.audioBlob = null
             this.audio = null
+            this.audioExt = null
             return navigator.mediaDevices.getUserMedia({
                  audio: {
                    advanced: [
@@ -307,12 +314,34 @@ class AudioRecorder {
                  },
                })
                 .then(stream => {
-                    this.streamBeingCaptured = stream
-                    this.mediaRecorder = new MediaRecorder(stream)
-                    this.mediaRecorder.addEventListener("dataavailable", event => {
-                        this.audioPartBlobs.push(event.data)
-                    })
-                    this.mediaRecorder.start()
+                    try {
+                        this.streamBeingCaptured = stream
+                        
+                        const exts = Object.keys(this.preferredMimeTypes)
+                        for (let i = 0; i < exts.length; i++) {
+                            const ext = exts[i]
+                            const mimeType = this.preferredMimeTypes[ext]
+                            try {
+                                this.mediaRecorder = new MediaRecorder(stream, { mimeType })
+                                this.audioExt = ext
+                                break
+                            } catch (e) {
+                                console.warn(`MediaRecorder: ignoring unsupported mimeType: ${mimeType}`)
+                            }
+                        }
+
+                        if (this.mediaRecorder) {
+                            this.mediaRecorder.addEventListener("dataavailable", event => {
+                                this.audioPartBlobs.push(event.data)
+                            })
+                            this.mediaRecorder.start()
+                        }
+                    } catch (e) {
+                        console.log('error start()', e)
+                        throw e
+                    }
+                    if (!this.mediaRecorder)
+                        throw new Error("No supported MediaRecorder mimeTypes found")
                 })
         }
     }
@@ -321,16 +350,21 @@ class AudioRecorder {
         return new Promise(resolve => {
             let type = this.mediaRecorder.mimeType
             this.mediaRecorder.addEventListener("stop", () => {
-                this.audioBlob = new Blob(this.audioPartBlobs, { type })
-                
-                let reader = new FileReader()
-                reader.onload = e => {
-                    let base64URL = e.target.result
-                    this.audio = new Audio(base64URL)
-                    this.audio.load()
-                    resolve(this.audio)
+                try {
+                    this.audioBlob = new Blob(this.audioPartBlobs, { type })
+                    
+                    let reader = new FileReader()
+                    reader.onload = e => {
+                        let base64URL = e.target.result
+                        this.audio = new Audio(base64URL)
+                        this.audio.load()
+                        resolve(this.audio)
+                    }
+                    reader.readAsDataURL(this.audioBlob)
+                } catch (e) {
+                    console.log('error stop()', e)
+                    throw e
                 }
-                reader.readAsDataURL(this.audioBlob)
             })
             this.cancel()
         })
@@ -513,7 +547,7 @@ const App = {
                     transcript.value = Mock.recording.transcript
                 } else {
                     const formData = new FormData()
-                    formData.append('path', audioRecorder.audioBlob, 'file.wav')
+                    formData.append('path', audioRecorder.audioBlob, `file.${audioRecorder.audioExt}`)
                     const api = await client.apiForm(new CreateCoffeeShopRecording(), formData)
                     if (api.succeeded) {
                         transcript.value = api.response.transcript

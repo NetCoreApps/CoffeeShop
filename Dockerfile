@@ -12,8 +12,8 @@ RUN --mount=type=secret,id=googlecloud_credentials_base64 \
 
 FROM mcr.microsoft.com/dotnet/aspnet:6.0-focal AS runtime
 
-# install node.js and npm install
-RUN apt-get clean && apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends curl gnupg \
+# install node.js, ffmpeg and npm install
+RUN apt-get clean && apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends curl gnupg ffmpeg \
     && curl -sL https://deb.nodesource.com/setup_current.x | bash - \
     && apt-get install nodejs -yq
 
