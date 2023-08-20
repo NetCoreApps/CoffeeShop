@@ -20,6 +20,7 @@ RUN apt-get clean && apt-get update && apt-get upgrade -y && apt-get install -y 
 WORKDIR /app
 COPY --from=build /out ./
 
-RUN npm install
+# don't run dev postinstall script when installing npm deps
+RUN grep -Ev 'postinstall' package.json > tmp && mv tmp package.json && npm install
 
 ENTRYPOINT ["dotnet", "CoffeeShop.dll"]
