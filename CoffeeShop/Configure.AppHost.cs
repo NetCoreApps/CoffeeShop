@@ -78,9 +78,10 @@ public class AppHost : AppHostBase, IHostingStartup
         
         var now = DateTime.UtcNow;
         var time = $"{now:yyyy-M-d_s.fff}";
-        var tmpMp4 = Path.GetTempPath().CombineWith($"{time}.mp4");
+        var tmpPath = Environment.CurrentDirectory.CombineWith("App_Data", "tmp").AssertDir();
+        var tmpMp4 = tmpPath.CombineWith($"{time}.mp4");
         await using (File.Create(tmpMp4)) {}
-        var tmpWebm = Path.GetTempPath().CombineWith($"{time}.webm");
+        var tmpWebm = tmpPath.CombineWith($"{time}.webm");
         
         var msMp4 = await file.InputStream.CopyToNewMemoryStreamAsync();
         await using (var fsMp4 = File.OpenWrite(tmpMp4))
@@ -88,7 +89,7 @@ public class AppHost : AppHostBase, IHostingStartup
             await msMp4.WriteToAsync(fsMp4);
         }
         await ProcessUtils.RunShellAsync($"{appConfig.FfmpegPath} -i {tmpMp4} {tmpWebm}");
-        File.Delete(tmpMp4);
+        // File.Delete(tmpMp4);
         
         HttpFile? to = null;
         await using (var fsWebm = File.OpenRead(tmpWebm))
@@ -98,7 +99,7 @@ public class AppHost : AppHostBase, IHostingStartup
                 InputStream = await fsWebm.CopyToNewMemoryStreamAsync()
             };
         }
-        File.Delete(tmpWebm);
+        // File.Delete(tmpWebm);
                 
         ThreadPool.QueueUserWorkItem(_ => {
             try
