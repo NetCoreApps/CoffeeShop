@@ -81,8 +81,10 @@ public class AppHost : AppHostBase, IHostingStartup
         var tmpMp4 = Path.GetTempPath().CombineWith($"{time}.mp4");
         await using (File.Create(tmpMp4)) {}
         var tmpWebm = Path.GetTempPath().CombineWith($"{time}.webm");
-        await using var fsM4a = File.OpenWrite(tmpMp4);
-        await file.WriteToAsync(fsM4a);
+        await using (var fsMp4 = File.OpenWrite(tmpMp4))
+        {
+            await file.WriteToAsync(fsMp4);
+        }
         await ProcessUtils.RunShellAsync($"{appConfig.FfmpegPath} -i {tmpMp4} {tmpWebm}");
         File.Delete(tmpMp4);
         HttpFile? to = null;
