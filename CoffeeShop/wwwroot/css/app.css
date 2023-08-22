@@ -3898,6 +3898,10 @@ select{
     margin-top: 0px;
   }
 
+  .sm\:mb-0 {
+    margin-bottom: 0px;
+  }
+
   .sm\:block {
     display: block;
   }
@@ -3968,8 +3972,16 @@ select{
     flex-direction: row-reverse;
   }
 
+  .sm\:flex-nowrap {
+    flex-wrap: nowrap;
+  }
+
   .sm\:items-center {
     align-items: center;
+  }
+
+  .sm\:justify-end {
+    justify-content: flex-end;
   }
 
   .sm\:gap-3 {
@@ -4124,6 +4136,10 @@ select{
 
   .lg\:ml-8 {
     margin-left: 2rem;
+  }
+
+  .lg\:mt-0 {
+    margin-top: 0px;
   }
 
   .lg\:block {
