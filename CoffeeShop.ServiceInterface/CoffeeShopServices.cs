@@ -12,19 +12,6 @@ using ServiceStack.Text;
 
 namespace CoffeeShop.ServiceInterface;
 
-public class GptMethods : ScriptMethods
-{
-    public IRawString tsUnionStrings(IEnumerable<string> strings)
-    {
-        return new RawString(string.Join(" | ", strings.Map(x => $"'{x}'")));
-    }
-
-    public IRawString tsUnionTypes(IEnumerable<string> strings)
-    {
-        return new RawString(string.Join(" | ", strings));
-    }
-}
-
 public class CoffeeShopServices : Service
 {
     public IKernel Kernel { get; set; }
@@ -48,7 +35,7 @@ public class CoffeeShopServices : Service
         {
             ScriptMethods =
             {
-                new GptMethods(),
+                new TypeScriptMethods(),
             }
         }.Init();
 
@@ -74,12 +61,8 @@ public class CoffeeShopServices : Service
 
         var schema = await Any(new CoffeeShopSchema());
         var tpl = file.ReadAllText();
-        var context = new ScriptContext
-        {
-            ScriptMethods =
-            {
-                new GptMethods(),
-            }
+        var context = new ScriptContext {
+            Plugins = { new TypeScriptPlugin() }
         }.Init();
 
         var prompt = await new PageResult(context.OneTimePage(tpl))
@@ -148,9 +131,7 @@ public class CoffeeShopServices : Service
                 PhraseSetName = new PhraseSetName(Config.Project, Config.Location, Config.CoffeeShop.PhraseSetId)
             });
         }
-        catch (Exception ignoreNonExistingPhraseSet)
-        {
-        }
+        catch (Exception ignoreNonExistingPhraseSet) {}
 
         await SpeechClient.CreatePhraseSetAsync(new CreatePhraseSetRequest
         {
@@ -175,9 +156,7 @@ public class CoffeeShopServices : Service
                 RecognizerName = new RecognizerName(Config.Project, Config.Location, Config.CoffeeShop.RecognizerId)
             });
         }
-        catch (Exception ignoreNonExistingRecognizer)
-        {
-        }
+        catch (Exception ignoreNonExistingRecognizer) {}
 
         await Any(new CreateCoffeeShopPhrases());
 
@@ -245,33 +224,11 @@ public class CoffeeShopServices : Service
         }
 
         recording = await Db.SingleByIdAsync<Recording>(recording.Id);
-                
-        ThreadPool.QueueUserWorkItem(_ => {
-            try
-            {
-                var googleCloudVfs = new GoogleCloudVirtualFiles(TryResolve<StorageClient>(), Config.CoffeeShop.Bucket);
-                var path = $"/speech-to-text/{recording.CreatedDate:yyyy/MM/dd}/{recording.CreatedDate.TimeOfDay.TotalMilliseconds}.json";
-                googleCloudVfs.WriteFile(path, recording.ToJson());
-            }
-            catch (Exception ignore) {}
-        });
+
+        WriteJsonFile($"/speech-to-text/{recording.CreatedDate:yyyy/MM/dd}/{recording.CreatedDate.TimeOfDay.TotalMilliseconds}.json", 
+            recording.ToJson());
 
         return recording;
-    }
-
-    public static ProcessStartInfo ConvertToCmdExec(ProcessStartInfo startInfo)
-    {
-        var to = new ProcessStartInfo
-        {
-            FileName = Env.IsWindows
-                ? "cmd.exe"
-                : "/bin/bash",
-            WorkingDirectory = startInfo.WorkingDirectory,
-            Arguments = Env.IsWindows
-                ? $"/c \"\"{startInfo.FileName}\" {startInfo.Arguments}\""
-                : $"-c \"{startInfo.FileName} {startInfo.Arguments}\"",
-        };
-        return to;
     }
 
     public async Task<object> Any(CreateCoffeeShopChat request)
@@ -300,7 +257,7 @@ public class CoffeeShopServices : Service
                     Arguments = $"typechat.mjs ./{schemaPath} \"{shellRequest}\"",
                 };
                 if (Env.IsWindows)
-                    processInfo = ConvertToCmdExec(processInfo);
+                    processInfo = processInfo.ConvertToCmdExec();
 
                 var sb = StringBuilderCache.Allocate();
                 var sbError = StringBuilderCacheAlt.Allocate();
@@ -342,16 +299,20 @@ public class CoffeeShopServices : Service
 
         chat = await Db.SingleByIdAsync<Chat>(chat.Id);
         
+        WriteJsonFile($"/chat/{chat.CreatedDate:yyyy/MM/dd}/{chat.CreatedDate.TimeOfDay.TotalMilliseconds}.json", chat.ToJson());
+
+        return chat;
+    }
+    
+    void WriteJsonFile(string path, string json)
+    {
         ThreadPool.QueueUserWorkItem(_ => {
             try
             {
-                var googleCloudVfs = new GoogleCloudVirtualFiles(TryResolve<StorageClient>(), Config.CoffeeShop.Bucket);
-                var path = $"/chat/{chat.CreatedDate:yyyy/MM/dd}/{chat.CreatedDate.TimeOfDay.TotalMilliseconds}.json";
-                googleCloudVfs.WriteFile(path, chat.ToJson());
+                var googleCloudVfs = new GoogleCloudVirtualFiles(TryResolve<StorageClient>(), TryResolve<AppConfig>().CoffeeShop.Bucket);
+                googleCloudVfs.WriteFile(path, json);
             }
             catch (Exception ignore) {}
         });
-
-        return chat;
     }
 }
