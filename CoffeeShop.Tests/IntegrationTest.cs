@@ -13,7 +13,7 @@ public class IntegrationTest
 
     class AppHost : AppSelfHostBase
     {
-        public AppHost() : base(nameof(IntegrationTest), typeof(MyServices).Assembly) { }
+        public AppHost() : base(nameof(IntegrationTest), typeof(PortalServices).Assembly) { }
 
         public override void Configure(Container container)
         {

@@ -13,7 +13,7 @@ public class UnitTest
     public UnitTest()
     {
         appHost = new BasicAppHost().Init();
-        appHost.Container.AddTransient<MyServices>();
+        appHost.Container.AddTransient<PortalServices>();
     }
 
     [OneTimeTearDown]

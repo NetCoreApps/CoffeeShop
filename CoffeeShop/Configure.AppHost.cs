@@ -38,7 +38,7 @@ public class AppHost : AppHostBase, IHostingStartup
             }
         });
 
-    public AppHost() : base("CoffeeShop", typeof(MyServices).Assembly) {}
+    public AppHost() : base("CoffeeShop", typeof(PortalServices).Assembly) {}
 
     public override void Configure(Container container)
     {

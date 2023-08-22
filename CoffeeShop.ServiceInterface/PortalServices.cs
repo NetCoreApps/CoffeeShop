@@ -4,7 +4,7 @@ using ServiceStack.OrmLite;
 
 namespace CoffeeShop.ServiceInterface;
 
-public class MyServices : Service
+public class PortalServices : Service
 {
     public async Task<object> Any(AdminData request)
     {
