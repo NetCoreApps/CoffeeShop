@@ -61,19 +61,19 @@
 
 <div id="app" class="container mx-auto w-full bg-white">
     <div class="flex justify-between w-full">
-        <div class="pt-12 mt-2 w-40">
+        <div class="pl-4 pt-12 mt-2 w-40">
             @foreach (var category in categories.Results)
             {
                 <a href="#@category.Name" class="block mb-8 cursor-pointer hover:text-indigo-600">
-                    <img src="@category.ImageUrl" alt="" class="w-16 h-16 rounded-full object-cover">
-                    <span class="block mt-2 select-none">
+                    <img src="@category.ImageUrl" alt="" class="w-12 h-12 lg:w-16 lg:h-16 rounded-full object-cover">
+                    <span class="block mt-2 select-none text-sm lg:text-base">
                         @category.Description
                     </span>
                 </a>
             }
         </div>
         <div v-cloak class="flex-grow">
-            <div v-if="activeCategory" class="mb-4 text-xl select-none">
+            <div v-if="activeCategory" class="mb-4 lg:text-xl select-none">
                 <a href="#">Menu</a> /
                 <a :href="`#${activeCategory.name}`" :class="{ 'font-semibold':!activeProduct }">{{activeCategory.description}}</a>
                 <span v-if="activeProduct" class="font-semibold"> / {{activeProduct.name}}</span>
@@ -81,18 +81,18 @@
             <div v-if="activeProduct">
                 <div class="p-8 bg-stone-50 rounded-md">
                     <div class="flex items-center">
-                        <img :src="activeProduct.imageUrl" alt="" class="w-40 h-40 object-cover">
-                        <div class="ml-8 text-4xl">
+                        <img :src="activeProduct.imageUrl" alt="" class="w-24 h-24 lg:w-40 lg:h-40 object-cover">
+                        <div class="ml-8 text-2xl lg:text-4xl">
                             <div>{{activeProduct.name}}</div>
                             <div class="pt-2" v-html="currency(activeProduct.cost)"></div>
                         </div>
                     </div>
                 </div>
-                <div class="flex">
-                    <div v-if="activeCategory.sizes || activeCategory.temperatures" class="w-1/2">
+                <div class="flex flex-wrap">
+                    <div v-if="activeCategory.sizes || activeCategory.temperatures" class="w-full lg:w-1/2">
                         <div class="pl-8">
                             <div class="pt-8 pr-8" v-if="activeCategory.sizes">
-                                <h3 class="text-2xl border-b pb-2 mb-4">Size Options</h3>
+                                <h3 class="lg:text-2xl border-b pb-2 mb-4">Size Options</h3>
                                 <fieldset class="mt-2">
                                     <legend class="sr-only">Choose a Size preference</legend>
                                     <div class="grid grid-cols-2 md:grid-cols-4 gap-1 sm:gap-3">
@@ -106,7 +106,7 @@
                                 </fieldset>
                             </div>
                             <div class="pt-8 pr-8" v-if="activeCategory.temperatures">
-                                <h3 class="text-2xl border-b pb-2 mb-4">Temperature preference</h3>
+                                <h3 class="lg:text-2xl border-b pb-2 mb-4">Temperature preference</h3>
                                 <fieldset class="mt-2">
                                     <legend class="sr-only">Choose a Temperature preference</legend>
                                     <div class="grid grid-cols-2 md:grid-cols-4 gap-1 sm:gap-3">
@@ -121,13 +121,13 @@
                             </div>
                         </div>
                     </div>
-                    <div class="w-1/2">
+                    <div class="w-full lg:w-1/2">
                         <div v-if="productOptions.length" class="pl-8 pt-8">
-                            <h3 class="text-2xl border-b pb-2 mb-4">Customize</h3>
+                            <h3 class="lg:text-2xl border-b pb-2 mb-4">Customize</h3>
                             <div v-for="option in productOptions" class="pb-8 flex max-w-xs">
                                 <div class="">
                                     <label for="">{{humanize(option.type)}}</label>
-                                    <select-input class="w-32 md:w-60 flex-grow" v-model="orderItem.options[option.type]" :values="['',...option.names]"></select-input>
+                                    <select-input class="w-60 flex-grow" v-model="orderItem.options[option.type]" :values="['',...option.names]"></select-input>
                                 </div>
                                 <div v-if="option.allowQuantity && option.quantityLabel" class="ml-4 select-none">
                                     <label for="">{{option.quantityLabel}}</label>
@@ -154,19 +154,19 @@
                     </button>
                 </div>
             </div>
-            <div v-else-if="activeCategory" class="mt-8 grid grid-cols-3">
+            <div v-else-if="activeCategory" class="mt-8 grid grid-cols-2 lg:grid-cols-3">
                 <a v-for="product in activeCategory.products" :href="`#${activeCategory.name}/${product.name}`" class="block mb-8 flex flex-col items-center">
-                    <img :src="product.imageUrl" alt="" class="w-28 h-28 rounded-full object-cover">
-                    <span class="block mt-2 text-lg font-medium">
+                    <img :src="product.imageUrl" alt="" class="w-16 h-16 lg:w-28 lg:h-28 rounded-full object-cover">
+                    <span class="block mt-2 lg:text-lg font-medium">
                         {{product.name}}
                     </span>
                 </a>
             </div>
             <div v-else class="mt-20 text-center">
                 <div class="mx-auto max-w-screen-sm flex items-center justify-end">
-                    <div>
+                    <div class="w-full lg:w-auto">
                         <form v-if="!(loadingRecording || isRecording || isTranscribing || transcript)" v-on:submit.prevent="onSubmit">
-                            <text-input v-model="txtOrder" :disabled="isSendingChat" class="w-96 text-2xl" placeholder="What can we get for you today?"></text-input>
+                            <text-input v-model="txtOrder" :disabled="isSendingChat" class="w-full lg:w-96 text-2xl" placeholder="What can we get for you today?"></text-input>
                         </form>
                         <div v-else class="text-2xl text-gray-600">
                             <div v-if="isTranscribing" class="pr-20 flex items-center">
@@ -191,16 +191,16 @@
                             <div class="pr-20" v-else-if="isRecording">Speak Now</div>
                         </div>
                     </div>
-                    <div class="ml-8">
+                    <div class="ml-4 lg:ml-8">
                         <div class="flex justify-center items-center">
-                            <div v-if="loadingRecording" class="h-20 w-20 bg-yellow-600 rounded-full flex justify-center items-center cursor-pointer animation-loading-pulse">
-                                <svg class="w-10 h-10 text-white" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="4"><rect width="14" height="27" x="17" y="4" rx="7"/><path stroke-linecap="round" d="M9 23c0 8.284 6.716 15 15 15c8.284 0 15-6.716 15-15M24 38v6"/></g></svg>
+                            <div v-if="loadingRecording" class="w-16 h-16 lg:h-20 lg:w-20 bg-yellow-600 rounded-full flex justify-center items-center cursor-pointer animation-loading-pulse">
+                                <svg class="w-8 h-8 lg:w-10 lg:h-10 text-white" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="4"><rect width="14" height="27" x="17" y="4" rx="7"/><path stroke-linecap="round" d="M9 23c0 8.284 6.716 15 15 15c8.284 0 15-6.716 15-15M24 38v6"/></g></svg>
                             </div>
-                            <div v-else-if="!isRecording" v-on:click="toggleRecording" class="h-20 w-20 rounded-full flex justify-center items-center cursor-pointer shadow">
-                                <svg class="w-10 h-10 text-gray-600" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="4"><rect width="14" height="27" x="17" y="4" rx="7"/><path stroke-linecap="round" d="M9 23c0 8.284 6.716 15 15 15c8.284 0 15-6.716 15-15M24 38v6"/></g></svg>
+                            <div v-else-if="!isRecording" v-on:click="toggleRecording" class="w-16 h-16 lg:h-20 lg:w-20 rounded-full flex justify-center items-center cursor-pointer shadow">
+                                <svg class="w-8 h-8 lg:w-10 lg:h-10 text-gray-600" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="4"><rect width="14" height="27" x="17" y="4" rx="7"/><path stroke-linecap="round" d="M9 23c0 8.284 6.716 15 15 15c8.284 0 15-6.716 15-15M24 38v6"/></g></svg>
                             </div>
-                            <div v-else v-on:click="toggleRecording" class="h-20 w-20 bg-red-600 rounded-full flex justify-center items-center cursor-pointer animation-pulse">
-                                <svg class="w-10 h-10 text-white" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="4"><rect width="14" height="27" x="17" y="4" rx="7"/><path stroke-linecap="round" d="M9 23c0 8.284 6.716 15 15 15c8.284 0 15-6.716 15-15M24 38v6"/></g></svg>
+                            <div v-else v-on:click="toggleRecording" class="w-16 h-16 lg:h-20 lg:w-20 bg-red-600 rounded-full flex justify-center items-center cursor-pointer animation-pulse">
+                                <svg class="w-8 h-8 lg:w-10 lg:h-10 text-white" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="4"><rect width="14" height="27" x="17" y="4" rx="7"/><path stroke-linecap="round" d="M9 23c0 8.284 6.716 15 15 15c8.284 0 15-6.716 15-15M24 38v6"/></g></svg>
                             </div>
                         </div>
                     </div>
@@ -217,19 +217,20 @@
                 </div>
             </div>
         </div>
-        <div v-cloak class="ml-4 w-80">
+        <div v-if="showCart" v-cloak class="ml-4 w-80 bg-white lg:relative absolute right-0 p-4 pl-8 lg:pl-0 rounded shadow lg:shadow-none">
             <div v-if="cartItems.length">
-                <div v-cloak class="mb-4 text-xl select-none font-medium">
-                    Cart
+                <div v-cloak class="mb-4 text-xl select-none font-medium flex justify-between items-start">
+                    <span>Cart</span>
+                    <close-button v-on:click="showCart=false" class="lg:pt-0 lg:pr-0"></close-button>
                 </div>
                 <div v-for="item in cartItems" class="shadow rounded p-4 mb-4">
                     <div class="flex">
                         <div>
-                            <img :src="productsMap[item.product].imageUrl" alt="" class="w-16 h-16 rounded-full object-cover">
+                            <img :src="productsMap[item.product].imageUrl" alt="" class="w-12 h-12 lg:w-16 lg:h-16 rounded-full object-cover">
                         </div>
                         <div class="ml-4">
                             <div class="">
-                                <span class="text-lg font-semibold">{{productsMap[item.product].name}}</span>
+                                <span class="lg:text-lg font-semibold">{{productsMap[item.product].name}}</span>
                                 <div class="flex mt-1">
                                     <div v-if="item.size" class="mr-2">
                                         <span class="inline-flex items-center rounded-full bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10">{{item.size}}</span>
@@ -258,6 +259,12 @@
                     <primary-button v-on:click="emptyCart" color="red">Empty Cart</primary-button>
                 </div>
             </div>
+        </div>
+        <div v-cloak v-else-if="cartItems.length" class="-mt-20 absolute right-4">
+            <button v-on:click="showCart=true" type="button" class="relative rounded-full bg-white p-4 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                <svg class="w-6 h-6 text-gray-700" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path fill="currentColor" d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .49.598l-1 5a.5.5 0 0 1-.465.401l-9.397.472L4.415 11H13a.5.5 0 0 1 0 1H4a.5.5 0 0 1-.491-.408L2.01 3.607L1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l.84 4.479l9.144-.459L13.89 4H3.102zM5 12a2 2 0 1 0 0 4a2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4a2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2a1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2a1 1 0 0 1 0-2z"/></svg>
+                <div class="absolute inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-red-500 border-2 border-white rounded-full -top-2 -right-2 dark:border-gray-900">{{cartItems.length}}</div>
+            </button>
         </div>
     </div>
 </div>
@@ -417,6 +424,7 @@ const App = {
         const categoryOptions = ref()
         const productOptions = computed(() => (categoryOptions.value && activeCategory.value 
             ? categoryOptions.value.filter(x => activeCategory.value.categoryOptions?.some(y => y.optionId === x.id)) : null) || [])
+        const showCart = ref(false)
         const cart = ref()
         const cartItems = computed(() => cart.value && cart.value.items || [])
         const orderItem = ref(createOrderItem(activeCategory.value))
@@ -475,6 +483,7 @@ const App = {
             cart.value.items.push(sanitizeItem(item))
             saveCart()
             reset()
+            showCart.value = true
         }
         
         function itemOptions(item) {
@@ -527,6 +536,7 @@ const App = {
         }
         function emptyCart() {
             cart.value = { items:[] }
+            showCart.value = false
             localStorage.removeItem('cart')
         }
         
@@ -680,6 +690,7 @@ const App = {
 
         onMounted(async () => {
             cart.value = map(localStorage.getItem('cart'), x => JSON.parse(x)) || null
+            showCart.value = cart.value?.items?.length > 0 
             
             window.addEventListener('popstate', event => {
                 navTo(event.state?.category || getCategory(), { product:event.state?.product || getProduct() }, false)
@@ -703,6 +714,7 @@ const App = {
             activeCategory,
             activeProduct,
             currency,
+            showCart,
             cart,
             cartItems,
             orderItem,
