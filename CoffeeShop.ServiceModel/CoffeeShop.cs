@@ -141,7 +141,13 @@ public class UpdateCategory : IPatchDb<Category>, IReturn<Category>
     public string? DefaultTemperature { get; set; }
     [Input(Type = "file"), UploadTo("products")]
     public string? ImageUrl { get; set; }
+
+    [Input(Type = "hidden")]
+    public List<int>? AddOptionIds { get; set; }
+    [Input(Type = "hidden")]
+    public List<int>? RemoveOptionIds { get; set; }
 }
+
 [Tag(Tags.CoffeeShop)]
 public class DeleteCategory : IDeleteDb<Category>, IReturnVoid
 {
@@ -230,14 +236,6 @@ public class UpdateOptionQuantity : IPatchDb<OptionQuantity>, IReturn<OptionQuan
 public class DeleteOptionQuantity : IDeleteDb<OptionQuantity>, IReturnVoid
 {
     public int Id { get; set; }
-}
-
-[Tag(Tags.CoffeeShop)]
-public class ModifyCategoryOptions
-{
-    public int CategoryId { get; set; }
-    public List<int>? AddOptionIds { get; set; }
-    public List<int>? RemoveOptionIds { get; set; }
 }
 
 [Tag(Tags.CoffeeShop)]

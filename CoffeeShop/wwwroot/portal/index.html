@@ -69,16 +69,91 @@
 </div>
 
 <script type="module">
-import { createApp, ref, onMounted, shallowRef } from "vue"
+import { createApp, ref, computed, onMounted, shallowRef } from "vue"
 import { JsonApiClient, leftPart, rightPart, appendQueryString, humanize } from "@servicestack/client"
-import ServiceStackVue, { useClient, useAuth, useMetadata, useFormatters } from "@servicestack/vue"
-import { Authenticate, AdminData } from "dtos.mjs"
+import ServiceStackVue, { useClient, useConfig, useAuth, useMetadata, useFormatters } from "@servicestack/vue"
+import { Authenticate, AdminData, QueryOptions } from "dtos.mjs"
 
+const { registerInterceptor } = useConfig()
 const { Formats } = useFormatters()
 const { loadMetadata, metadataApi, typeOf } = useMetadata()
 await loadMetadata({
     olderThan: window.Server ? null : location.search.includes('clear=metadata') ? 0 : 60 * 60 * 1000, //1hr
 })
+
+;['AutoEditForm.new','AutoEditForm.save']
+    .forEach(k => registerInterceptor(k, (key,value) => {
+        console.log('intercept', key, value)
+    }))
+
+const CategoryOptions = {
+    template:`
+         <div>
+            <ul v-for="optionType in currentOptionTypes">
+                <li class="py-1 flex justify-between">
+                    <span>
+                        {{optionType}}
+                    </span>
+                    <span>
+                        <svg class="w-6 h-6 text-red-600 hover:text-red-800 cursor-pointer" @click="removeOption(optionType)" xmlns='http://www.w3.org/2000/svg' width='1024' height='1024' viewBox='0 0 1024 1024'>
+                            <title>Remove Option</title>
+                            <path fill='currentColor' d='M512 64a448 448 0 1 1 0 896a448 448 0 0 1 0-896zM288 512a38.4 38.4 0 0 0 38.4 38.4h371.2a38.4 38.4 0 0 0 0-76.8H326.4A38.4 38.4 0 0 0 288 512z'/>
+                        </svg>
+                    </span>
+                </li> 
+            </ul>
+            <div class="flex justify-between items-center">
+                <select-input class="flex-grow" @change="addOption" :values="['',...options.filter(x => !currentOptionTypes.includes(x.type)).map(x => x.type)]"></select-input>
+                <svg class="ml-2 w-6 h-6 text-green-600" xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'>
+                    <title>Add Option</title>
+                    <path fill='currentColor' d='M11 17h2v-4h4v-2h-4V7h-2v4H7v2h4v4Zm1 5q-2.075 0-3.9-.788t-3.175-2.137q-1.35-1.35-2.137-3.175T2 12q0-2.075.788-3.9t2.137-3.175q1.35-1.35 3.175-2.137T12 2q2.075 0 3.9.788t3.175 2.137q1.35 1.35 2.138 3.175T22 12q0 2.075-.788 3.9t-2.137 3.175q-1.35 1.35-3.175 2.138T12 22Z'/>
+                </svg>            
+            </div>
+         </div>
+    `,
+    props:['type','id','modelValue'],
+    emits:['update:modelValue'],
+    setup(props, { emit }) {
+        const client = useClient()
+        const options = ref([])
+        const model = props.modelValue
+        
+        model.addOptionIds ??= []
+        model.removeOptionIds ??= []
+        const origOptionIds = model.categoryOptions?.map(x => x.optionId) || []
+        
+        const currentOptionIds = computed(() => [...origOptionIds, ...model.addOptionIds]
+            .filter(x => !model.removeOptionIds.includes(x)))
+        const currentOptionTypes = computed(() =>
+            currentOptionIds.value.map(id => options.value.find(x => x.id === id)?.type).filter(x => !!x))
+        
+        function addOption(e) {
+            const optionType = e.target.value
+            if (!optionType) return
+            const option = options.value.find(x => x.type === optionType)
+            if (model.removeOptionIds.includes(option.id))
+                model.removeOptionIds = model.removeOptionIds.filter(id => id !== option.id)
+            else if (!model.addOptionIds.includes(option.id))
+                model.addOptionIds.push(option.id)
+            emit('update:modelValue', model)
+        }
+        function removeOption(optionType) {
+            const option = options.value.find(x => x.type === optionType)
+            if (model.addOptionIds.includes(option.id))
+                model.addOptionIds = model.addOptionIds.filter(id => id !== option.id)
+            else if (!model.removeOptionIds.includes(option.id))
+                model.removeOptionIds.push(option.id)
+        }
+
+        onMounted(async () => {
+            const api = await client.api(new QueryOptions({ orderBy:'id' }))
+            options.value = api.response.results || []
+            emit('update:modelValue', model)
+        })
+
+        return { options, addOption, removeOption, currentOptionTypes }
+    }
+}
 
 const sections = {
     Dashboard: {
@@ -109,6 +184,7 @@ const sections = {
     Categories: {
         type: 'Category',
         component: {
+            components: { CategoryOptions },
             template:`
             <AutoQueryGrid :type="type" selectedColumns="imageUrl,id,name,defaultSize,products"
                     :headerTitles="{ imageUrl: ' ' }" :canFilter="x => x != 'ImageUrl'">
@@ -120,6 +196,12 @@ const sections = {
                 <template #description="{ description }">{{description}}</template>
                 <template #defaultSize="{ defaultSize }">{{defaultSize}}</template>
                 <template #products="{ products }">{{ products.map(x => x.name).join(', ') }}</template>
+                <template #formfooter="{ form, type, apis, model, id, updateModel }">
+                    <div class="w-1/2 mt-4 px-4 sm:px-6">
+                        <h3 class="text-lg font-semibold">Options</h3>
+                        <CategoryOptions v-if="form === 'edit'" :key="id" :type="type" :id="id" v-model="model" @update:modelValue="updateModel(model)" />
+                    </div>
+                </template>                
             </AutoQueryGrid>`,
             setup() {
                 return { Formats }
