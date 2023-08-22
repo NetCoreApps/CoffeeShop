@@ -1,5 +1,4 @@
 ﻿@page
-@model IndexModel
 @{
     ViewData["Title"] = "CoffeeShop - TypeChat";
     var categories = await base.Gateway.SendAsync(new QueryCategories());
@@ -123,12 +122,12 @@
                         </div>
                     </div>
                     <div class="w-1/2">
-                        <div class="pl-8 pt-8">
+                        <div v-if="productOptions.length" class="pl-8 pt-8">
                             <h3 class="text-2xl border-b pb-2 mb-4">Customize</h3>
                             <div v-for="option in productOptions" class="pb-8 flex max-w-xs">
                                 <div class="">
                                     <label for="">{{humanize(option.type)}}</label>
-                                    <select-input class="w-32 md:w-60" class="flex-grow" v-model="orderItem.options[option.type]" :values="['',...option.names]"></select-input>
+                                    <select-input class="w-32 md:w-60 flex-grow" v-model="orderItem.options[option.type]" :values="['',...option.names]"></select-input>
                                 </div>
                                 <div v-if="option.allowQuantity && option.quantityLabel" class="ml-4 select-none">
                                     <label for="">{{option.quantityLabel}}</label>
@@ -417,7 +416,7 @@ const App = {
         const activeProduct = shallowRef(categories.flatMap(x => x.products).find(x => x.name === getProduct()))
         const categoryOptions = ref()
         const productOptions = computed(() => (categoryOptions.value && activeCategory.value 
-            ? categoryOptions.value.filter(x => activeCategory.value.categoryOptions.some(y => y.optionId === x.id)) : null) || [])
+            ? categoryOptions.value.filter(x => activeCategory.value.categoryOptions?.some(y => y.optionId === x.id)) : null) || [])
         const cart = ref()
         const cartItems = computed(() => cart.value && cart.value.items || [])
         const orderItem = ref(createOrderItem(activeCategory.value))
