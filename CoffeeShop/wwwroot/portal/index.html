@@ -168,9 +168,15 @@ const sections = {
                   <dd class="mt-1 text-3xl font-semibold tracking-tight text-gray-900">{{formatNumber(stat.total)}}</dd>
                 </div>
               </dl>
-              <p class="mt-8 text-sm font-semibold leading-6">
-                Go to <a href="/" class="text-indigo-600">Menu <span aria-hidden="true">&rarr;</span></a>    
-              </p>
+              <div class="flex justify-between mt-8 text-sm font-semibold leading-6">
+                  <p class="">
+                    Go to <a href="/" class="text-indigo-600">Menu <span aria-hidden="true">&rarr;</span></a>    
+                  </p>
+                  <p>
+                    <a href="/coffeeshop/schema" class="text-indigo-600">schema.ts</a>
+                    <a href="/coffeeshop/prompt?request=i'd+like+a+latte+that's+it" class="ml-4 text-indigo-600">prompt</a>
+                  </p>
+              </div>
             </div>`,
             setup() {
                 const client = useClient()
