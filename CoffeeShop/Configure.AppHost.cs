@@ -1,9 +1,6 @@
 using Funq;
 using CoffeeShop.ServiceInterface;
-using Google.Cloud.Speech.V2;
-using Google.Cloud.Storage.V1;
 using ServiceStack.Configuration;
-using ServiceStack.GoogleCloud;
 using ServiceStack.Host;
 using ServiceStack.IO;
 using ServiceStack.Web;
@@ -23,18 +20,10 @@ public class AppHost : AppHostBase, IHostingStartup
 
             if (!AppTasks.IsRunAsAppTask())
             {
-                appConfig.NodePath = ScriptContext.ProtectedMethods.exePath("node")
+                appConfig.NodePath = ProcessUtils.FindExePath("node")
                                      ?? throw new Exception("Could not resolve path to node");
-                appConfig.FfmpegPath = ScriptContext.ProtectedMethods.exePath("ffmpeg");
-
-                var googleCredentials = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS");
-                if (string.IsNullOrEmpty(googleCredentials))
-                    throw new Exception("GOOGLE_APPLICATION_CREDENTIALS Environment Variable not set");
-                if (!File.Exists(googleCredentials))
-                    throw new Exception($"GOOGLE_APPLICATION_CREDENTIALS '{googleCredentials}' does not exist");
-
-                services.AddSingleton(SpeechClient.Create());
-                services.AddSingleton(StorageClient.Create());
+                appConfig.FfmpegPath = ProcessUtils.FindExePath("ffmpeg");
+                appConfig.WhisperPath = ProcessUtils.FindExePath("whisper");
             }
         });
 
@@ -51,15 +40,12 @@ public class AppHost : AppHostBase, IHostingStartup
 
         if (!AppTasks.IsRunAsAppTask())
         {
-            var audioFormats = new List<string>(FileExt.WebAudios) { "mp4" }.ToArray();
-            
             var appConfig = container.Resolve<AppConfig>();
             var wwwrootVfs = GetVirtualFileSource<FileSystemVirtualFiles>();
-            var googleCloudVfs = new GoogleCloudVirtualFiles(container.Resolve<StorageClient>(), appConfig.CoffeeShop.Bucket);
             Plugins.Add(new FilesUploadFeature(
                 new UploadLocation("products", wwwrootVfs, allowExtensions:FileExt.WebImages,
                     resolvePath: ctx => $"/products/{ctx.FileName}"),
-                new UploadLocation("recordings", googleCloudVfs, allowExtensions:audioFormats, writeAccessRole: RoleNames.AllowAnon,
+                new UploadLocation("recordings", VirtualFiles, allowExtensions:FileExt.WebAudios, writeAccessRole: RoleNames.AllowAnon,
                     maxFileBytes: 1024 * 1024,
                     transformFile: ctx => ConvertAudioToWebM(ctx.File),
                     resolvePath: ctx => $"/recordings/{ctx.DateSegment}/{DateTime.UtcNow.TimeOfDay.TotalMilliseconds}.{ctx.FileExtension}")
@@ -67,6 +53,10 @@ public class AppHost : AppHostBase, IHostingStartup
         }
     }
 
+    /// <summary>
+    /// Safari can only encode Web Audio Recordings in mp4/aac which Google speech-to-text doesn't support so we
+    /// need to convert it to .webm before we send it to speech-to-text API to transcribe 
+    /// </summary>
     public async Task<IHttpFile?> ConvertAudioToWebM(IHttpFile file)
     {
         if (!file.FileName.EndsWith("mp4")) 
@@ -89,7 +79,7 @@ public class AppHost : AppHostBase, IHostingStartup
             await msMp4.WriteToAsync(fsMp4);
         }
         await ProcessUtils.RunShellAsync($"{appConfig.FfmpegPath} -i {tmpMp4} {tmpWebm}");
-        // File.Delete(tmpMp4);
+        File.Delete(tmpMp4);
         
         HttpFile? to = null;
         await using (var fsWebm = File.OpenRead(tmpWebm))
@@ -99,20 +89,28 @@ public class AppHost : AppHostBase, IHostingStartup
                 InputStream = await fsWebm.CopyToNewMemoryStreamAsync()
             };
         }
-        // File.Delete(tmpWebm);
+        File.Delete(tmpWebm);
                 
         ThreadPool.QueueUserWorkItem(_ => {
             try
             {
-                var googleCloudVfs = new GoogleCloudVirtualFiles(Container.Resolve<StorageClient>(), appConfig.CoffeeShop.Bucket);
                 var origPath = $"/recordings/{now:yyyy/MM/dd}/{now.TimeOfDay.TotalMilliseconds}.mp4";
                 msMp4.Position = 0;
-                googleCloudVfs.WriteFile(origPath, msMp4);
+                VirtualFiles.WriteFile(origPath, msMp4);
             }
             catch (Exception ignore) {}
         });
 
         return to;
+    }
+
+    public static void AssertGoogleCloudCredentials()
+    {
+        var googleCredentials = Environment.GetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS");
+        if (string.IsNullOrEmpty(googleCredentials))
+            throw new Exception("GOOGLE_APPLICATION_CREDENTIALS Environment Variable not set");
+        if (!File.Exists(googleCredentials))
+            throw new Exception($"GOOGLE_APPLICATION_CREDENTIALS '{googleCredentials}' does not exist");
     }
     
     public static void RegisterKey() =>

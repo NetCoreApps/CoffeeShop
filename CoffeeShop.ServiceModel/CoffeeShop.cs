@@ -255,15 +255,8 @@ public class CoffeeShopPhrases : IReturn<StringsResponse> {}
 
 [ValidateIsAdmin]
 [Tag(Tags.CoffeeShop)]
-[Route("/coffeeshop/phrases")]
-public class CreateCoffeeShopPhrases : IReturnVoid
-{
-}
-
-[ValidateIsAdmin]
-[Tag(Tags.CoffeeShop)]
-[Route("/coffeeshop/recognizer")]
-public class CreateCoffeeShopRecognizer : IReturnVoid {}
+[Route("/coffeeshop/speech/init")]
+public class CoffeeShopInitSpeech : IReturnVoid {}
 
 [Tag(Tags.CoffeeShop)]
 public class QueryRecordings : QueryDb<Recording> {}
