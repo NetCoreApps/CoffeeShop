@@ -58,6 +58,22 @@ jobs:
         run: |
           npm install
         working-directory: ./CoffeeShop
+          
+      - name: setup .net core
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '6.0'
+          
+      - name: Install x tool
+        run: dotnet tool install -g x
+          
+      - name: Apply Production AppSettings
+        working-directory: ./CoffeeShop
+        run: | 
+          cat <<EOF >> appsettings.json.patch
+          ${{ secrets.APPSETTINGS_PATCH }}
+          EOF
+          x patch appsettings.json.patch
 
       # Publish .NET Project
       - name: Publish dotnet project
