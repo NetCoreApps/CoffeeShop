@@ -118,10 +118,6 @@ public class Migration1000 : MigrationBase
         Db.CreateTable<Chat>();
         
         var options = new List<Option>();
-        var optionQuantities = new[]{ "no", "light", "regular", "extra" }
-            .Map(x => new OptionQuantity {
-                Name = x
-            });
         Db.SaveAll(new OptionQuantity[]
         {
             new() { Name = "no", Value = 0 },
