@@ -39,7 +39,7 @@ public class GoogleCloudSpeechToText : ISpeechToText
         {
             await SpeechClient.DeletePhraseSetAsync(new DeletePhraseSetRequest
             {
-                PhraseSetName = new PhraseSetName(Config.Project, Config.Location, Config.CoffeeShop.PhraseSetId)
+                PhraseSetName = new PhraseSetName(Config.Project, Config.Location, Config.SiteConfig.PhraseSetId)
             });
         }
         catch (Exception ignoreNonExistingPhraseSet) {}
@@ -47,7 +47,7 @@ public class GoogleCloudSpeechToText : ISpeechToText
         await SpeechClient.CreatePhraseSetAsync(new CreatePhraseSetRequest
         {
             Parent = $"projects/{Config.Project}/locations/{Config.Location}",
-            PhraseSetId = Config.CoffeeShop.PhraseSetId,
+            PhraseSetId = Config.SiteConfig.PhraseSetId,
             PhraseSet = new PhraseSet
             {
                 Phrases =
@@ -61,7 +61,7 @@ public class GoogleCloudSpeechToText : ISpeechToText
         {
             await SpeechClient.DeleteRecognizerAsync(new DeleteRecognizerRequest
             {
-                RecognizerName = new RecognizerName(Config.Project, Config.Location, Config.CoffeeShop.RecognizerId)
+                RecognizerName = new RecognizerName(Config.Project, Config.Location, Config.SiteConfig.RecognizerId)
             });
         }
         catch (Exception ignoreNonExistingRecognizer) {}
@@ -69,7 +69,7 @@ public class GoogleCloudSpeechToText : ISpeechToText
         await SpeechClient.CreateRecognizerAsync(new CreateRecognizerRequest
         {
             Parent = $"projects/{Config.Project}/locations/{Config.Location}",
-            RecognizerId = Config.CoffeeShop.RecognizerId,
+            RecognizerId = Config.SiteConfig.RecognizerId,
             Recognizer = new Recognizer
             {
                 DefaultRecognitionConfig = new RecognitionConfig
@@ -83,7 +83,7 @@ public class GoogleCloudSpeechToText : ISpeechToText
                         {
                             new SpeechAdaptation.Types.AdaptationPhraseSet
                             {
-                                PhraseSet = $"projects/{Config.Project}/locations/{Config.Location}/phraseSets/{Config.CoffeeShop.PhraseSetId}"
+                                PhraseSet = $"projects/{Config.Project}/locations/{Config.Location}/phraseSets/{Config.SiteConfig.PhraseSetId}"
                             }
                         }
                     }
@@ -96,8 +96,8 @@ public class GoogleCloudSpeechToText : ISpeechToText
     {
         var response = await SpeechClient.RecognizeAsync(new RecognizeRequest
         {
-            Recognizer = $"projects/{Config.Project}/locations/{Config.Location}/recognizers/{Config.CoffeeShop.RecognizerId}",
-            Uri = $"gs://{Config.CoffeeShop.Bucket}".CombineWith(recordingPath)
+            Recognizer = $"projects/{Config.Project}/locations/{Config.Location}/recognizers/{Config.SiteConfig.RecognizerId}",
+            Uri = $"gs://{Config.SiteConfig.Bucket}".CombineWith(recordingPath)
         });
 
         var alt = response.Results[0].Alternatives[0];

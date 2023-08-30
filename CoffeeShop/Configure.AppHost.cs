@@ -37,6 +37,8 @@ public class AppHost : AppHostBase, IHostingStartup
         Plugins.Add(new CorsFeature(new[] {
             "http://localhost:5173", //vite dev
         }, allowCredentials:true));
+        
+        Plugins.Add(new ProfilingFeature());
 
         if (!AppTasks.IsRunAsAppTask())
         {

@@ -1,4 +1,5 @@
 ﻿using CoffeeShop.ServiceInterface;
+using CoffeeShop.ServiceModel;
 using Microsoft.SemanticKernel;
 
 [assembly: HostingStartup(typeof(CoffeeShop.ConfigureGpt))]
@@ -12,7 +13,7 @@ public class ConfigureGpt : IHostingStartup
         {
             // Call Open AI Chat API directly without going through node TypeChat
             var gptProvider = context.Configuration.GetValue<string>("GptChatProvider");
-            if (gptProvider == nameof(KernelGptCoffeeShop))
+            if (gptProvider == nameof(KernelChatProvider<Cart>))
             {
                 var kernel = Kernel.Builder
                     .WithOpenAIChatCompletionService(
@@ -20,14 +21,14 @@ public class ConfigureGpt : IHostingStartup
                         Environment.GetEnvironmentVariable("OPENAI_API_KEY")!)
                     .Build();
                 services.AddSingleton(kernel);
-                services.AddSingleton<IGptCoffeeShop>(c => 
-                    new KernelGptCoffeeShop(c.Resolve<AppConfig>(), c.Resolve<IKernel>()));
+                services.AddSingleton<ITypeChatProvider<Cart>>(c => 
+                    new KernelChatProvider<Cart>(c.Resolve<AppConfig>(), c.Resolve<IKernel>()));
             }
-            else if (gptProvider == nameof(NodeTypeChatGptCoffeeShop))
+            else if (gptProvider == nameof(NodeTypeChatProvider<Cart>))
             {
                 // Call Open AI Chat API through node TypeChat
-                services.AddSingleton<IGptCoffeeShop>(c =>
-                    new NodeTypeChatGptCoffeeShop(c.Resolve<AppConfig>()));
+                services.AddSingleton<ITypeChatProvider<Cart>>(c =>
+                    new NodeTypeChatProvider<Cart>(c.Resolve<AppConfig>()));
             }
             else throw new NotSupportedException($"Unknown GptChatProvider: {gptProvider}");
         });

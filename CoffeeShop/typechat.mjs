@@ -10,11 +10,7 @@ const model = createLanguageModel(process.env)
 //const schema = await fs.readFile(path.join(__dirname, "coffeeShopSchema.ts"), "utf8")
 const schema = await fs.readFile(path.join(__dirname, process.argv[2]), "utf8")
 
-const firstInterfacePos = schema.indexOf('export interface ')
-const endPos = schema.indexOf('{', firstInterfacePos)
-const schemaName = schema.substring(firstInterfacePos + 'export interface '.length, endPos).trim()
-
-const translator = createJsonTranslator(model, schema, schemaName)
+const translator = createJsonTranslator(model, schema, process.argv[4])
 
 const response = await translator.translate(process.argv[3])
 if (!response.success) {
