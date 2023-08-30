@@ -127,7 +127,7 @@ public class KernelGptCoffeeShop : GptCoffeeShopBase
 
     public override async Task<string> OrderAsync(IDbConnection db, string request, CancellationToken token = default)
     {
-        var prompt = await GetSchemaAsync(db, token);
+        var prompt = await CreatePromptAsync(db, request, token);
         var chatHistory = new ChatHistory();
         chatHistory.AddUserMessage(prompt);
         var chatCompletionService = Kernel.GetService<IChatCompletion>();
