@@ -12,14 +12,56 @@ public class CoffeeShopServices : Service
 
     public IAutoQueryDb AutoQuery { get; set; }
     
-    public IGptCoffeeShop GptCoffeeShop { get; set; }
+    public ITypeChatProvider<Cart> GptCoffeeShop { get; set; }
     public ISpeechToText SpeechToText { get; set; }
 
     [AddHeader(HttpHeaders.ContentType, MimeTypes.PlainText)]
-    public async Task<string> Any(CoffeeShopSchema request) => await GptCoffeeShop.GetSchemaAsync(Db);
+    public async Task<string> Any(CoffeeShopSchema request)
+    {
+        var categories = await Db.LoadSelectAsync(Db.From<Category>());
+        var options = await Db.SelectAsync<Option>();
+        var optionsMap = options.ToDictionary(x => x.Id);
+        var optionQuantities = await Db.SelectAsync<OptionQuantity>();
+
+        
+        var processCartRequest = new ProcessCartRequest {
+            UserRequest = "",
+            PromptContext = 
+            {
+                [nameof(categories)] = categories,
+                [nameof(options)] = options,
+                [nameof(optionsMap)] = optionsMap,
+                [nameof(optionQuantities)] = optionQuantities,
+            },
+        };
+        
+        var schema = await GptCoffeeShop.GetSchemaAsync(processCartRequest);
+        return schema;
+    }
 
     [AddHeader(HttpHeaders.ContentType, MimeTypes.PlainText)]
-    public async Task<string> Any(CoffeeShopPrompt request) => await GptCoffeeShop.CreatePromptAsync(Db, request.Request);
+    public async Task<string> Any(CoffeeShopPrompt request)
+    {
+        var categories = await Db.LoadSelectAsync(Db.From<Category>());
+        var options = await Db.SelectAsync<Option>();
+        var optionsMap = options.ToDictionary(x => x.Id);
+        var optionQuantities = await Db.SelectAsync<OptionQuantity>();
+
+        
+        var processCartRequest = new ProcessCartRequest {
+            UserRequest = request.Request,
+            PromptContext = 
+            {
+                [nameof(categories)] = categories,
+                [nameof(options)] = options,
+                [nameof(optionsMap)] = optionsMap,
+                [nameof(optionQuantities)] = optionQuantities,
+            },
+        };
+        
+        var prompt = await GptCoffeeShop.CreatePromptAsync(processCartRequest);
+        return prompt;
+    }
 
     public async Task<StringsResponse> Any(CoffeeShopPhrases request)
     {
@@ -141,12 +183,29 @@ public class CoffeeShopServices : Service
 
         try
         {
-            var result = await GptCoffeeShop.OrderAsync(Db, request.Request);
+            
+            var categories = await Db.LoadSelectAsync(Db.From<Category>());
+            var options = await Db.SelectAsync<Option>();
+            var optionsMap = options.ToDictionary(x => x.Id);
+            var optionQuantities = await Db.SelectAsync<OptionQuantity>();
+            
+            var gptRequest = new ProcessCartRequest()
+            {
+                UserRequest = request.Request,
+                PromptContext = new Dictionary<string, object>
+                {
+                    [nameof(categories)] = categories,
+                    [nameof(options)] = options,
+                    [nameof(optionsMap)] = optionsMap,
+                    [nameof(optionQuantities)] = optionQuantities,
+                },
+            };
+            var result = await GptCoffeeShop.ProcessAsync(gptRequest);
             var chatEnd = DateTime.UtcNow;
             await Db.UpdateOnlyAsync(() => new Chat
             {
                 Request = request.Request,
-                ChatResponse = result,
+                ChatResponse = result.ToJson(),
                 ChatEnd = chatEnd,
                 ChatDurationMs = (int)(chatEnd - chatStart).TotalMilliseconds,
             }, where: x => x.Id == chat.Id);

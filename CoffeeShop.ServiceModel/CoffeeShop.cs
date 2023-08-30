@@ -281,6 +281,11 @@ public class CreateCoffeeShopChat : ICreateDb<Chat>, IReturn<Chat>
     public string Request { get; set; }
 }
 
+public class ProcessCartRequest : GptRequestBase<Cart>
+{
+
+}
+
 /* GPT Models */
 public class Cart
 {
@@ -297,13 +302,13 @@ public class ProductItem
 {
     public string Type { get; set; }
     public string Name { get; set; }
-    public List<ProductOption> Options { get; set; }
+    public string Temperature { get; set; }
+    public string Size { get; set; }
+    public string OptionQuantity { get; set; }
 }
 public class ProductOption
 {
     public string Type { get; set; }
     public string Name { get; set; }
-    public string Temperature { get; set; }
-    public string Size { get; set; }
-    public string OptionQuantity { get; set; }
+
 }

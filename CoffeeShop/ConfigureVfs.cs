@@ -26,7 +26,7 @@ public class ConfigureVfs : IHostingStartup
             if (appHost.Container.Exists<StorageClient>())
             {
                 appHost.VirtualFiles = new GoogleCloudVirtualFiles(
-                    appHost.Resolve<StorageClient>(), appHost.Resolve<AppConfig>().CoffeeShop.Bucket);
+                    appHost.Resolve<StorageClient>(), appHost.Resolve<AppConfig>().SiteConfig.Bucket);
             }
         });
 }

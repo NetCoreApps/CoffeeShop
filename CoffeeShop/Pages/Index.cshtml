@@ -621,6 +621,7 @@ const App = {
             console.log('processChatResponse', items)
             const addedProducts = []
             items.forEach(item => {
+                console.log(item)
                 if (item.type.toLowerCase() !== "lineitem") {
                     console.warn(`ignoring unknown lineItem type ${item.type}`)
                     return
@@ -638,6 +639,7 @@ const App = {
                 const temperature = !category.temperatures || !item.temperature
                     ? null
                     : category.temperatures.find(x => x.toLowerCase() === item.temperature.toLowerCase())
+                console.log(temperature)
                 if (temperature) {
                     orderItem.temperature = temperature
                 }
