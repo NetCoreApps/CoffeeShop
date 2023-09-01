@@ -131,8 +131,8 @@ public class CreateCategory : ICreateDb<Category>, IReturn<Category>
 public class UpdateCategory : IPatchDb<Category>, IReturn<Category>
 {
     public int Id { get; set; }
-    public string Name { get; set; }
-    public string Description { get; set; }
+    public string? Name { get; set; }
+    public string? Description { get; set; }
     [Input(Type = "tag"), FieldCss(Field = "col-span-12")]
     public List<string>? Sizes { get; set; }
     [Input(Type = "tag"), FieldCss(Field = "col-span-12")]
@@ -162,11 +162,8 @@ public class QueryProducts : QueryDb<Product> {}
 public class CreateProduct : ICreateDb<Product>, IReturn<Product>
 {
     public int CategoryId { get; set; }
-
     public string Name { get; set; }
-
     public decimal Cost { get; set; }
-
     [Input(Type = "file"), UploadTo("products")]
     public string? ImageUrl { get; set; }
 }
@@ -174,13 +171,9 @@ public class CreateProduct : ICreateDb<Product>, IReturn<Product>
 public class UpdateProduct : IPatchDb<Product>, IReturn<Product>
 {
     public int Id { get; set; }
-
     public int? CategoryId { get; set; }
-
     public string? Name { get; set; }
-
     public decimal? Cost { get; set; }
-
     [Input(Type = "file"), UploadTo("products")]
     public string? ImageUrl { get; set; }
 }
@@ -206,9 +199,9 @@ public class CreateOption : ICreateDb<Option>, IReturn<Option>
 public class UpdateOption : IPatchDb<Option>, IReturn<Option>
 {
     public int Id { get; set; }
-    public string Type { get; set; }
+    public string? Type { get; set; }
     [Input(Type = "tag"), FieldCss(Field = "col-span-12")]
-    public List<string> Names { get; set; }
+    public List<string>? Names { get; set; }
     public bool? AllowQuantity { get; set; }
     public string? QuantityLabel { get; set; }
 }

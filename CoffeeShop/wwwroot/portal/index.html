@@ -209,9 +209,6 @@ const sections = {
                     </div>
                 </template>                
             </AutoQueryGrid>`,
-            setup() {
-                return { Formats }
-            }
         },
     },
     Products: {
@@ -231,10 +228,12 @@ const sections = {
                 </template>
                 <template #id="{ id }">{{id}}</template>
                 <template #name="{ name }">{{name}}</template>
-                <template #cost="{ cost }">{{cost}}</template>
+                <template #cost="{ cost }">
+                    <preview-format :value="cost" :format="Formats.currency"></preview-format>
+                </template>
             </AutoQueryGrid>`,
             setup() {
-                return { getIcon }
+                return { getIcon, Formats }
             }
         },
     },
@@ -250,6 +249,7 @@ const sections = {
             template:`<AutoQueryGrid :type="type" />`,
         },
     },
+    /*
     Recordings: {
         type: 'Recording',
         component: {
@@ -262,6 +262,7 @@ const sections = {
             template:`<AutoQueryGrid :type="type" />`,
         },
     },
+    */
 }
 function getIcon(id) {
     const section = sections[id]

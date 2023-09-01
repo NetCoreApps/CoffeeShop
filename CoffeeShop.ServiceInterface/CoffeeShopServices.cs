@@ -115,10 +115,12 @@ public class CoffeeShopServices : Service
     
     public async Task<object> Any(UpdateCategory request)
     {
+        // Perform all RDBMS Updates within the same Transaction
         using var trans = Db.OpenTransaction();
 
         Category? response = null;
         var ignore = new[] { nameof(request.Id), nameof(request.AddOptionIds), nameof(request.RemoveOptionIds) };
+        // Only call AutoQuery Update if there's something to update
         if (request.ToObjectDictionary().HasNonDefaultValues(ignoreKeys:ignore))
         {
             response = (Category) await AutoQuery.PartialUpdateAsync<Category>(request, Request, Db);
@@ -129,8 +131,7 @@ public class CoffeeShopServices : Service
         }
         if (request.AddOptionIds?.Count > 0)
         {
-            var options = request.AddOptionIds.Map(id => new CategoryOption { CategoryId = request.Id, OptionId = id });
-            await Db.InsertAllAsync(options);
+            await Db.InsertAllAsync(request.AddOptionIds.Map(id => new CategoryOption { CategoryId = request.Id, OptionId = id }));
         }
         trans.Commit();
 
