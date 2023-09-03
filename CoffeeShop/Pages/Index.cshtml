@@ -608,12 +608,14 @@ const App = {
                 apiChat.value = new ApiResult({ response: Mock.chat })
             } else {
                 apiChat.value = await client.api(new CreateCoffeeShopChat({
-                    request: request.toLowerCase()
+                    userMessage: request.toLowerCase()
                 }))
             }
             isSendingChat.value = false
             if (apiChat.value.response) {
                 processChatItems(JSON.parse(apiChat.value.response.chatResponse).items)
+            } else if (apiChat.value.error) {
+                apiProcessed.value = apiChat.value
             }
         }
         

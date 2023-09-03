@@ -239,7 +239,7 @@ public class CoffeeShopSchema : IReturn<string> {}
 [Route("/coffeeshop/prompt")]
 public class CoffeeShopPrompt : IReturn<string>
 {
-    public string Request { get; set; }
+    public string UserMessage { get; set; }
 }
 
 [Tag(Tags.CoffeeShop)]
@@ -271,7 +271,7 @@ public class QueryChats : QueryDb<Chat> {}
 [AutoPopulate(nameof(Recording.IpAddress),  Eval = "Request.RemoteIp")]
 public class CreateCoffeeShopChat : ICreateDb<Chat>, IReturn<Chat>
 {
-    public string Request { get; set; }
+    public string UserMessage { get; set; }
 }
 
 public class ProcessCartRequest : GptRequestBase<Cart>

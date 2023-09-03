@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CoffeeShop.ServiceModel\CoffeeShop.ServiceModel.csproj" />
+    <ProjectReference Include="..\ServiceStack.Gpt\ServiceStack.Gpt.csproj" />
   </ItemGroup>
 
 </Project>

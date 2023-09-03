@@ -1,5 +1,5 @@
 /* Options:
-Date: 2023-08-19 18:30:15
+Date: 2023-09-04 00:12:51
 Version: 6.101
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: https://localhost:5001
@@ -13,6 +13,56 @@ BaseUrl: https://localhost:5001
 */
 
 "use strict";
+export class CategoryOption {
+    /** @param {{id?:number,categoryId?:number,optionId?:number}} [init] */
+    constructor(init) { Object.assign(this, init) }
+    /** @type {number} */
+    id;
+    /** @type {number} */
+    categoryId;
+    /** @type {number} */
+    optionId;
+}
+export class Category {
+    /** @param {{id?:number,name?:string,description?:string,temperatures?:string[],defaultTemperature?:string,sizes?:string[],defaultSize?:string,imageUrl?:string,products?:Product[],categoryOptions?:CategoryOption[]}} [init] */
+    constructor(init) { Object.assign(this, init) }
+    /** @type {number} */
+    id;
+    /** @type {string} */
+    name;
+    /** @type {string} */
+    description;
+    /** @type {?string[]} */
+    temperatures;
+    /** @type {?string} */
+    defaultTemperature;
+    /** @type {?string[]} */
+    sizes;
+    /** @type {?string} */
+    defaultSize;
+    /** @type {?string} */
+    imageUrl;
+    /** @type {Product[]} */
+    products;
+    /** @type {CategoryOption[]} */
+    categoryOptions;
+}
+export class Product {
+    /** @param {{id?:number,categoryId?:number,name?:string,category?:Category,cost?:number,imageUrl?:string}} [init] */
+    constructor(init) { Object.assign(this, init) }
+    /** @type {number} */
+    id;
+    /** @type {number} */
+    categoryId;
+    /** @type {string} */
+    name;
+    /** @type {Category} */
+    category;
+    /** @type {number} */
+    cost;
+    /** @type {?string} */
+    imageUrl;
+}
 export class Recording {
     /** @param {{id?:number,path?:string,transcript?:string,transcriptConfidence?:number,transcriptResponse?:string,createdDate?:string,transcribeStart?:string,transcribeEnd?:string,transcribeDurationMs?:number,durationMs?:number,ipAddress?:string,error?:string}} [init] */
     constructor(init) { Object.assign(this, init) }
@@ -87,56 +137,6 @@ export class QueryBase {
 export class QueryDb extends QueryBase {
     /** @param {{skip?:number,take?:number,orderBy?:string,orderByDesc?:string,include?:string,fields?:string,meta?:{ [index: string]: string; }}} [init] */
     constructor(init) { super(init); Object.assign(this, init) }
-}
-export class CategoryOption {
-    /** @param {{id?:number,categoryId?:number,optionId?:number}} [init] */
-    constructor(init) { Object.assign(this, init) }
-    /** @type {number} */
-    id;
-    /** @type {number} */
-    categoryId;
-    /** @type {number} */
-    optionId;
-}
-export class Category {
-    /** @param {{id?:number,name?:string,description?:string,temperatures?:string[],defaultTemperature?:string,sizes?:string[],defaultSize?:string,imageUrl?:string,products?:Product[],categoryOptions?:CategoryOption[]}} [init] */
-    constructor(init) { Object.assign(this, init) }
-    /** @type {number} */
-    id;
-    /** @type {string} */
-    name;
-    /** @type {string} */
-    description;
-    /** @type {?string[]} */
-    temperatures;
-    /** @type {?string} */
-    defaultTemperature;
-    /** @type {?string[]} */
-    sizes;
-    /** @type {?string} */
-    defaultSize;
-    /** @type {?string} */
-    imageUrl;
-    /** @type {Product[]} */
-    products;
-    /** @type {CategoryOption[]} */
-    categoryOptions;
-}
-export class Product {
-    /** @param {{id?:number,categoryId?:number,name?:string,category?:Category,cost?:number,imageUrl?:string}} [init] */
-    constructor(init) { Object.assign(this, init) }
-    /** @type {number} */
-    id;
-    /** @type {number} */
-    categoryId;
-    /** @type {string} */
-    name;
-    /** @type {Category} */
-    category;
-    /** @type {number} */
-    cost;
-    /** @type {?string} */
-    imageUrl;
 }
 export class Option {
     /** @param {{id?:number,type?:string,names?:string[],allowQuantity?:boolean,quantityLabel?:string}} [init] */
@@ -310,10 +310,10 @@ export class CoffeeShopSchema {
     createResponse() { return '' }
 }
 export class CoffeeShopPrompt {
-    /** @param {{request?:string}} [init] */
+    /** @param {{userMessage?:string}} [init] */
     constructor(init) { Object.assign(this, init) }
     /** @type {string} */
-    request;
+    userMessage;
     getTypeName() { return 'CoffeeShopPrompt' }
     getMethod() { return 'POST' }
     createResponse() { return '' }
@@ -324,17 +324,38 @@ export class CoffeeShopPhrases {
     getMethod() { return 'POST' }
     createResponse() { return new StringsResponse() }
 }
-export class CreateCoffeeShopPhrases {
+export class CoffeeShopInitSpeech {
     constructor(init) { Object.assign(this, init) }
-    getTypeName() { return 'CreateCoffeeShopPhrases' }
+    getTypeName() { return 'CoffeeShopInitSpeech' }
     getMethod() { return 'POST' }
     createResponse() { }
 }
-export class CreateCoffeeShopRecognizer {
+export class UpdateCategory {
+    /** @param {{id?:number,name?:string,description?:string,sizes?:string[],temperatures?:string[],defaultSize?:string,defaultTemperature?:string,imageUrl?:string,addOptionIds?:number[],removeOptionIds?:number[]}} [init] */
     constructor(init) { Object.assign(this, init) }
-    getTypeName() { return 'CreateCoffeeShopRecognizer' }
-    getMethod() { return 'POST' }
-    createResponse() { }
+    /** @type {number} */
+    id;
+    /** @type {?string} */
+    name;
+    /** @type {?string} */
+    description;
+    /** @type {?string[]} */
+    sizes;
+    /** @type {?string[]} */
+    temperatures;
+    /** @type {?string} */
+    defaultSize;
+    /** @type {?string} */
+    defaultTemperature;
+    /** @type {?string} */
+    imageUrl;
+    /** @type {?number[]} */
+    addOptionIds;
+    /** @type {?number[]} */
+    removeOptionIds;
+    getTypeName() { return 'UpdateCategory' }
+    getMethod() { return 'PATCH' }
+    createResponse() { return new Category() }
 }
 export class CreateCoffeeShopRecording {
     /** @param {{path?:string}} [init] */
@@ -346,10 +367,10 @@ export class CreateCoffeeShopRecording {
     createResponse() { return new Recording() }
 }
 export class CreateCoffeeShopChat {
-    /** @param {{request?:string}} [init] */
+    /** @param {{userMessage?:string}} [init] */
     constructor(init) { Object.assign(this, init) }
     /** @type {string} */
-    request;
+    userMessage;
     getTypeName() { return 'CreateCoffeeShopChat' }
     getMethod() { return 'POST' }
     createResponse() { return new Chat() }
@@ -361,7 +382,7 @@ export class AdminData {
     createResponse() { return new AdminDataResponse() }
 }
 export class Authenticate {
-    /** @param {{provider?:string,state?:string,oauth_token?:string,oauth_verifier?:string,userName?:string,password?:string,rememberMe?:boolean,errorView?:string,nonce?:string,uri?:string,response?:string,qop?:string,nc?:string,cnonce?:string,accessToken?:string,accessTokenSecret?:string,scope?:string,meta?:{ [index: string]: string; }}} [init] */
+    /** @param {{provider?:string,state?:string,oauth_token?:string,oauth_verifier?:string,userName?:string,password?:string,rememberMe?:boolean,errorView?:string,nonce?:string,uri?:string,response?:string,qop?:string,nc?:string,cnonce?:string,accessToken?:string,accessTokenSecret?:string,scope?:string,returnUrl?:string,meta?:{ [index: string]: string; }}} [init] */
     constructor(init) { Object.assign(this, init) }
     /**
      * @type {string}
@@ -399,6 +420,8 @@ export class Authenticate {
     accessTokenSecret;
     /** @type {string} */
     scope;
+    /** @type {string} */
+    returnUrl;
     /** @type {{ [index: string]: string; }} */
     meta;
     getTypeName() { return 'Authenticate' }
@@ -525,29 +548,6 @@ export class CreateCategory {
     getMethod() { return 'POST' }
     createResponse() { return new Category() }
 }
-export class UpdateCategory {
-    /** @param {{id?:number,name?:string,description?:string,sizes?:string[],temperatures?:string[],defaultSize?:string,defaultTemperature?:string,imageUrl?:string}} [init] */
-    constructor(init) { Object.assign(this, init) }
-    /** @type {number} */
-    id;
-    /** @type {string} */
-    name;
-    /** @type {string} */
-    description;
-    /** @type {?string[]} */
-    sizes;
-    /** @type {?string[]} */
-    temperatures;
-    /** @type {?string} */
-    defaultSize;
-    /** @type {?string} */
-    defaultTemperature;
-    /** @type {?string} */
-    imageUrl;
-    getTypeName() { return 'UpdateCategory' }
-    getMethod() { return 'PATCH' }
-    createResponse() { return new Category() }
-}
 export class DeleteCategory {
     /** @param {{id?:number}} [init] */
     constructor(init) { Object.assign(this, init) }
@@ -618,9 +618,9 @@ export class UpdateOption {
     constructor(init) { Object.assign(this, init) }
     /** @type {number} */
     id;
-    /** @type {string} */
+    /** @type {?string} */
     type;
-    /** @type {string[]} */
+    /** @type {?string[]} */
     names;
     /** @type {?boolean} */
     allowQuantity;

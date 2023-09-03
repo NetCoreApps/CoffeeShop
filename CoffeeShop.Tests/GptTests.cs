@@ -68,7 +68,7 @@ public class GptTests
         var service = appHost.Resolve<CoffeeShopServices>();
         var prompt = (string) await service.Any(new CoffeeShopPrompt
         {
-            Request = request,
+            UserMessage = request,
         });
         var dto = new Dictionary<string, object>
         {
@@ -111,7 +111,7 @@ public class GptTests
         // schema.Print();
         var prompt = (string) await service.Any(new CreateCoffeeShopChat
         {
-            Request = request,
+            UserMessage = request,
         });
         prompt.Print();
     }

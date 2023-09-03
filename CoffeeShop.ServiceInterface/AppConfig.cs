@@ -1,14 +1,25 @@
-﻿namespace CoffeeShop.ServiceInterface;
+﻿using ServiceStack.Gpt;
+
+namespace CoffeeShop.ServiceInterface;
 
 public class AppConfig
 {
     public string Project { get; set; }
     public string Location { get; set; }
-    public SiteConfig SiteConfig { get; set; }
+    public SiteConfig CoffeeShop { get; set; }
     public string NodePath { get; set; }
     public string? FfmpegPath { get; set; }
     public string? WhisperPath { get; set; }
     public int NodeProcessTimeoutMs { get; set; } = 120 * 1000;
+
+    public GoogleCloudSpeechConfig CoffeeShopGoogleCloudSpeechConfig() => new()
+    {
+        Project = Project,
+        Location = Location,
+        Bucket = CoffeeShop.Bucket,
+        RecognizerId = CoffeeShop.RecognizerId,
+        PhraseSetId = CoffeeShop.PhraseSetId,
+    };
 }
 
 public class SiteConfig
