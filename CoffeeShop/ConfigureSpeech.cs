@@ -36,6 +36,8 @@ public class ConfigureSpeech : IHostingStartup
             else throw new NotSupportedException($"Unknown SpeechProvider '{speechProvider}'");
         })
         .ConfigureAppHost(appHost => {
+            if (AppTasks.IsRunAsAppTask()) return;
+
             if (appHost.Resolve<ISpeechToText>() is IRequireVirtualFiles requireVirtualFiles)
             {
                 requireVirtualFiles.VirtualFiles = appHost.VirtualFiles;
