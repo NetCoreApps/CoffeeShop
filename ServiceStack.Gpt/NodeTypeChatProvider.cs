@@ -12,13 +12,14 @@ public class NodeTypeChatProvider : ITypeChatProvider
         
         var schema = await request.PromptProvider.CreateSchemaAsync(request, token);
         await File.WriteAllTextAsync(schemaPath, schema, token);
+        var scriptPath = request.ScriptPath ?? "typechat.mjs";
 
         var shellRequest = request.UserMessage.Replace('"', '\'');
         var processInfo = new ProcessStartInfo
         {
             WorkingDirectory = request.WorkingDirectory ?? Environment.CurrentDirectory,
             FileName = request.NodePath,
-            Arguments = $"typechat.mjs ./{schemaPath} \"{shellRequest}\"",
+            Arguments = $"{scriptPath} {request.TypeChatTranslator} ./{schemaPath} \"{shellRequest}\"",
         };
         if (Env.IsWindows)
             processInfo = processInfo.ConvertToCmdExec();

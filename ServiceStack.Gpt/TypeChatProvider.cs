@@ -48,9 +48,14 @@ public class TypeChatRequest
     public int NodeProcessTimeoutMs { get; set; } = 120 * 1000;
 
     /// <summary>
-    /// Path to node TypeChat script - defaults to ~/typechat.mjs
+    /// Path to node TypeChat script (default typechat.mjs)
     /// </summary>
     public string? ScriptPath { get; set; }
+    
+    /// <summary>
+    /// TypeChat Behavior we want to use
+    /// </summary>
+    public TypeChatTranslator TypeChatTranslator { get; set; }
 
     /// <summary>
     /// Path to write TypeScript Schema to (default Temp File)
@@ -75,4 +80,10 @@ public class TypeChatResponse
 public interface ITypeChatProvider
 {
     Task<TypeChatResponse> TranslateMessageAsync(TypeChatRequest request, CancellationToken token = default);
+}
+
+public enum TypeChatTranslator
+{
+    Json,
+    Program,
 }
