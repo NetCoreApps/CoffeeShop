@@ -10,12 +10,15 @@ const useProgram = process.argv[2].toLowerCase() === "program"
 const model = createLanguageModel(process.env)
 const schema = await fs.readFile(path.join(__dirname, process.argv[3]), "utf8")
 
-const firstInterfacePos = schema.indexOf('export interface ')
-const firstTypePos = schema.indexOf('export type ')
-const endPos = schema.indexOf('{', firstInterfacePos)
-const schemaName = firstInterfacePos !== -1 && firstInterfacePos < firstTypePos
-    ? schema.substring(firstInterfacePos + 'export interface '.length, endPos).trim()
-    : schema.substring(firstTypePos + 'export type '.length, endPos).trim()
+let schemaName = ""
+if (!useProgram) {
+    const firstInterfacePos = schema.indexOf('export interface ')
+    const firstTypePos = schema.indexOf('export type ')
+    const endPos = schema.indexOf('{', firstInterfacePos)
+    schemaName = firstInterfacePos !== -1 && firstInterfacePos < firstTypePos
+        ? schema.substring(firstInterfacePos + 'export interface '.length, endPos).trim()
+        : schema.substring(firstTypePos + 'export type '.length, endPos).trim()
+}
 
 const translator = useProgram
     ? createProgramTranslator(model, schema)
