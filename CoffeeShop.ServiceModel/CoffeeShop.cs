@@ -274,11 +274,6 @@ public class CreateCoffeeShopChat : ICreateDb<Chat>, IReturn<Chat>
     public string UserMessage { get; set; }
 }
 
-public class ProcessCartRequest : GptRequestBase<Cart>
-{
-
-}
-
 /* GPT Models */
 public class Cart
 {

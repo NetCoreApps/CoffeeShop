@@ -31,7 +31,7 @@ if (!useProgram) {
 
 const translator = useProgram
     ? createProgramTranslator(model, schema)
-    : createJsonTranslator(model, schema, "SentimentResponse")
+    : createJsonTranslator(model, schema, schemaName)
 
 const response = await translator.translate(process.argv[4])
 
