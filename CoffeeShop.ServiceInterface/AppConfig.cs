@@ -12,7 +12,7 @@ public class AppConfig
     public string? WhisperPath { get; set; }
     public int NodeProcessTimeoutMs { get; set; } = 120 * 1000;
 
-    public GoogleCloudSpeechConfig CoffeeShopGoogleCloudSpeechConfig() => new()
+    public GoogleCloudSpeechConfig CoffeeShopGoogleSpeechConfig() => new()
     {
         Project = Project,
         Location = Location,
