@@ -18,9 +18,8 @@ public class ConfigureSpeech : IHostingStartup
             if (speechProvider == nameof(GoogleCloudSpeechToText))
             {
                 AppHost.AssertGoogleCloudCredentials();
-                services.AddSingleton(SpeechClient.Create());
-                services.AddSingleton<ISpeechToText>(c =>
-                    new GoogleCloudSpeechToText(c.Resolve<AppConfig>().CoffeeShopGoogleCloudSpeechConfig(), c.Resolve<SpeechClient>()));
+                services.AddSingleton<ISpeechToText>(c => new GoogleCloudSpeechToText(
+                    c.Resolve<AppConfig>().CoffeeShopGoogleCloudSpeechConfig(), SpeechClient.Create()));
             }
             else if (speechProvider == nameof(WhisperApiSpeechToText))
             {
