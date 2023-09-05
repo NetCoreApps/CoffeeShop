@@ -1,4 +1,14 @@
 export class AudioRecorder {
+    /** @type {String} */
+    audioExt = null
+
+    preferredMimeTypes = {
+        webm: 'audio/webm',
+        mp4: 'audio/mp4;codecs=mp4a',
+    }
+
+    constructor(init) { Object.assign(this, init) }
+
     /** @type {Blob[]} */
     audioPartBlobs = []
     /** @type {Blob} */
@@ -9,13 +19,6 @@ export class AudioRecorder {
     mediaRecorder = null
     /** @type {MediaStream} */
     streamBeingCaptured = null
-    /** @type {String} */
-    audioExt = null
-
-    preferredMimeTypes = {
-        webm: 'audio/webm',
-        mp4: 'audio/mp4;codecs=mp4a',
-    }
 
     hasAudio() {
         return !!this.audio
