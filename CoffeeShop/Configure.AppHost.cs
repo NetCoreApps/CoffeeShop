@@ -20,10 +20,10 @@ public class AppHost : AppHostBase, IHostingStartup
 
             if (!AppTasks.IsRunAsAppTask())
             {
-                appConfig.NodePath = ProcessUtils.FindExePath("node")
-                                     ?? throw new Exception("Could not resolve path to node");
-                appConfig.FfmpegPath = ProcessUtils.FindExePath("ffmpeg");
-                appConfig.WhisperPath = ProcessUtils.FindExePath("whisper");
+                appConfig.NodePath ??= (ProcessUtils.FindExePath("node")
+                                        ?? throw new Exception("Could not resolve path to node"));
+                appConfig.FfmpegPath ??= ProcessUtils.FindExePath("ffmpeg");
+                appConfig.WhisperPath ??= ProcessUtils.FindExePath("whisper");
             }
         });
 
