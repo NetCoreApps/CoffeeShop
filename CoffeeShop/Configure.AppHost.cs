@@ -42,7 +42,6 @@ public class AppHost : AppHostBase, IHostingStartup
 
         if (!AppTasks.IsRunAsAppTask())
         {
-            var appConfig = container.Resolve<AppConfig>();
             var wwwrootVfs = GetVirtualFileSource<FileSystemVirtualFiles>();
             Plugins.Add(new FilesUploadFeature(
                 new UploadLocation("products", wwwrootVfs, allowExtensions:FileExt.WebImages,
