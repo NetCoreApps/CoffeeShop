@@ -16,14 +16,22 @@ if (!useProgram) {
     const firstTypePos = schema.indexOf('export type ')
     const endInterfacePos = schema.indexOf('{', firstInterfacePos)
     const endTypePos = schema.indexOf(' = {', firstTypePos)
-    schemaName = firstInterfacePos !== -1 && firstInterfacePos < firstTypePos
+    if(firstInterfacePos === -1 && firstTypePos === -1) {
+        console.log(JSON.stringify({
+            responseStatus: {
+                errorCode: 'Error',
+                message: "No interface or type found in schema"
+            }
+        }, undefined, 2))
+    }
+    schemaName = firstInterfacePos !== -1 && (firstTypePos !== -1 && firstInterfacePos < firstTypePos)
         ? schema.substring(firstInterfacePos + 'export interface '.length, endInterfacePos).trim()
         : schema.substring(firstTypePos + 'export type '.length, endTypePos).trim()
 }
 
 const translator = useProgram
     ? createProgramTranslator(model, schema)
-    : createJsonTranslator(model, schema, schemaName)
+    : createJsonTranslator(model, schema, "SentimentResponse")
 
 const response = await translator.translate(process.argv[4])
 
