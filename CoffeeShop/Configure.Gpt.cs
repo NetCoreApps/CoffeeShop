@@ -21,7 +21,7 @@ public class ConfigureGpt : IHostingStartup
             {
                 var kernel = Kernel.Builder
                     .WithOpenAIChatCompletionService(
-                        Environment.GetEnvironmentVariable("OPENAI_MODEL")!, 
+                        Environment.GetEnvironmentVariable("OPENAI_MODEL") ?? "gpt-3.5-turbo", 
                         Environment.GetEnvironmentVariable("OPENAI_API_KEY")!)
                     .Build();
                 services.AddSingleton(kernel);
