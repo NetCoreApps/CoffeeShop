@@ -14,10 +14,11 @@ let schemaName = ""
 if (!useProgram) {
     const firstInterfacePos = schema.indexOf('export interface ')
     const firstTypePos = schema.indexOf('export type ')
-    const endPos = schema.indexOf('{', firstInterfacePos)
+    const endInterfacePos = schema.indexOf('{', firstInterfacePos)
+    const endTypePos = schema.indexOf(' = {', firstTypePos)
     schemaName = firstInterfacePos !== -1 && firstInterfacePos < firstTypePos
-        ? schema.substring(firstInterfacePos + 'export interface '.length, endPos).trim()
-        : schema.substring(firstTypePos + 'export type '.length, endPos).trim()
+        ? schema.substring(firstInterfacePos + 'export interface '.length, endInterfacePos).trim()
+        : schema.substring(firstTypePos + 'export type '.length, endTypePos).trim()
 }
 
 const translator = useProgram
@@ -28,9 +29,9 @@ const response = await translator.translate(process.argv[4])
 
 if (!response.success) {
     console.log(JSON.stringify({
-        responseStatus: { 
+        responseStatus: {
             errorCode: 'Error',
-            message: response.message 
+            message: response.message
         }
     }, undefined, 2))
 } else {
