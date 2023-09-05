@@ -80,7 +80,9 @@ public class CoffeeShopServices : Service
     public async Task Any(CoffeeShopInitSpeech request)
     {
         var response = await Any(new CoffeeShopPhrases());
-        await SpeechToText.InitAsync(response.Results);
+        await SpeechToText.InitAsync(new() {
+            PhraseWeights = new Dictionary<string, int>(response.Results.Map(x => KeyValuePair.Create(x, 10)))
+        });
     }
     
     public async Task<object> Any(UpdateCategory request)

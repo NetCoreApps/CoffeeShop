@@ -10,7 +10,7 @@ public class WhisperLocalSpeechToText : ISpeechToText
     public string? WorkingDirectory { get; set; }
     public int TimeoutMs { get; set; } = 120 * 1000;
 
-    public Task InitAsync(List<string> phrases, CancellationToken token = default) => Task.CompletedTask;
+    public Task InitAsync(InitSpeechToText config, CancellationToken token = default) => Task.CompletedTask;
 
     public async Task<TranscriptResult> TranscribeAsync(string recordingPath, CancellationToken token = default)
     {

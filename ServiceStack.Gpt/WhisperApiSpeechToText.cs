@@ -5,7 +5,7 @@ namespace ServiceStack.Gpt;
 public class WhisperApiSpeechToText : ISpeechToText, IRequireVirtualFiles
 {
     public IVirtualFiles? VirtualFiles { get; set; }
-    public Task InitAsync(List<string> phrases, CancellationToken token = default) => Task.CompletedTask;
+    public Task InitAsync(InitSpeechToText config, CancellationToken token = default) => Task.CompletedTask;
 
     public async Task<TranscriptResult> TranscribeAsync(string recordingPath, CancellationToken token = default)
     {

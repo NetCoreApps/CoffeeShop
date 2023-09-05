@@ -2,6 +2,15 @@
 
 namespace ServiceStack.Gpt;
 
+public class GoogleCloudSpeechConfig
+{
+    public string Project { get; set; } 
+    public string Location { get; set; }
+    public string Bucket { get; set; }
+    public string PhraseSetId { get; set; }
+    public string RecognizerId { get; set; }
+}
+
 public class GoogleCloudSpeechToText : ISpeechToText
 {
     GoogleCloudSpeechConfig Config { get; }
@@ -13,29 +22,32 @@ public class GoogleCloudSpeechToText : ISpeechToText
         SpeechClient = speechClient;
     }
 
-    public async Task InitAsync(List<string> phrases, CancellationToken token = default)
+    public async Task InitAsync(InitSpeechToText config, CancellationToken token = default)
     {
-        try
+        if (config.PhraseWeights != null)
         {
-            await SpeechClient.DeletePhraseSetAsync(new DeletePhraseSetRequest
+            try
             {
-                PhraseSetName = new PhraseSetName(Config.Project, Config.Location, Config.PhraseSetId)
-            });
-        }
-        catch (Exception ignoreNonExistingPhraseSet) {}
-
-        await SpeechClient.CreatePhraseSetAsync(new CreatePhraseSetRequest
-        {
-            Parent = $"projects/{Config.Project}/locations/{Config.Location}",
-            PhraseSetId = Config.PhraseSetId,
-            PhraseSet = new PhraseSet
-            {
-                Phrases =
+                await SpeechClient.DeletePhraseSetAsync(new DeletePhraseSetRequest
                 {
-                    phrases.Map(x => new PhraseSet.Types.Phrase { Value = x, Boost = 10 })
-                }
+                    PhraseSetName = new PhraseSetName(Config.Project, Config.Location, Config.PhraseSetId)
+                });
             }
-        });        
+            catch (Exception ignoreNonExistingPhraseSet) {}
+
+            await SpeechClient.CreatePhraseSetAsync(new CreatePhraseSetRequest
+            {
+                Parent = $"projects/{Config.Project}/locations/{Config.Location}",
+                PhraseSetId = Config.PhraseSetId,
+                PhraseSet = new PhraseSet
+                {
+                    Phrases =
+                    {
+                        config.PhraseWeights.Map(x => new PhraseSet.Types.Phrase { Value = x.Key, Boost = x.Value })
+                    }
+                }
+            });        
+        }
         
         try
         {
