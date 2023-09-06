@@ -1,22 +1,6 @@
 ﻿namespace ServiceStack.Gpt;
 
 /// <summary>
-/// The App Provider to use to generate TypeChat Schema and Prompts 
-/// </summary>
-public interface IPromptProvider
-{
-    /// <summary>
-    /// Create a TypeChat TypeScript Schema from a TypeChatRequest
-    /// </summary>
-    Task<string> CreateSchemaAsync(CancellationToken token = default);
-
-    /// <summary>
-    /// Create a TypeChat TypeScript Prompt from a User request
-    /// </summary>
-    Task<string> CreatePromptAsync(string userMessage, CancellationToken token = default);
-}
-
-/// <summary>
 /// Request to process a TypeChat Request
 /// </summary>
 public class TypeChatRequest
@@ -44,7 +28,7 @@ public class TypeChatRequest
     public string UserMessage { get; }
     
     /// <summary>
-    /// Path to node.exe, optional: defaults to node in $PATH
+    /// Path to node exe (default node in $PATH)
     /// </summary>
     public string? NodePath { get; set; }
 
@@ -59,7 +43,7 @@ public class TypeChatRequest
     public string? ScriptPath { get; set; }
     
     /// <summary>
-    /// TypeChat Behavior we want to use
+    /// TypeChat Behavior we want to use (Json | Program)
     /// </summary>
     public TypeChatTranslator TypeChatTranslator { get; set; }
 
@@ -69,7 +53,7 @@ public class TypeChatRequest
     public string? SchemaPath { get; set; }
     
     /// <summary>
-    /// Which directory to execute the ScriptPath (default Environment.CurrentDirectory) 
+    /// Which directory to execute the ScriptPath (default CurrentDirectory) 
     /// </summary>
     public string? WorkingDirectory { get; set; }
 }
