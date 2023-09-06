@@ -24,6 +24,4 @@
         RenderLinkButton("/auth/logout?continue=/", "Sign Out");
     if (!isAuthenticated)
         RenderLinkButton("/signin", "Sign In");
-    if (!isAuthenticated)
-        RenderLinkButton("/signup", "Sign Up", $"ml-2 {Css.PrimaryButton}");
 }

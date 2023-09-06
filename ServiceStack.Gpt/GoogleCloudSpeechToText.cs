@@ -92,12 +92,23 @@ public class GoogleCloudSpeechToText : ISpeechToText
             Uri = $"gs://{Config.Bucket}".CombineWith(recordingPath)
         });
 
-        var alt = response.Results[0].Alternatives[0];
+        var alt = response.Results.Count > 0 && response.Results[0].Alternatives.Count > 0
+            ? response.Results[0].Alternatives[0]
+            : null;
+        if (alt == null)
+        {
+            return new TranscriptResult
+            {
+                ResponseStatus = new() { ErrorCode = nameof(Exception), Message = $"{recordingPath} returned no results" },
+                ApiResponse = response.ToJson(),
+            };
+        }
+        
         var result = new TranscriptResult
         {
             Transcript = alt.Transcript,
             Confidence = alt.Confidence,
-            ApiResponse = response.Results[0].ToJson()
+            ApiResponse = response.ToJson(),
         };
         return result;
     }

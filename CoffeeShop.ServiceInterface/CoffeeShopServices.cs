@@ -120,30 +120,37 @@ public class CoffeeShopServices : Service
         await Db.UpdateOnlyAsync(() => new Recording { TranscribeStart = transcribeStart },
             where: x => x.Id == recording.Id);
 
+        ResponseStatus? responseStatus = null;
         try
         {
-            var result = await SpeechToText.TranscribeAsync(request.Path);
+            var response = await SpeechToText.TranscribeAsync(request.Path);
             var transcribeEnd = DateTime.UtcNow;
             await Db.UpdateOnlyAsync(() => new Recording
             {
                 Provider = SpeechToText.GetType().Name,
-                Transcript = result.Transcript,
-                TranscriptConfidence = result.Confidence,
-                TranscriptResponse = result.ApiResponse,
+                Transcript = response.Transcript,
+                TranscriptConfidence = response.Confidence,
+                TranscriptResponse = response.ApiResponse,
                 TranscribeEnd = transcribeEnd,
                 TranscribeDurationMs = (int)(transcribeEnd - transcribeStart).TotalMilliseconds,
+                Error = response.ResponseStatus.ToJson(),
             }, where: x => x.Id == recording.Id);
+            responseStatus = response.ResponseStatus;
         }
         catch (Exception e)
         {
-            await Db.UpdateOnlyAsync(() => new Recording { Error = e.Message },
+            await Db.UpdateOnlyAsync(() => new Recording { Error = e.ToString() },
                 where: x => x.Id == recording.Id);
+            responseStatus = e.ToResponseStatus();
         }
 
         recording = await Db.SingleByIdAsync<Recording>(recording.Id);
 
         WriteJsonFile($"/speech-to-text/{recording.CreatedDate:yyyy/MM/dd}/{recording.CreatedDate.TimeOfDay.TotalMilliseconds}.json", 
             recording.ToJson());
+
+        if (responseStatus != null)
+            throw new HttpError(responseStatus, HttpStatusCode.BadRequest);
 
         return recording;
     }
@@ -156,7 +163,7 @@ public class CoffeeShopServices : Service
         await Db.UpdateOnlyAsync(() => new Chat { ChatStart = chatStart },
             where: x => x.Id == chat.Id);
 
-        ResponseStatus? responseStatus = null; 
+        ResponseStatus? responseStatus = null;
         try
         {
             var schema = await PromptProvider.CreateSchemaAsync();
@@ -172,15 +179,15 @@ public class CoffeeShopServices : Service
                 Schema = schema,
                 Prompt = prompt,
                 ChatResponse = response.Result,
-                Error = response.ResponseStatus.ToJson(),
                 ChatEnd = chatEnd,
                 ChatDurationMs = (int)(chatEnd - chatStart).TotalMilliseconds,
+                Error = response.ResponseStatus.ToJson(),
             }, where: x => x.Id == chat.Id);
             responseStatus = response.ResponseStatus;
         }
         catch (Exception e)
         {
-            await Db.UpdateOnlyAsync(() => new Chat { Error = e.Message },
+            await Db.UpdateOnlyAsync(() => new Chat { Error = e.ToString() },
                 where: x => x.Id == chat.Id);
             responseStatus = e.ToResponseStatus();
         }
