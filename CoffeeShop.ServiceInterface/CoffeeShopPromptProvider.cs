@@ -18,7 +18,7 @@ public class CoffeeShopPromptProvider : IPromptProvider
         Config = config;
     }
 
-    public async Task<string> CreateSchemaAsync(TypeChatRequest request, CancellationToken token = default)
+    public async Task<string> CreateSchemaAsync(CancellationToken token = default)
     {
         var file = new FileInfo(Config.CoffeeShop.GptPath.CombineWith("schema.ss"));
         if (file == null)
@@ -30,12 +30,12 @@ public class CoffeeShopPromptProvider : IPromptProvider
         var optionsMap = options.ToDictionary(x => x.Id);
         var optionQuantities = await db.SelectAsync<OptionQuantity>(token: token);
 
-        var tpl = await file.ReadAllTextAsync(token: token);
+        var template = await file.ReadAllTextAsync(token: token);
         var context = new ScriptContext {
             Plugins = { new TypeScriptPlugin() }
         }.Init();
 
-        var output = await new PageResult(context.OneTimePage(tpl))
+        var output = await new PageResult(context.OneTimePage(template))
         {
             Args =
             {
@@ -48,24 +48,24 @@ public class CoffeeShopPromptProvider : IPromptProvider
         return output;
     }
 
-    public async Task<string> CreatePromptAsync(TypeChatRequest request, CancellationToken token = default)
+    public async Task<string> CreatePromptAsync(string userMessage, CancellationToken token = default)
     {
         var file = new FileInfo(Config.CoffeeShop.GptPath.CombineWith("prompt.ss"));
         if (file == null)
             throw HttpError.NotFound($"{Config.CoffeeShop.GptPath}/prompt.ss not found");
         
-        var schema = await CreateSchemaAsync(request, token:token);
-        var tpl = await file.ReadAllTextAsync(token: token);
+        var schema = await CreateSchemaAsync(token: token);
+        var template = await file.ReadAllTextAsync(token: token);
         var context = new ScriptContext {
             Plugins = { new TypeScriptPlugin() }
         }.Init();
 
-        var prompt = await new PageResult(context.OneTimePage(tpl))
+        var prompt = await new PageResult(context.OneTimePage(template))
         {
             Args =
             {
                 [nameof(schema)] = schema,
-                [nameof(request)] = request,
+                [nameof(userMessage)] = userMessage,
             }
         }.RenderScriptAsync(token: token);
 

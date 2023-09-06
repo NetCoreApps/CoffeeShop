@@ -8,12 +8,12 @@ public interface IPromptProvider
     /// <summary>
     /// Create a TypeChat TypeScript Schema from a TypeChatRequest
     /// </summary>
-    Task<string> CreateSchemaAsync(TypeChatRequest request, CancellationToken token = default);
+    Task<string> CreateSchemaAsync(CancellationToken token = default);
 
     /// <summary>
-    /// Create a TypeChat TypeScript Prompt from a TypeChatRequest
+    /// Create a TypeChat TypeScript Prompt from a User request
     /// </summary>
-    Task<string> CreatePromptAsync(TypeChatRequest request, CancellationToken token = default);
+    Task<string> CreatePromptAsync(string userMessage, CancellationToken token = default);
 }
 
 /// <summary>
@@ -21,16 +21,22 @@ public interface IPromptProvider
 /// </summary>
 public class TypeChatRequest
 {
-    public TypeChatRequest(IPromptProvider promptProvider, string userMessage)
+    public TypeChatRequest(string schema, string prompt, string userMessage)
     {
-        PromptProvider = promptProvider;
+        Schema = schema;
+        Prompt = prompt;
         UserMessage = userMessage;
     }
 
     /// <summary>
-    /// Source for Creating Schemas and TypeChat Prompts
+    /// TypeScript Schema
     /// </summary>
-    public IPromptProvider PromptProvider { get; }
+    public string Schema { get; set; }
+    
+    /// <summary>
+    /// TypeChat Prompt
+    /// </summary>
+    public string Prompt { get; set; }
     
     /// <summary>
     /// Chat Request

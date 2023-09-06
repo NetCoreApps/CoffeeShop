@@ -296,8 +296,6 @@ const products = categories.flatMap(x => x.products)
 const productsMap = {}
 categories.forEach(c => c.products.forEach(p => productsMap[p.name] = p))
 
-
-
 const App = {
     setup() {
         const { user, signIn } = useAuth()

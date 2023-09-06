@@ -10,9 +10,8 @@ public class KernelTypeChatProvider : ITypeChatProvider
 
     public async Task<TypeChatResponse> TranslateMessageAsync(TypeChatRequest request, CancellationToken token = default)
     {
-        var prompt = await request.PromptProvider.CreatePromptAsync(request, token);
         var chatHistory = new ChatHistory();
-        chatHistory.AddUserMessage(prompt);
+        chatHistory.AddUserMessage(request.Prompt);
         var chatCompletionService = Kernel.GetService<IChatCompletion>();
         var result = await chatCompletionService.GenerateMessageAsync(chatHistory, new ChatRequestSettings {
             Temperature = 0.0,

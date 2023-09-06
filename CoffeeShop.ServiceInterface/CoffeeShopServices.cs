@@ -14,23 +14,24 @@ public class CoffeeShopServices : Service
     public IPromptProvider PromptProvider { get; set; }
     public ITypeChatProvider TypeChatProvider { get; set; }
     
-    public TypeChatRequest CreateTypeChatRequest(string userMessage) => new(PromptProvider, userMessage) {
-        NodePath = Config.NodePath,
-        NodeProcessTimeoutMs = Config.NodeProcessTimeoutMs,
-        WorkingDirectory = Environment.CurrentDirectory,
-        SchemaPath = Config.CoffeeShop.GptPath.CombineWith("schema.ts"),
-    };
+    public TypeChatRequest CreateTypeChatRequest(string schema, string prompt, string userMessage) => 
+        new(schema, prompt, userMessage) {
+            NodePath = Config.NodePath,
+            NodeProcessTimeoutMs = Config.NodeProcessTimeoutMs,
+            WorkingDirectory = Environment.CurrentDirectory,
+            SchemaPath = Config.CoffeeShop.GptPath.CombineWith("schema.ts"),
+        };
 
     [AddHeader(HttpHeaders.ContentType, MimeTypes.PlainText)]
     public async Task<string> Any(CoffeeShopSchema request)
     {
-        return await PromptProvider.CreateSchemaAsync(CreateTypeChatRequest(string.Empty));
+        return await PromptProvider.CreateSchemaAsync();
     }
 
     [AddHeader(HttpHeaders.ContentType, MimeTypes.PlainText)]
     public async Task<string> Any(CoffeeShopPrompt request)
     {
-        return await PromptProvider.CreatePromptAsync(CreateTypeChatRequest(request.UserMessage));
+        return await PromptProvider.CreatePromptAsync(request.UserMessage);
     }
 
     public async Task<StringsResponse> Any(CoffeeShopPhrases request)
@@ -125,6 +126,7 @@ public class CoffeeShopServices : Service
             var transcribeEnd = DateTime.UtcNow;
             await Db.UpdateOnlyAsync(() => new Recording
             {
+                Provider = SpeechToText.GetType().Name,
                 Transcript = result.Transcript,
                 TranscriptConfidence = result.Confidence,
                 TranscriptResponse = result.ApiResponse,
@@ -157,12 +159,18 @@ public class CoffeeShopServices : Service
         ResponseStatus? responseStatus = null; 
         try
         {
-            var typeChatRequest = CreateTypeChatRequest(request.UserMessage);
+            var schema = await PromptProvider.CreateSchemaAsync();
+            var prompt = await PromptProvider.CreatePromptAsync(request.UserMessage);
+            var typeChatRequest = CreateTypeChatRequest(schema, prompt, request.UserMessage);
+            
             var response = await TypeChatProvider.TranslateMessageAsync(typeChatRequest);
             var chatEnd = DateTime.UtcNow;
             await Db.UpdateOnlyAsync(() => new Chat
             {
                 Request = request.UserMessage,
+                Provider = TypeChatProvider.GetType().Name,
+                Schema = schema,
+                Prompt = prompt,
                 ChatResponse = response.Result,
                 Error = response.ResponseStatus.ToJson(),
                 ChatEnd = chatEnd,

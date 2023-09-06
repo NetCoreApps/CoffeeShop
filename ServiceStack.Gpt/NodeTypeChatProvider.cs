@@ -10,8 +10,7 @@ public class NodeTypeChatProvider : ITypeChatProvider
         var schemaPath = request.SchemaPath
             ?? Path.GetTempFileName();
         
-        var schema = await request.PromptProvider.CreateSchemaAsync(request, token);
-        await File.WriteAllTextAsync(schemaPath, schema, token);
+        await File.WriteAllTextAsync(schemaPath, request.Schema, token);
         var scriptPath = request.ScriptPath ?? "typechat.mjs";
 
         var shellRequest = request.UserMessage.Replace('"', '\'');
