@@ -190,7 +190,7 @@ public class Migration1000 : MigrationBase
             "Butter", 
             "Strawberry Jam", 
             "Cream Cheese",
-        });
+        }, allowQuantity:true);
         AddOptions("BakeryPreparations", new[] {
             "Warmed", 
             "Cut in Half", 
@@ -232,7 +232,7 @@ public class Migration1000 : MigrationBase
             "Nutmeg",
             "Whipped Cream",
             "Water", 
-        });
+        }, allowQuantity:true);
         AddOptions("Caffeines", new[] {
             "Regular",
             "Two Thirds Caf",
