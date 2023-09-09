@@ -168,20 +168,41 @@
                         <form v-if="!(loadingRecording || isRecording || isTranscribing || transcript)" v-on:submit.prevent="onSubmit">
                             <text-input v-model="txtOrder" :disabled="isSendingChat" class="w-full lg:w-96 text-2xl" placeholder="What can we get for you today?"></text-input>
                         </form>
-                        <div v-else class="text-2xl text-gray-600">
+                        <div class="mt-2 text-2xl text-gray-600">
                             <div v-if="isTranscribing" class="pr-20 flex items-center">
                                 <loading></loading>
                                 Transcribing...
                             </div>
                             <div v-else-if="apiProcessed.response" class="text-green-600 flex">
-                                {{apiProcessed.response}}
-                                <svg v-on:click="clear" class="w-10 h-10 cursor-pointer hover:text-green-800" xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21 21">
+                                <div>
+                                    {{apiProcessed.response}}
+                                    <div v-if="unknownItems.length" class="text-left text-sm text-red-600">
+                                        <h4 class="text-lg">We couldn't understand part of your order</h4>
+                                        <ul class="list-disc text-sm">
+                                            <li class="ml-6" v-for="item in unknownItems">{{item}}</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <svg v-on:click="clear" class="w-10 h-10 cursor-pointer hover:text-green-800 shrink-0" xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21 21">
                                     <title>clear</title>
                                     <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m7.5 7.5l6 6m0-6l-6 6"/>
                                 </svg>
                             </div>
                             <div v-else-if="apiProcessed.error" class="text-red-600 flex">
-                                {{apiProcessed.error.message}}
+                                <div>
+                                    <div class="text-lg">
+                                        {{apiProcessed.error.message}}
+                                    </div>
+                                    <div v-if="unknownItems.length" class="text-left text-sm text-red-600">
+                                        <ul class="list-disc text-sm">
+                                            <li class="ml-6" v-for="item in unknownItems">{{item}}</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <svg v-on:click="clear" class="w-10 h-10 cursor-pointer hover:text-green-800 shrink-0" xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21 21">
+                                    <title>clear</title>
+                                    <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m7.5 7.5l6 6m0-6l-6 6"/>
+                                </svg>
                             </div>
                             <div v-else-if="transcript" class="lowercase">
                                 <div class="pb-4">{{ transcript }}</div>
@@ -242,7 +263,7 @@
                                 <div class="pt-4">
                                     <ul v-if="itemOptions(item).length">
                                         <li v-for="option in itemOptions(item)">
-                                            {{map(option.size, x => `${x}x `) || '' }} {{option.name}}
+                                            {{map(option.size, x => x === 0 ? 'No ' : x === .5 ? '1/2' : `${x}x `) || '' }} {{option.name}}
                                         </li>
                                     </ul>
                                 </div>
@@ -282,10 +303,10 @@ const Mock = {
     sendingChat: false,
     wait: 2000,
     recording: {
-        "transcript": "i want a cold chai latte and a bagel",
+        "transcript": "may i get a decaf soy vanilla syrup caramel latte with sugar and foam",
     },
     chat: {
-        "chatResponse": "{\r\n  \"items\": [\r\n    {\r\n      \"type\": \"lineitem\",\r\n      \"product\": {\r\n        \"type\": \"LatteDrinks\",\r\n        \"name\": \"chai latte\",\r\n        \"temperature\": \"iced\"\r\n      },\r\n      \"quantity\": 1\r\n    },\r\n    {\r\n      \"type\": \"lineitem\",\r\n      \"product\": {\r\n        \"type\": \"BakeryProducts\",\r\n        \"name\": \"bagel\"\r\n      },\r\n      \"quantity\": 1\r\n    }\r\n  ]\r\n}\r\n",
+        "chatResponse": '{"items":[{"type":"lineitem","product":{"type":"LatteDrinks","name":"latte","options":[{"type":"Caffeines","name":"decaf"},{"type":"Milks","name":"soy milk"},{"type":"Syrups","name":"vanilla syrup","optionQuantity":"regular"},{"type":"Syrups","name":"caramel syrup","optionQuantity":"regular"},{"type":"Toppings","name":"foam","optionQuantity":"regular"}]},"quantity":1}]}',
     }
 }
 
@@ -327,6 +348,7 @@ const App = {
         const transcript = ref('')
         const apiChat = ref(new ApiResult())
         const apiProcessed = ref(new ApiResult())
+        const unknownItems = ref([])
         
         function navTo(category, args={}, pushState=true) {
             console.log('navTo', category, args, pushState)
@@ -507,44 +529,51 @@ const App = {
         function processChatItems(items) {
             console.log('processChatResponse', items)
             const addedProducts = []
+            unknownItems.value = []
+            console.log('options', options)
             items.forEach(item => {
                 console.log(item)
                 if (item.type.toLowerCase() !== "lineitem") {
-                    console.warn(`ignoring unknown lineItem type ${item.type}`)
+                    unknownItems.value.push(`Unknown LineItem ${item.type}: ${item.text}`)
                     return
                 }
                 const productLower = item.product?.name?.toLowerCase() ?? ''
                 const product = products.find(x => x.name.toLowerCase() === productLower)
                 if (!product) {
-                    console.warn(`ignoring unknown product ${productLower}`)
+                    unknownItems.value.push(`Unknown Product '${productLower}'`)
                     return
                 }
                 const category = categories.find(x => x.id === product.categoryId)
-                const categoryOptions = category.options?.map(x => options.find(o => o.id === x.optionId)) ?? []
+                const categoryOptions = category.categoryOptions?.map(x => options.find(o => o.id === x.optionId)) ?? []
                 const orderItem = createOrderItem(category)
                 orderItem.product = product.name
-                const temperature = !category.temperatures || !item.temperature
+                const temperature = !category.temperatures || !item.product?.temperature
                     ? null
-                    : category.temperatures.find(x => x.toLowerCase() === item.temperature.toLowerCase())
-                console.log(temperature)
+                    : category.temperatures.find(x => x.toLowerCase() === item.product?.temperature.toLowerCase())
                 if (temperature) {
                     orderItem.temperature = temperature
                 }
-                const size = !category.sizes || !item.size
+                const size = !category.sizes || !item.product?.size
                     ? null
-                    : category.sizes.find(x => x.toLowerCase() === item.size.toLowerCase())
+                    : category.sizes.find(x => x.toLowerCase() === item.product?.size.toLowerCase())
                 if (size) {
                     orderItem.size = size
                 }
-                (item.options || []).forEach(itemOption => {
+                
+                console.log('category', category)
+                console.log('categoryOptions', categoryOptions)
+                console.log('temperature', temperature)
+                console.log('size', size)
+                
+                ;(item.product?.options || []).forEach(itemOption => {
                     const option = categoryOptions.find(x => x.type.toLowerCase() === itemOption.type.toLowerCase())
                     if (!option) {
-                        console.warn(`ignoring unknown option '${itemOption.type}' for category ${category.name}`)
+                        unknownItems.value.push(`Unknown option '${itemOption.type}' for category '${category.name}'`)
                         return
                     }
                     const optionName = option.names.find(x => x.toLowerCase() === itemOption.name)
                     if (!optionName) {
-                        console.warn(`ignoring unknown option name '${itemOption.name}' for option ${option.type}`)
+                        unknownItems.value.push(`Unknown option name '${itemOption.name}' for option '${option.type}'`)
                         return
                     }
                     orderItem.options[option.type] = optionName
@@ -552,7 +581,7 @@ const App = {
                         ? (Number.isInteger(itemOption.optionQuantity)
                             ? parseInt(itemOption.optionQuantity)
                             : parseFloat(itemOption.optionQuantity))
-                        : optionQuantities.find(x => x.name.toLowerCase() === itemOption.optionQuantity)?.value || 1
+                        : optionQuantities.find(x => x.name.toLowerCase() === itemOption.optionQuantity)?.value ?? 1
                     orderItem.optionSizes[option.type] = optionQuantity
                 })
                 
@@ -561,12 +590,19 @@ const App = {
                     : 1
                 
                 for (let i = 0; i<quantity; i++) {
+                    console.log('orderItem', orderItem)
                     addToOrder(orderItem)
                     if (!addedProducts.includes(orderItem.product)) {
                         addedProducts.push(orderItem.product)
                     }
                 }
             })
+            
+            if (unknownItems.value.length) {
+                console.log(`Unknown Items:`)
+                unknownItems.value.map(x => console.log(' - ' + x))
+            }
+            
             if (addedProducts.length > 0) {
                 const productsList = addedProducts.length === 1
                     ? addedProducts[0]
@@ -635,6 +671,7 @@ const App = {
             transcript,
             apiChat,
             apiProcessed,
+            unknownItems,
         }
     }
 }
