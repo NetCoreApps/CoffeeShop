@@ -23,7 +23,6 @@ public class AppHost : AppHostBase, IHostingStartup
                 appConfig.NodePath ??= (ProcessUtils.FindExePath("node")
                                         ?? throw new Exception("Could not resolve path to node"));
                 appConfig.FfmpegPath ??= ProcessUtils.FindExePath("ffmpeg");
-                appConfig.WhisperPath ??= ProcessUtils.FindExePath("whisper");
             }
         });
 

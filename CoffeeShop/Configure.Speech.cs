@@ -28,7 +28,7 @@ public class ConfigureSpeech : IHostingStartup
             else if (speechProvider == nameof(WhisperLocalSpeechToText))
             {
                 services.AddSingleton<ISpeechToText>(c => new WhisperLocalSpeechToText {
-                    WhisperPath = c.Resolve<AppConfig>().WhisperPath,
+                    WhisperPath = c.Resolve<AppConfig>().WhisperPath ?? ProcessUtils.FindExePath("whisper"),
                     TimeoutMs = c.Resolve<AppConfig>().NodeProcessTimeoutMs,
                 });
             }
