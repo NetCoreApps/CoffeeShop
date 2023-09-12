@@ -63,23 +63,22 @@ public class AppHost : AppHostBase, IHostingStartup
         if (!file.FileName.EndsWith("mp4")) 
             return file;
         
-        var appConfig = Container.Resolve<AppConfig>();
-        if (appConfig.FfmpegPath == null)
-            throw new Exception("Could not resolve path to ffmpeg");
+        var ffmpegPath = Container.Resolve<AppConfig>().FfmpegPath ?? ProcessUtils.FindExePath("ffmpeg") 
+            ?? throw new Exception("Could not resolve path to ffmpeg");
         
         var now = DateTime.UtcNow;
         var time = $"{now:yyyy-M-d_s.fff}";
-        var tmpPath = Environment.CurrentDirectory.CombineWith("App_Data", "tmp").AssertDir();
-        var tmpMp4 = tmpPath.CombineWith($"{time}.mp4");
+        var tmpDir = Environment.CurrentDirectory.CombineWith("App_Data/tmp").AssertDir();
+        var tmpMp4 = tmpDir.CombineWith($"{time}.mp4");
         await using (File.Create(tmpMp4)) {}
-        var tmpWebm = tmpPath.CombineWith($"{time}.webm");
+        var tmpWebm = tmpDir.CombineWith($"{time}.webm");
         
         var msMp4 = await file.InputStream.CopyToNewMemoryStreamAsync();
         await using (var fsMp4 = File.OpenWrite(tmpMp4))
         {
             await msMp4.WriteToAsync(fsMp4);
         }
-        await ProcessUtils.RunShellAsync($"{appConfig.FfmpegPath} -i {tmpMp4} {tmpWebm}");
+        await ProcessUtils.RunShellAsync($"{ffmpegPath} -i {tmpMp4} {tmpWebm}");
         File.Delete(tmpMp4);
         
         HttpFile? to = null;
