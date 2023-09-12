@@ -488,10 +488,12 @@ const App = {
                 } else {
                     const formData = new FormData()
                     formData.append('path', audioRecorder.audioBlob, `file.${audioRecorder.audioExt}`)
+                    console.time('transcribe')
                     const api = await client.apiForm(new CreateCoffeeShopRecording(), formData)
                     if (api.succeeded) {
                         transcript.value = api.response.transcript
                     }
+                    console.timeEnd('transcribe')
                 }
                 isTranscribing.value = false
                 await processOrder(transcript.value)
@@ -514,9 +516,11 @@ const App = {
                 await timeout(Mock.wait)
                 apiChat.value = new ApiResult({ response: Mock.chat })
             } else {
+                console.time('gpt')
                 apiChat.value = await client.api(new CreateCoffeeShopChat({
                     userMessage: request.toLowerCase()
                 }))
+                console.timeEnd('gpt')
             }
             isSendingChat.value = false
             if (apiChat.value.response) {
