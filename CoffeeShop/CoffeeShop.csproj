@@ -42,7 +42,6 @@
 
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="wwwroot\mjs\components\" />
   </ItemGroup>
 
   <ItemGroup>

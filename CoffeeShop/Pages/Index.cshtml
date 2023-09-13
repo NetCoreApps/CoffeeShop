@@ -18,38 +18,6 @@
     background-position: 50% 0;
     z-index: -1;
 }
-.animation-pulse {
-    animation: pulse 2s infinite;
-}
-@@keyframes pulse {
-    0% {
-        transform: scale(0.8);
-        box-shadow: 0 0 0 0 rgba(229, 62, 62, 1);
-    }
-    70% {
-        transform: scale(1);
-        box-shadow: 0 0 0 60px rgba(229, 62, 62, 0);
-    }
-    100% {
-        transform: scale(0.8);
-    }
-}
-.animation-loading-pulse {
-    animation: loading-pulse 2s infinite;
-}
-@@keyframes loading-pulse {
-    0% {
-        transform: scale(0.8);
-        box-shadow: 0 0 0 0 rgba(202,138,4, 1);
-    }
-    70% {
-        transform: scale(1);
-        box-shadow: 0 0 0 60px rgba(202,138,4, 0);
-    }
-    100% {
-        transform: scale(0.8);
-    }
-}
 </style>
 <div class="bg"></div>
 
@@ -213,21 +181,10 @@
                         </div>
                     </div>
                     <div class="lg:ml-8">
-                        <div class="flex justify-center items-center">
-                            <div v-if="loadingRecording" class="w-16 h-16 lg:h-20 lg:w-20 bg-yellow-600 rounded-full flex justify-center items-center cursor-pointer animation-loading-pulse">
-                                <svg class="w-8 h-8 lg:w-10 lg:h-10 text-white" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="4"><rect width="14" height="27" x="17" y="4" rx="7"/><path stroke-linecap="round" d="M9 23c0 8.284 6.716 15 15 15c8.284 0 15-6.716 15-15M24 38v6"/></g></svg>
-                            </div>
-                            <div v-else-if="!isRecording" v-on:click="toggleRecording" class="w-16 h-16 lg:h-20 lg:w-20 rounded-full flex justify-center items-center cursor-pointer shadow">
-                                <svg class="w-8 h-8 lg:w-10 lg:h-10 text-gray-600" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="4"><rect width="14" height="27" x="17" y="4" rx="7"/><path stroke-linecap="round" d="M9 23c0 8.284 6.716 15 15 15c8.284 0 15-6.716 15-15M24 38v6"/></g></svg>
-                            </div>
-                            <div v-else v-on:click="toggleRecording" class="w-16 h-16 lg:h-20 lg:w-20 bg-red-600 rounded-full flex justify-center items-center cursor-pointer animation-pulse">
-                                <svg class="w-8 h-8 lg:w-10 lg:h-10 text-white" xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-linejoin="round" stroke-width="4"><rect width="14" height="27" x="17" y="4" rx="7"/><path stroke-linecap="round" d="M9 23c0 8.284 6.716 15 15 15c8.284 0 15-6.716 15-15M24 38v6"/></g></svg>
-                            </div>
-                        </div>
+                        <record-button :loading="loadingRecording" :recording="isRecording" v-on:toggle="toggleRecording"></record-button>
                     </div>
                     <div :class="['ml-4', audio ? '' : 'invisible']">
-                        <svg v-if="!isPlaying" v-on:click="audio.play()" class="w-10 h-10 text-gray-600 hover:text-gray-800 cursor-pointer" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><title>play</title> <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m14.752 11.168l-3.197-2.132A1 1 0 0 0 10 9.87v4.263a1 1 0 0 0 1.555.832l3.197-2.132a1 1 0 0 0 0-1.664Z"/><path d="M21 12a9 9 0 1 1-18 0a9 9 0 0 1 18 0Z"/></g></svg>
-                        <svg v-else v-on:click="audio.pause()" class="w-10 h-10 text-gray-600 hover:text-gray-800 cursor-pointer" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 1 1-18 0a9 9 0 0 1 18 0Z"/></svg>
+                        <play-button :playing="isPlaying" v-on:play="audio.play()" v-on:pause="audio.pause()"></play-button>
                     </div>
                 </div>
             </div>
@@ -297,6 +254,8 @@ import { ApiResult, leftPart, rightPart, appendQueryString, omit, map, humanize 
 import { useAuth, useFormatters } from "@@servicestack/vue"
 import { QueryOptions, Authenticate, CreateCoffeeShopRecording, CreateCoffeeShopChat } from "/mjs/dtos.mjs" 
 import { AudioRecorder } from "/mjs/AudioRecorder.mjs"
+import RecordButton from "/mjs/components/RecordButton.mjs"
+import PlayButton from "/mjs/components/PlayButton.mjs"
 
 const Mock = {
     transcribing: false,
@@ -318,6 +277,10 @@ const productsMap = {}
 categories.forEach(c => c.products.forEach(p => productsMap[p.name] = p))
 
 const App = {
+    components: {
+        RecordButton,
+        PlayButton,
+    },
     setup() {
         const { user, signIn } = useAuth()
         const { currency } = useFormatters()
