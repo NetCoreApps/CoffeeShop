@@ -195,7 +195,7 @@ const sections = {
             <AutoQueryGrid :type="type" selectedColumns="imageUrl,id,name,defaultSize,products"
                     :headerTitles="{ imageUrl: ' ' }" :canFilter="x => x != 'ImageUrl'">
                 <template #imageUrl="{ imageUrl }">
-                    <Icon :src="imageUrl" class="w-8 h-8 rounded-full" />
+                    <div class="w-8 h-8 flex"><Icon :src="imageUrl" class="rounded-full" /></div>
                 </template>
                 <template #id="{ id }">{{id}}</template>
                 <template #name="{ name }">{{name}}</template>
@@ -218,7 +218,7 @@ const sections = {
             <AutoQueryGrid :type="type" selectedColumns="imageUrl,category,id,name,cost"
                     :headerTitles="{ imageUrl: ' ' }" :canFilter="x => x != 'ImageUrl'">
                 <template #imageUrl="{ imageUrl }">
-                    <Icon :src="imageUrl" class="w-8 h-8 rounded-full" />
+                    <div class="w-8 h-8 flex"><Icon :src="imageUrl" class="rounded-full" /></div>
                 </template>
                 <template #category="{ category }">
                     <a :href="'#Categories?edit=' + category.id" class="flex text-indigo-600 hover:underline">
