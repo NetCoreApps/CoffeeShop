@@ -1,5 +1,4 @@
-﻿using CoffeeShop.ServiceModel;
-using ServiceStack.Gpt;
+﻿using ServiceStack.Gpt;
 
 namespace CoffeeShop.ServiceInterface;
 
