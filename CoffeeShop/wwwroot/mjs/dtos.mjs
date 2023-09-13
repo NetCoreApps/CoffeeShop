@@ -1,5 +1,5 @@
 /* Options:
-Date: 2023-09-04 00:12:51
+Date: 2023-09-13 21:48:09
 Version: 6.101
 Tip: To override a DTO option, remove "//" prefix before updating
 BaseUrl: https://localhost:5001
@@ -64,10 +64,14 @@ export class Product {
     imageUrl;
 }
 export class Recording {
-    /** @param {{id?:number,path?:string,transcript?:string,transcriptConfidence?:number,transcriptResponse?:string,createdDate?:string,transcribeStart?:string,transcribeEnd?:string,transcribeDurationMs?:number,durationMs?:number,ipAddress?:string,error?:string}} [init] */
+    /** @param {{id?:number,feature?:string,provider?:string,path?:string,transcript?:string,transcriptConfidence?:number,transcriptResponse?:string,createdDate?:string,transcribeStart?:string,transcribeEnd?:string,transcribeDurationMs?:number,durationMs?:number,ipAddress?:string,error?:string}} [init] */
     constructor(init) { Object.assign(this, init) }
     /** @type {number} */
     id;
+    /** @type {string} */
+    feature;
+    /** @type {string} */
+    provider;
     /** @type {string} */
     path;
     /** @type {?string} */
@@ -92,14 +96,20 @@ export class Recording {
     error;
 }
 export class Chat {
-    /** @param {{id?:number,request?:string,prompt?:string,chatResponse?:string,createdDate?:string,chatStart?:string,chatEnd?:string,chatDurationMs?:number,ipAddress?:string,error?:string}} [init] */
+    /** @param {{id?:number,feature?:string,provider?:string,request?:string,prompt?:string,schema?:string,chatResponse?:string,createdDate?:string,chatStart?:string,chatEnd?:string,chatDurationMs?:number,ipAddress?:string,error?:string}} [init] */
     constructor(init) { Object.assign(this, init) }
     /** @type {number} */
     id;
     /** @type {string} */
+    feature;
+    /** @type {string} */
+    provider;
+    /** @type {string} */
     request;
     /** @type {string} */
     prompt;
+    /** @type {string} */
+    schema;
     /** @type {?string} */
     chatResponse;
     /** @type {string} */
@@ -303,33 +313,6 @@ export class QueryResponse {
     /** @type {ResponseStatus} */
     responseStatus;
 }
-export class CoffeeShopSchema {
-    constructor(init) { Object.assign(this, init) }
-    getTypeName() { return 'CoffeeShopSchema' }
-    getMethod() { return 'POST' }
-    createResponse() { return '' }
-}
-export class CoffeeShopPrompt {
-    /** @param {{userMessage?:string}} [init] */
-    constructor(init) { Object.assign(this, init) }
-    /** @type {string} */
-    userMessage;
-    getTypeName() { return 'CoffeeShopPrompt' }
-    getMethod() { return 'POST' }
-    createResponse() { return '' }
-}
-export class CoffeeShopPhrases {
-    constructor(init) { Object.assign(this, init) }
-    getTypeName() { return 'CoffeeShopPhrases' }
-    getMethod() { return 'POST' }
-    createResponse() { return new StringsResponse() }
-}
-export class CoffeeShopInitSpeech {
-    constructor(init) { Object.assign(this, init) }
-    getTypeName() { return 'CoffeeShopInitSpeech' }
-    getMethod() { return 'POST' }
-    createResponse() { }
-}
 export class UpdateCategory {
     /** @param {{id?:number,name?:string,description?:string,sizes?:string[],temperatures?:string[],defaultSize?:string,defaultTemperature?:string,imageUrl?:string,addOptionIds?:number[],removeOptionIds?:number[]}} [init] */
     constructor(init) { Object.assign(this, init) }
@@ -357,21 +340,63 @@ export class UpdateCategory {
     getMethod() { return 'PATCH' }
     createResponse() { return new Category() }
 }
-export class CreateCoffeeShopRecording {
-    /** @param {{path?:string}} [init] */
+export class GetSchema {
+    /** @param {{feature?:string}} [init] */
     constructor(init) { Object.assign(this, init) }
     /** @type {string} */
+    feature;
+    getTypeName() { return 'GetSchema' }
+    getMethod() { return 'POST' }
+    createResponse() { return '' }
+}
+export class GetPrompt {
+    /** @param {{feature?:string,userMessage?:string}} [init] */
+    constructor(init) { Object.assign(this, init) }
+    /** @type {string} */
+    feature;
+    /** @type {string} */
+    userMessage;
+    getTypeName() { return 'GetPrompt' }
+    getMethod() { return 'POST' }
+    createResponse() { return '' }
+}
+export class GetPhrases {
+    /** @param {{feature?:string}} [init] */
+    constructor(init) { Object.assign(this, init) }
+    /** @type {string} */
+    feature;
+    getTypeName() { return 'GetPhrases' }
+    getMethod() { return 'POST' }
+    createResponse() { return new StringsResponse() }
+}
+export class InitSpeech {
+    /** @param {{feature?:string}} [init] */
+    constructor(init) { Object.assign(this, init) }
+    /** @type {string} */
+    feature;
+    getTypeName() { return 'InitSpeech' }
+    getMethod() { return 'POST' }
+    createResponse() { }
+}
+export class CreateRecording {
+    /** @param {{feature?:string,path?:string}} [init] */
+    constructor(init) { Object.assign(this, init) }
+    /** @type {string} */
+    feature;
+    /** @type {string} */
     path;
-    getTypeName() { return 'CreateCoffeeShopRecording' }
+    getTypeName() { return 'CreateRecording' }
     getMethod() { return 'POST' }
     createResponse() { return new Recording() }
 }
-export class CreateCoffeeShopChat {
-    /** @param {{userMessage?:string}} [init] */
+export class CreateChat {
+    /** @param {{feature?:string,userMessage?:string}} [init] */
     constructor(init) { Object.assign(this, init) }
     /** @type {string} */
+    feature;
+    /** @type {string} */
     userMessage;
-    getTypeName() { return 'CreateCoffeeShopChat' }
+    getTypeName() { return 'CreateChat' }
     getMethod() { return 'POST' }
     createResponse() { return new Chat() }
 }

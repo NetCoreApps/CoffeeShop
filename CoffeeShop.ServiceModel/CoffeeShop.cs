@@ -81,8 +81,9 @@ public class Recording
 {
     [AutoIncrement]
     public int Id { get; set; }
-    public string Path { get; set; }
+    public string Feature { get; set; }
     public string Provider { get; set; }
+    public string Path { get; set; }
     public string? Transcript { get; set; }
     public float? TranscriptConfidence { get; set; }
     public string? TranscriptResponse { get; set; }
@@ -100,10 +101,11 @@ public class Chat
 {
     [AutoIncrement]
     public int Id { get; set; }
+    public string Feature { get; set; }
+    public string Provider { get; set; }
     public string Request { get; set; }
     public string Prompt { get; set; }
     public string Schema { get; set; }
-    public string Provider { get; set; }
     public string? ChatResponse { get; set; }
     public DateTime CreatedDate { get; set; }
     public DateTime? ChatStart { get; set; }
@@ -234,49 +236,6 @@ public class DeleteOptionQuantity : IDeleteDb<OptionQuantity>, IReturnVoid
     public int Id { get; set; }
 }
 
-[Tag(Tags.CoffeeShop)]
-[Route("/coffeeshop/schema")]
-public class CoffeeShopSchema : IReturn<string> {}
-
-[Tag(Tags.CoffeeShop)]
-[Route("/coffeeshop/prompt")]
-public class CoffeeShopPrompt : IReturn<string>
-{
-    public string UserMessage { get; set; }
-}
-
-[Tag(Tags.CoffeeShop)]
-[Route("/coffeeshop/phrases")]
-public class CoffeeShopPhrases : IReturn<StringsResponse> {}
-
-[ValidateIsAdmin]
-[Tag(Tags.CoffeeShop)]
-[Route("/coffeeshop/speech/init")]
-public class CoffeeShopInitSpeech : IReturnVoid {}
-
-[Tag(Tags.CoffeeShop)]
-public class QueryRecordings : QueryDb<Recording> {}
-
-[Tag(Tags.CoffeeShop)]
-[AutoPopulate(nameof(Recording.CreatedDate),  Eval = "utcNow")]
-[AutoPopulate(nameof(Recording.IpAddress),  Eval = "Request.RemoteIp")]
-public class CreateCoffeeShopRecording : ICreateDb<Recording>, IReturn<Recording>
-{
-    [Input(Type="file"), UploadTo("recordings")]
-    public string Path { get; set; }
-}
-
-[Tag(Tags.CoffeeShop)]
-public class QueryChats : QueryDb<Chat> {}
-
-[Tag(Tags.CoffeeShop)]
-[AutoPopulate(nameof(Recording.CreatedDate),  Eval = "utcNow")]
-[AutoPopulate(nameof(Recording.IpAddress),  Eval = "Request.RemoteIp")]
-public class CreateCoffeeShopChat : ICreateDb<Chat>, IReturn<Chat>
-{
-    public string UserMessage { get; set; }
-}
-
 /* GPT Models */
 public class Cart
 {
@@ -301,5 +260,4 @@ public class ProductOption
 {
     public string Type { get; set; }
     public string Name { get; set; }
-
 }

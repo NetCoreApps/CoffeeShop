@@ -7,7 +7,7 @@ using ServiceStack.Script;
 
 namespace CoffeeShop.ServiceInterface;
 
-public class CoffeeShopPromptProvider : IPromptProvider
+public class CoffeeShopPromptProvider : IPromptProvider, IPhrasesProvider
 {
     public IDbConnectionFactory DbFactory { get; set; }
     public AppConfig Config { get; set; }
@@ -18,6 +18,46 @@ public class CoffeeShopPromptProvider : IPromptProvider
         Config = config;
     }
 
+    public async Task<IEnumerable<string>> GetPhrases(CancellationToken token = default)
+    {
+        using var db = await DbFactory.OpenDbConnectionAsync(token: token);
+        var categories = await db.SelectAsync<Category>(token: token);
+        var products = await db.SelectAsync<Product>(token: token);
+        var options = await db.SelectAsync<Option>(token: token);
+        var optionQuantities = await db.SelectAsync<OptionQuantity>(token: token);
+
+        var words = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var category in categories)
+        {
+            words.Add(category.Name.SplitCamelCase());
+            foreach (var size in category.Sizes.Safe())
+            {
+                words.Add(size);
+            }
+            foreach (var temperature in category.Temperatures.Safe())
+            {
+                words.Add(temperature);
+            }
+        }
+        foreach (var product in products)
+        {
+            words.Add(product.Name);
+        }
+        foreach (var option in options)
+        {
+            words.Add(option.Type.SplitCamelCase());
+            foreach (var name in option.Names.Safe())
+            {
+                words.Add(name);
+            }
+        }
+        foreach (var opt in optionQuantities)
+        {
+            words.Add(opt.Name);
+        }
+        return words;
+    }
+    
     public async Task<string> CreateSchemaAsync(CancellationToken token = default)
     {
         var file = new FileInfo(Config.CoffeeShop.GptPath.CombineWith("schema.ss"));

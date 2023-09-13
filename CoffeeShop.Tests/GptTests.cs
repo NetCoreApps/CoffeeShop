@@ -48,7 +48,7 @@ public class GptTests
                         .Build();
 
                     host.Register(kernel);
-                    host.Container.AddSingleton<ITypeChatProvider>(c => new KernelTypeChatProvider(c.Resolve<IKernel>()));
+                    host.Container.AddSingleton<ITypeChat>(c => new KernelTypeChat(c.Resolve<IKernel>()));
                     host.Container.AddSingleton<IPromptProvider>(c => new CoffeeShopPromptProvider(dbFactory, appConfig)); 
                 }
             }
@@ -69,8 +69,8 @@ public class GptTests
     public async Task Dump_all_phrases()
     {
         using var appHost = CreateAppHost();
-        var service = appHost.Resolve<CoffeeShopServices>();
-        var response = await service.Any(new CoffeeShopPhrases());
+        var service = appHost.Resolve<GptServices>();
+        var response = await service.Any(new GetPhrases());
         
         response.Results.PrintDump();
     }
@@ -83,11 +83,11 @@ public class GptTests
         //json.Print();
 
         using var appHost = CreateAppHost();
-        var service = appHost.Resolve<CoffeeShopServices>();
-        var prompt = (string) await service.Any(new CoffeeShopPrompt
+        var service = appHost.Resolve<GptServices>();
+        var prompt = await service.Any(new GetPrompt
         {
             UserMessage = request +
-@"
+                          @"
 JSON validation failed: 'vanilla' is not a valid name for the type: Syrups
 ``` 
 export interface Syrups {
@@ -137,10 +137,10 @@ export interface Syrups {
         var request = "i'd like a latte that's it";
         using var appHost = CreateAppHost();
 
-        var service = appHost.Resolve<CoffeeShopServices>();
+        var service = appHost.Resolve<GptServices>();
         // var schema = (string) await service.Any(new CoffeeShopSchema());
         // schema.Print();
-        var prompt = (string) await service.Any(new CreateCoffeeShopChat
+        var prompt = (string) await service.Any(new CreateChat
         {
             UserMessage = request,
         });

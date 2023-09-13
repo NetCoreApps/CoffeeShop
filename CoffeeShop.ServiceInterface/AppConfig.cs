@@ -1,4 +1,5 @@
-﻿using ServiceStack.Gpt;
+﻿using CoffeeShop.ServiceModel;
+using ServiceStack.Gpt;
 
 namespace CoffeeShop.ServiceInterface;
 
@@ -12,14 +13,27 @@ public class AppConfig
     public string? WhisperPath { get; set; }
     public int NodeProcessTimeoutMs { get; set; } = 120 * 1000;
 
-    public GoogleCloudSpeechConfig CoffeeShopGoogleSpeechConfig() => new()
+    public SiteConfig GetSiteConfig(string name)
     {
-        Project = Project,
-        Location = Location,
-        Bucket = CoffeeShop.Bucket,
-        RecognizerId = CoffeeShop.RecognizerId,
-        PhraseSetId = CoffeeShop.PhraseSetId,
-    };
+        return name.ToLower() switch
+        {
+            "coffeeshop" => CoffeeShop,
+            _ => throw new NotSupportedException($"No SiteConfig exists for '{name}'")
+        };
+    }
+
+    public GoogleCloudSpeechConfig SpeechConfig(string name)
+    {
+        var siteConfig = GetSiteConfig(name);
+        return new GoogleCloudSpeechConfig
+        {
+            Project = Project,
+            Location = Location,
+            Bucket = siteConfig.Bucket,
+            RecognizerId = siteConfig.RecognizerId,
+            PhraseSetId = siteConfig.PhraseSetId,
+        };
+    }
 }
 
 public class SiteConfig

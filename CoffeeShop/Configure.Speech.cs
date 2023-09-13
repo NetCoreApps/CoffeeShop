@@ -1,4 +1,5 @@
 ﻿using CoffeeShop.ServiceInterface;
+using CoffeeShop.ServiceModel;
 using Google.Cloud.Speech.V2;
 using ServiceStack.Gpt;
 using ServiceStack.IO;
@@ -19,7 +20,7 @@ public class ConfigureSpeech : IHostingStartup
             {
                 AppHost.AssertGoogleCloudCredentials();
                 services.AddSingleton<ISpeechToText>(c => new GoogleCloudSpeechToText(
-                    c.Resolve<AppConfig>().CoffeeShopGoogleSpeechConfig(), SpeechClient.Create()));
+                    c.Resolve<AppConfig>().SpeechConfig(Tags.CoffeeShop), SpeechClient.Create()));
             }
             else if (speechProvider == nameof(WhisperApiSpeechToText))
             {

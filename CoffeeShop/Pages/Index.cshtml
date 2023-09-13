@@ -252,7 +252,7 @@ import { mount } from "/mjs/app.mjs"
 import { ref, computed, onMounted, shallowRef } from "vue"
 import { ApiResult, leftPart, rightPart, appendQueryString, omit, map, humanize } from "@@servicestack/client"
 import { useAuth, useFormatters } from "@@servicestack/vue"
-import { QueryOptions, Authenticate, CreateCoffeeShopRecording, CreateCoffeeShopChat } from "/mjs/dtos.mjs" 
+import { QueryOptions, Authenticate, CreateRecording, CreateChat } from "/mjs/dtos.mjs" 
 import { AudioRecorder } from "/mjs/AudioRecorder.mjs"
 import RecordButton from "/mjs/components/RecordButton.mjs"
 import PlayButton from "/mjs/components/PlayButton.mjs"
@@ -452,7 +452,7 @@ const App = {
                     const formData = new FormData()
                     formData.append('path', audioRecorder.audioBlob, `file.${audioRecorder.audioExt}`)
                     console.time('transcribe')
-                    const api = await client.apiForm(new CreateCoffeeShopRecording(), formData)
+                    const api = await client.apiForm(new CreateRecording({feature:'coffeeshop'}), formData)
                     if (api.succeeded) {
                         transcript.value = api.response.transcript
                     }
@@ -480,7 +480,8 @@ const App = {
                 apiChat.value = new ApiResult({ response: Mock.chat })
             } else {
                 console.time('gpt')
-                apiChat.value = await client.api(new CreateCoffeeShopChat({
+                apiChat.value = await client.api(new CreateChat({
+                    feature: 'coffeeshop',
                     userMessage: request.toLowerCase()
                 }))
                 console.timeEnd('gpt')
