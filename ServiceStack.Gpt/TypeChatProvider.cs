@@ -67,7 +67,7 @@ public class TypeChatResponse
     public ResponseStatus ResponseStatus { get; set; }
 }
 
-public interface ITypeChatProvider
+public interface ITypeChat
 {
     Task<TypeChatResponse> TranslateMessageAsync(TypeChatRequest request, CancellationToken token = default);
 }

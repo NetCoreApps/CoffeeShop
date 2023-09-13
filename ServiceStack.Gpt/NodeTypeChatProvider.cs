@@ -3,7 +3,7 @@ using ServiceStack.Text;
 
 namespace ServiceStack.Gpt;
 
-public class NodeTypeChatProvider : ITypeChatProvider
+public class NodeTypeChat : ITypeChat
 {
     public async Task<TypeChatResponse> TranslateMessageAsync(TypeChatRequest request, CancellationToken token = default)
     {

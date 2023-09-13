@@ -3,10 +3,10 @@ using Microsoft.SemanticKernel.AI.ChatCompletion;
 
 namespace ServiceStack.Gpt;
 
-public class KernelTypeChatProvider : ITypeChatProvider
+public class KernelTypeChat : ITypeChat
 {
     public IKernel Kernel { get; }
-    public KernelTypeChatProvider(IKernel kernel) => Kernel = kernel;
+    public KernelTypeChat(IKernel kernel) => Kernel = kernel;
 
     public async Task<TypeChatResponse> TranslateMessageAsync(TypeChatRequest request, CancellationToken token = default)
     {
