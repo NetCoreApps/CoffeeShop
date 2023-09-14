@@ -1,8 +1,8 @@
 ﻿using System.Net;
-using CoffeeShop.ServiceModel;
 using ServiceStack;
 using ServiceStack.AI;
 using ServiceStack.OrmLite;
+using CoffeeShop.ServiceModel;
 
 namespace CoffeeShop.ServiceInterface;
 
@@ -47,7 +47,7 @@ public class GptServices : Service
         }
     }
 
-    public async Task<object> Any(CreateRecording request)
+    public async Task<Recording> Any(CreateRecording request)
     {
         var feature = request.Feature.ToLower();
         var recording = (Recording)await AutoQuery.CreateAsync(request, Request);
@@ -92,7 +92,7 @@ public class GptServices : Service
         return recording;
     }
 
-    public async Task<object> Any(CreateChat request)
+    public async Task<Chat> Any(CreateChat request)
     {
         var feature = request.Feature.ToLower();
         var promptProvider = PromptFactory.Get(feature);
@@ -107,7 +107,7 @@ public class GptServices : Service
         {
             var schema = await promptProvider.CreateSchemaAsync();
             var prompt = await promptProvider.CreatePromptAsync(request.UserMessage);
-            var typeChatRequest = CreateTypeChatRequest(feature, schema, prompt, request.UserMessage);
+            var typeChatRequest = CreateTypeChatRequest(feature, schema, prompt, request.UserMessage, request.Translator);
             
             var response = await TypeChat.TranslateMessageAsync(typeChatRequest);
             var chatEnd = DateTime.UtcNow;
@@ -142,12 +142,14 @@ public class GptServices : Service
         return chat;
     }
     
-    public TypeChatRequest CreateTypeChatRequest(string feature, string schema, string prompt, string userMessage) => 
+    public TypeChatRequest CreateTypeChatRequest(string feature, string schema, string prompt, string userMessage, 
+           TypeChatTranslator? translator = null) => 
         new(schema, prompt, userMessage) {
             NodePath = Config.NodePath,
             NodeProcessTimeoutMs = Config.NodeProcessTimeoutMs,
             WorkingDirectory = Environment.CurrentDirectory,
             SchemaPath = Config.GetSiteConfig(feature).GptPath.CombineWith("schema.ts"),
+            TypeChatTranslator = translator ?? TypeChatTranslator.Json,
         };
 
     void WriteJsonFile(string path, string json)
