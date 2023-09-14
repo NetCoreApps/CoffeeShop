@@ -21,7 +21,18 @@ public class ConfigureSpeech : IHostingStartup
             {
                 AppHost.AssertGoogleCloudCredentials();
                 services.AddSingleton<ISpeechToText>(c => new GoogleCloudSpeechToText(
-                    c.Resolve<AppConfig>().SpeechConfig(Tags.CoffeeShop), SpeechClient.Create()));
+                    X.Map(c.Resolve<AppConfig>(), config =>
+                    {
+                        var siteConfig = config.GetSiteConfig(Tags.CoffeeShop);
+                        return new GoogleCloudSpeechConfig
+                        {
+                            Project = config.Project,
+                            Location = config.Location,
+                            Bucket = siteConfig.Bucket,
+                            RecognizerId = siteConfig.RecognizerId,
+                            PhraseSetId = siteConfig.PhraseSetId,
+                        };
+                    })!, SpeechClient.Create()));
             }
             else if (speechProvider == nameof(WhisperApiSpeechToText))
             {

@@ -1,6 +1,4 @@
-﻿using ServiceStack.GoogleCloud;
-
-namespace CoffeeShop.ServiceInterface;
+﻿namespace CoffeeShop.ServiceInterface;
 
 public class AppConfig
 {
@@ -18,19 +16,6 @@ public class AppConfig
         {
             "coffeeshop" => CoffeeShop,
             _ => throw new NotSupportedException($"No SiteConfig exists for '{name}'")
-        };
-    }
-
-    public GoogleCloudSpeechConfig SpeechConfig(string name)
-    {
-        var siteConfig = GetSiteConfig(name);
-        return new GoogleCloudSpeechConfig
-        {
-            Project = Project,
-            Location = Location,
-            Bucket = siteConfig.Bucket,
-            RecognizerId = siteConfig.RecognizerId,
-            PhraseSetId = siteConfig.PhraseSetId,
         };
     }
 }

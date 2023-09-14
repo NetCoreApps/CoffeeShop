@@ -10,8 +10,6 @@
     <PackageReference Include="ServiceStack" Version="6.*" />
     <PackageReference Include="ServiceStack.Server" Version="6.*" />
     <PackageReference Include="ServiceStack.Ormlite" Version="6.*" />
-    <PackageReference Include="ServiceStack.AI" Version="6.*" />
-    <PackageReference Include="ServiceStack.GoogleCloud" Version="6.*" />
   </ItemGroup>
 
   <ItemGroup>
