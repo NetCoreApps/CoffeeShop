@@ -1,4 +1,3 @@
-using ServiceStack;
 using ServiceStack.Web;
 using ServiceStack.Auth;
 using ServiceStack.Configuration;

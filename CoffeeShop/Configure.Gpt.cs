@@ -1,7 +1,7 @@
 ﻿using CoffeeShop.ServiceInterface;
 using CoffeeShop.ServiceModel;
 using Microsoft.SemanticKernel;
-using ServiceStack.Gpt;
+using ServiceStack.AI;
 
 [assembly: HostingStartup(typeof(CoffeeShop.ConfigureGpt))]
 

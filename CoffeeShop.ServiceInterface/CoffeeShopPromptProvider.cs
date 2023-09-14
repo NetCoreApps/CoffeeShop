@@ -1,7 +1,7 @@
 ﻿using CoffeeShop.ServiceModel;
 using ServiceStack;
 using ServiceStack.Data;
-using ServiceStack.Gpt;
+using ServiceStack.AI;
 using ServiceStack.OrmLite;
 using ServiceStack.Script;
 

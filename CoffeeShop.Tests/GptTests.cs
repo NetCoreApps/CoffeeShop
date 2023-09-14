@@ -1,10 +1,11 @@
+using System.Net;
 using CoffeeShop.ServiceInterface;
 using CoffeeShop.ServiceModel;
 using Microsoft.SemanticKernel;
 using NUnit.Framework;
 using ServiceStack;
 using ServiceStack.Data;
-using ServiceStack.Gpt;
+using ServiceStack.AI;
 using ServiceStack.IO;
 using ServiceStack.OrmLite;
 using ServiceStack.Testing;

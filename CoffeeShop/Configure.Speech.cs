@@ -1,8 +1,9 @@
 ﻿using CoffeeShop.ServiceInterface;
 using CoffeeShop.ServiceModel;
-using Google.Cloud.Speech.V2;
-using ServiceStack.Gpt;
+using ServiceStack.AI;
 using ServiceStack.IO;
+using ServiceStack.GoogleCloud;
+using Google.Cloud.Speech.V2;
 
 [assembly: HostingStartup(typeof(CoffeeShop.ConfigureSpeech))]
 

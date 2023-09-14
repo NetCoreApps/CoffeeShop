@@ -1,5 +1,4 @@
 using Microsoft.Extensions.DependencyInjection;
-using ServiceStack;
 using ServiceStack.Auth;
 using ServiceStack.FluentValidation;
 

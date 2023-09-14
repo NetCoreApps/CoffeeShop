@@ -1,4 +1,4 @@
-﻿using ServiceStack.Gpt;
+﻿using ServiceStack.GoogleCloud;
 
 namespace CoffeeShop.ServiceInterface;
 

@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using CoffeeShop.ServiceModel;
 using ServiceStack;
-using ServiceStack.Gpt;
+using ServiceStack.AI;
 using ServiceStack.OrmLite;
 
 namespace CoffeeShop.ServiceInterface;

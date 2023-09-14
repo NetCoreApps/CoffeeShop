@@ -26,13 +26,14 @@
     <PackageReference Include="ServiceStack.Mvc" Version="6.*" />
     <PackageReference Include="ServiceStack.Server" Version="6.*" />
     <PackageReference Include="ServiceStack.OrmLite.Sqlite.Data" Version="6.*" />
+    <PackageReference Include="ServiceStack.AI" Version="6.*" />
     <PackageReference Include="ServiceStack.GoogleCloud" Version="6.*" />
     <PackageReference Include="Google.Cloud.Storage.V1" Version="4.6.0" />
     <PackageReference Include="Google.Cloud.Speech.V2" Version="1.0.0-beta06" />
     
     <!-- Required for Razor compilation on change: https://docs.microsoft.com/en-us/aspnet/core/mvc/views/view-compilation?view=aspnetcore-5.0 -->
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="6.*" />
-    <PackageReference Include="Microsoft.SemanticKernel" Version="0.19.230804.2-preview" />
+    <PackageReference Include="Microsoft.SemanticKernel" Version="0.24.230912.2-preview" />
   </ItemGroup>
 
   <ItemGroup>
