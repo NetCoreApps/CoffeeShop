@@ -141,10 +141,11 @@ export interface Syrups {
         var service = appHost.Resolve<GptServices>();
         // var schema = (string) await service.Any(new CoffeeShopSchema());
         // schema.Print();
-        var prompt = (string) await service.Any(new CreateChat
+        var prompt = await service.Any(new CreateChat
         {
+            Feature = Tags.CoffeeShop,
             UserMessage = request,
         });
-        prompt.Print();
+        prompt.ChatResponse.Print();
     }
 }

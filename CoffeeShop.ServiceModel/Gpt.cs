@@ -1,4 +1,5 @@
 using ServiceStack;
+using ServiceStack.AI;
 using ServiceStack.DataAnnotations;
 
 namespace CoffeeShop.ServiceModel;
@@ -103,4 +104,5 @@ public class CreateChat : ICreateDb<Chat>, IReturn<Chat>
     [ValidateNotEmpty]
     public string Feature { get; set; }
     public string UserMessage { get; set; }
+    public TypeChatTranslator? Translator { get; set; }
 }
