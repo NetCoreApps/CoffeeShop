@@ -130,11 +130,44 @@
                     </span>
                 </a>
             </div>
-            <div v-else class="mt-20 text-center">
+            <div v-else class="mt-20">
                 <div class="mx-auto max-w-screen-sm flex flex-wrap sm:flex-nowrap items-center justify-center sm:justify-end">
                     <div class="mb-8 lg:mb-0 w-full lg:w-auto">
                         <form v-if="!(loadingRecording || isRecording || isTranscribing || transcript)" v-on:submit.prevent="onSubmit">
-                            <text-input v-model="txtOrder" :disabled="isSendingChat" class="w-full lg:w-96 text-2xl" placeholder="What can we get for you today?"></text-input>
+                            <text-input v-model="txtInput" :disabled="isSendingChat" class="w-full lg:w-96 text-2xl" placeholder="What can we get for you today?"></text-input>
+                            <input-examples :loading="isSendingChat" v-model="txtInput" v-on:change="onSubmit" class="mt-2">
+                                <pre>
+                                i'd like a latte that's it
+                                i'll have a dark roast coffee thank you
+                                get me a coffee please
+                                could i please get two mochas that's all
+                                we need twenty five flat whites and that'll do it
+                                how about a tall cappuccino
+                                i'd like a iced venti latte
+                                we'll also have a short tall latte
+                                i wanna latte macchiato with vanilla
+                                how about a peppermint latte
+                                may i also get a decaf soy vanilla syrup caramel latte with sugar and foam
+                                i want a latte with peppermint syrup with peppermint syrup
+                                can I get a skim soy latte
+                                i'd like a light nutmeg espresso that's it
+                                can i have an cappuccino no foam
+                                can i have an espresso with no nutmeg
+                                we want a light whipped no foam mocha with extra hazelnut and cinnamon
+                                i'd like a strawberry latte
+                                i want a flat white with five pumps of caramel syrup
+                                i want a two pump peppermint three squirt raspberry skinny vanilla latte with a pump of caramel and two sugars
+                                i want a latte cappuccino espresso and an apple muffin
+                                i'd like a tall decaf latte iced a grande cappuccino double espresso and a warmed poppyseed muffin sliced in half
+                                we'd like a latte with soy and a coffee with soy
+                                i want a latte latte macchiato and a chai latte
+                                we'd like a cappuccino with two pumps of vanilla
+                                i'd like a flat white with two equal
+                                add three equal to the flat white
+                                two tall lattes. the first one with no foam. the second one with whole milk.
+                                two tall lattes. the first one with no foam. the second one with whole milk. actually make the first one a grande.
+                                </pre>
+                            </input-examples>
                         </form>
                         <div class="mt-2 text-2xl text-gray-600">
                             <div v-if="isTranscribing" class="pr-20 flex items-center">
@@ -256,6 +289,7 @@ import { QueryOptions, Authenticate, CreateRecording, CreateChat } from "/mjs/dt
 import { AudioRecorder } from "/mjs/AudioRecorder.mjs"
 import RecordButton from "/mjs/components/RecordButton.mjs"
 import PlayButton from "/mjs/components/PlayButton.mjs"
+import InputExamples from "/mjs/components/InputExamples.mjs"
 
 const Mock = {
     transcribing: false,
@@ -280,6 +314,7 @@ const App = {
     components: {
         RecordButton,
         PlayButton,
+        InputExamples,
     },
     setup() {
         const { user, signIn } = useAuth()
@@ -298,7 +333,7 @@ const App = {
         const cartItems = computed(() => cart.value && cart.value.items || [])
         const orderItem = ref(createOrderItem(activeCategory.value))
         const modifyingExistingItem = computed(() => cartItems.value.some(x => x === orderItem.value))
-        const txtOrder = ref('')       
+        const txtInput = ref('')       
         const isRecording = ref(false)
         const loadingRecording = ref(false)
         const isTranscribing = ref(false)
@@ -420,7 +455,7 @@ const App = {
             isTranscribing.value = false
             transcript.value = ''
             apiProcessed.value = new ApiResult()
-            txtOrder.value = ''
+            txtInput.value = ''
             audio.value = null
         }
         
@@ -465,11 +500,11 @@ const App = {
         }
         
         async function onSubmit() {
-            const request = txtOrder.value
+            const request = txtInput.value
             clear()
-            txtOrder.value = request
+            txtInput.value = request
             await processOrder(request)
-            txtOrder.value = ''
+            txtInput.value = ''
         }
         
         async function processOrder(request) {
@@ -611,7 +646,7 @@ const App = {
             cartItems,
             orderItem,
             modifyingExistingItem,
-            txtOrder,
+            txtInput,
             onSubmit,
             doneEditCartItem,
             itemOptions,
