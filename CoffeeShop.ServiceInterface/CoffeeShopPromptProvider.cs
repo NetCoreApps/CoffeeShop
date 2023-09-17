@@ -18,7 +18,7 @@ public class CoffeeShopPromptProvider : IPromptProvider, IPhrasesProvider
         Config = config;
     }
 
-    public async Task<IEnumerable<string>> GetPhrases(CancellationToken token = default)
+    public async Task<IEnumerable<string>> GetPhrasesAsync(CancellationToken token = default)
     {
         using var db = await DbFactory.OpenDbConnectionAsync(token: token);
         var categories = await db.SelectAsync<Category>(token: token);

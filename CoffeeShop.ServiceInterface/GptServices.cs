@@ -28,23 +28,16 @@ public class GptServices : Service
 
     public async Task<StringsResponse> Any(GetPhrases request)
     {
-        IEnumerable<string> results = Array.Empty<string>();
-        if (PromptFactory.Get(request.Feature) is IPhrasesProvider phrasesProvider)
-        {
-            results = await phrasesProvider.GetPhrases();
-        }
-        return new StringsResponse { Results = results.ToList() };
+        var phraseWeights = await PromptFactory.Get(request.Feature).GetPhraseWeightsAsync();
+        return new StringsResponse { Results = phraseWeights.Map(x => x.Item1).ToList() };
     }
 
     public async Task Any(InitSpeech request)
     {
-        if (PromptFactory.Get(request.Feature) is IPhrasesProvider phrasesProvider)
-        {
-            var phrases = await phrasesProvider.GetPhrases();
-            await SpeechToText.InitAsync(new() {
-                PhraseWeights = new Dictionary<string, int>(phrases.Map(x => KeyValuePair.Create(x, 10)))
-            });
-        }
+        var phraseWeights = await PromptFactory.Get(request.Feature).GetPhraseWeightsAsync(defaultWeight:10);
+        await SpeechToText.InitAsync(new() {
+            PhraseWeights = phraseWeights.Map(x => KeyValuePair.Create(x.Item1, x.Item2))
+        });
     }
 
     public async Task<Recording> Any(CreateRecording request)

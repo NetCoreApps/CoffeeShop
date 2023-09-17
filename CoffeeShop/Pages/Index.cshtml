@@ -184,10 +184,6 @@
                                         </ul>
                                     </div>
                                 </div>
-                                <svg v-on:click="clear" class="w-10 h-10 cursor-pointer hover:text-green-800 shrink-0" xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21 21">
-                                    <title>clear</title>
-                                    <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m7.5 7.5l6 6m0-6l-6 6"/>
-                                </svg>
                             </div>
                             <div v-else-if="apiProcessed.error" class="text-red-600 flex">
                                 <div>
@@ -200,10 +196,6 @@
                                         </ul>
                                     </div>
                                 </div>
-                                <svg v-on:click="clear" class="w-10 h-10 cursor-pointer hover:text-green-800 shrink-0" xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 21 21">
-                                    <title>clear</title>
-                                    <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" d="m7.5 7.5l6 6m0-6l-6 6"/>
-                                </svg>
                             </div>
                             <div v-else-if="transcript" class="lowercase">
                                 <div class="pb-4">{{ transcript }}</div>
@@ -215,6 +207,9 @@
                     </div>
                     <div class="lg:ml-8">
                         <record-button :loading="loadingRecording" :recording="isRecording" v-on:toggle="toggleRecording"></record-button>
+                        <div class="relative mr-3">
+                            <close-button title="clear" v-if="apiProcessed.response || apiProcessed.error || transcript" v-on:click="clear"></close-button>
+                        </div>
                     </div>
                     <div :class="['ml-4', audio ? '' : 'invisible']">
                         <play-button :playing="isPlaying" v-on:play="audio.play()" v-on:pause="audio.pause()"></play-button>

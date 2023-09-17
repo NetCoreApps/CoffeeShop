@@ -5,7 +5,7 @@
     {
         <li class="@Html.ClassNames("relative flex flex-wrap just-fu-start m-0",cls)">
             <a href="@href" class="@Html.ClassNames("p-4 flex items-center justify-start mw-full hover:text-sky-500 dark:hover:text-sky-400", 
-                Html.MatchesPath(href) ? "text-blue-700 dark:text-blue-300" : "")">
+                                    Html.MatchesPath(href) ? "text-blue-700 dark:text-blue-300" : "")">
                 @Html.Raw(childContent)
             </a>
         </li>
@@ -13,7 +13,7 @@
     void RenderLinkButton(string href, string childContent, string? cls = null)
     {
         <li class="relative flex flex-wrap just-fu-start m-0">
-            <a href="@href" class="@(cls ?? Css.SecondaryButton)">
+            <a href="@href" class="@(cls ?? "inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 py-2 px-4 text-sm font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-400 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:ring-offset-black")">
                 @Html.Raw(childContent)
             </a>
         </li>
