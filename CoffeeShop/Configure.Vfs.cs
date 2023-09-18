@@ -15,7 +15,7 @@ public class ConfigureVfs : IHostingStartup
 
             if (appHost.AppSettings.Get<string>("VfsProvider") == nameof(GoogleCloudVirtualFiles))
             {
-                AppHost.AssertGoogleCloudCredentials();
+                GoogleCloudConfig.AssertValidCredentials();
                 appHost.VirtualFiles = new GoogleCloudVirtualFiles(
                     StorageClient.Create(), appHost.Resolve<AppConfig>().CoffeeShop.Bucket);
             }

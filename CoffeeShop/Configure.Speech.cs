@@ -19,8 +19,9 @@ public class ConfigureSpeech : IHostingStartup
             var speechProvider = context.Configuration.GetValue<string>("SpeechProvider");
             if (speechProvider == nameof(GoogleCloudSpeechToText))
             {
-                AppHost.AssertGoogleCloudCredentials();
+                GoogleCloudConfig.AssertValidCredentials();
                 services.AddSingleton<ISpeechToText>(c => new GoogleCloudSpeechToText(
+                    SpeechClient.Create(),
                     X.Map(c.Resolve<AppConfig>(), config =>
                     {
                         var siteConfig = config.GetSiteConfig(Tags.CoffeeShop);
@@ -32,7 +33,7 @@ public class ConfigureSpeech : IHostingStartup
                             RecognizerId = siteConfig.RecognizerId,
                             PhraseSetId = siteConfig.PhraseSetId,
                         };
-                    })!, SpeechClient.Create()));
+                    })!));
             }
             else if (speechProvider == nameof(WhisperApiSpeechToText))
             {
