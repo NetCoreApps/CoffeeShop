@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using Funq;
 using ServiceStack;
 using ServiceStack.AI;
 using ServiceStack.OrmLite;
@@ -10,9 +11,12 @@ public class GptServices : Service
 {
     public AppConfig Config { get; set; }
     public IAutoQueryDb AutoQuery { get; set; }
-    public ISpeechToText SpeechToText { get; set; }
+    public ISpeechToText? SpeechToText { get; set; }
+    public ISpeechToTextFactory? SpeechToTextFactory { get; set; }
     public IPromptProviderFactory PromptFactory { get; set; }
     public ITypeChat TypeChat { get; set; }
+    public ISpeechToText GetSpeechToText(string name) => SpeechToTextFactory?.Get(name) ?? SpeechToText
+        ?? throw new ResolutionException(typeof(ISpeechToText), "No ISpeechToText is configured");
 
     [AddHeader(HttpHeaders.ContentType, MimeTypes.PlainText)]
     public async Task<string> Any(GetSchema request)
@@ -35,7 +39,7 @@ public class GptServices : Service
     public async Task Any(InitSpeech request)
     {
         var phraseWeights = await PromptFactory.Get(request.Feature).GetPhraseWeightsAsync(defaultWeight:10);
-        await SpeechToText.InitAsync(new() {
+        await GetSpeechToText(request.Feature).InitAsync(new() {
             PhraseWeights = phraseWeights.Map(x => KeyValuePair.Create(x.Item1, x.Item2))
         });
     }
@@ -44,6 +48,7 @@ public class GptServices : Service
     {
         var feature = request.Feature.ToLower();
         var recording = (Recording)await AutoQuery.CreateAsync(request, Request);
+        var speechToText = GetSpeechToText(request.Feature);
 
         var transcribeStart = DateTime.UtcNow;
         await Db.UpdateOnlyAsync(() => new Recording { TranscribeStart = transcribeStart },
@@ -52,12 +57,12 @@ public class GptServices : Service
         ResponseStatus? responseStatus = null;
         try
         {
-            var response = await SpeechToText.TranscribeAsync(request.Path);
+            var response = await speechToText.TranscribeAsync(request.Path);
             var transcribeEnd = DateTime.UtcNow;
             await Db.UpdateOnlyAsync(() => new Recording
             {
                 Feature = feature,
-                Provider = SpeechToText.GetType().Name,
+                Provider = speechToText.GetType().Name,
                 Transcript = response.Transcript,
                 TranscriptConfidence = response.Confidence,
                 TranscriptResponse = response.ApiResponse,

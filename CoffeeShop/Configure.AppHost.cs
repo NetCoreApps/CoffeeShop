@@ -1,9 +1,10 @@
 using Funq;
-using CoffeeShop.ServiceInterface;
 using ServiceStack.Configuration;
 using ServiceStack.Host;
 using ServiceStack.IO;
 using ServiceStack.Web;
+using CoffeeShop.ServiceInterface;
+using CoffeeShop.ServiceModel;
 
 [assembly: HostingStartup(typeof(CoffeeShop.AppHost))]
 
@@ -16,6 +17,26 @@ public class AppHost : AppHostBase, IHostingStartup
             // Configure ASP.NET Core IOC Dependencies
             var appConfig = new AppConfig();
             context.Configuration.Bind(nameof(AppConfig), appConfig);
+            if (appConfig.AwsConfig != null)
+            {
+                appConfig.AwsConfig.AccountId ??= Environment.GetEnvironmentVariable("AWS_ACCOUNT_ID");
+                appConfig.AwsConfig.AccessKey ??= Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID");
+                appConfig.AwsConfig.SecretKey ??= Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY");
+                appConfig.AwsConfig.Region ??= Environment.GetEnvironmentVariable("AWS_REGION");
+            }
+            if (appConfig.R2Config != null)
+            {
+                appConfig.R2Config.AccountId ??= Environment.GetEnvironmentVariable("R2_ACCOUNT_ID");
+                appConfig.R2Config.AccessKey ??= Environment.GetEnvironmentVariable("R2_ACCESS_KEY_ID");
+                appConfig.R2Config.SecretKey ??= Environment.GetEnvironmentVariable("R2_SECRET_ACCESS_KEY");
+                appConfig.R2Config.Region ??= Environment.GetEnvironmentVariable("R2_REGION");
+            }
+            if (appConfig.AzureConfig != null)
+            {
+                appConfig.AzureConfig.SpeechKey ??= Environment.GetEnvironmentVariable("SPEECH_KEY");
+                appConfig.AzureConfig.SpeechRegion ??= Environment.GetEnvironmentVariable("SPEECH_REGION");
+                appConfig.AzureConfig.ConnectionString ??= Environment.GetEnvironmentVariable("AZURE_BLOB_CONNECTION_STRING");
+            }
             services.AddSingleton(appConfig);
 
             if (!AppTasks.IsRunAsAppTask())
@@ -48,7 +69,7 @@ public class AppHost : AppHostBase, IHostingStartup
                 new UploadLocation("recordings", VirtualFiles, allowExtensions:FileExt.WebAudios, writeAccessRole: RoleNames.AllowAnon,
                     maxFileBytes: 1024 * 1024,
                     transformFile: ctx => ConvertAudioToWebM(ctx.File),
-                    resolvePath: ctx => $"/recordings/{ctx.DateSegment}/{DateTime.UtcNow.TimeOfDay.TotalMilliseconds}.{ctx.FileExtension}")
+                    resolvePath: ctx => $"/recordings/{ctx.GetDto<IRequireFeature>().Feature}/{ctx.DateSegment}/{DateTime.UtcNow.TimeOfDay.TotalMilliseconds}.{ctx.FileExtension}")
             ));
         }
     }

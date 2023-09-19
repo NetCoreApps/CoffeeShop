@@ -1,6 +1,3 @@
-using System.Net;
-using CoffeeShop.ServiceInterface;
-using CoffeeShop.ServiceModel;
 using Microsoft.SemanticKernel;
 using NUnit.Framework;
 using ServiceStack;
@@ -10,37 +7,43 @@ using ServiceStack.IO;
 using ServiceStack.OrmLite;
 using ServiceStack.Testing;
 using ServiceStack.Text;
+using CoffeeShop.ServiceInterface;
+using CoffeeShop.ServiceModel;
 
 namespace CoffeeShop.Tests;
 
-[TestFixture, Explicit("Integration")]
+[TestFixture, Explicit, Category("Integration")]
 public class GptTests
 {
     IDbConnectionFactory ResolveDbFactory() => new ConfigureDb().ConfigureAndResolve<IDbConnectionFactory>();
 
     private ServiceStackHost CreateAppHost()
     {
-        var appHost = new BasicAppHost(typeof(CoffeeShopServices).Assembly)
+        var appHost = new BasicAppHost(typeof(GptServices).Assembly)
             {
                 ConfigureAppHost = host =>
                 {
-                    var hostDir = "../../../../CoffeeShop";
-                    host.VirtualFiles = new FileSystemVirtualFiles(hostDir);
                     var dbFactory = ResolveDbFactory();
+                    host.VirtualFiles = new FileSystemVirtualFiles(".");
                     host.Register(dbFactory);
                     var appConfig = new AppConfig
                     {
-                        Project = "servicestackdemo",
-                        Location = "global",
+                        GcpConfig = new()
+                        {
+                            Project = "servicestackdemo",
+                            Location = "global",
+                            Bucket = "servicestack-typechat",
+                        },
                         CoffeeShop = new()
                         {
-                            GptPath = Path.GetFullPath(Path.Combine(hostDir, "gpt/coffeeshop")),
-                            Bucket = "servicestack-coffeeshop",
+                            GptPath = Path.GetFullPath("gpt/coffeeshop"),
                             RecognizerId = "coffeeshop-recognizer",
                             PhraseSetId = "coffeeshop-phrases",
                         }
                     };
                     host.Register(appConfig);
+                    
+                    host.LoadPlugin(new AutoQueryFeature());
                     
                     var kernel = Kernel.Builder
                         .WithOpenAIChatCompletionService(
@@ -49,8 +52,15 @@ public class GptTests
                         .Build();
 
                     host.Register(kernel);
-                    host.Container.AddSingleton<ITypeChat>(c => new KernelTypeChat(c.Resolve<IKernel>()));
-                    host.Container.AddSingleton<IPromptProvider>(c => new CoffeeShopPromptProvider(dbFactory, appConfig)); 
+                    var services = host.Container;
+                    services.AddSingleton<ITypeChat>(c => new KernelTypeChat(c.Resolve<IKernel>()));
+                    services.AddSingleton<CoffeeShopPromptProvider>();
+                    services.AddSingleton<IPromptProviderFactory>(c => new PromptProviderFactory {
+                        Providers = {
+                            [Tags.CoffeeShop] = c.Resolve<CoffeeShopPromptProvider>(),
+                        }
+                    });
+                    
                 }
             }
             .Init();
@@ -71,7 +81,9 @@ public class GptTests
     {
         using var appHost = CreateAppHost();
         var service = appHost.Resolve<GptServices>();
-        var response = await service.Any(new GetPhrases());
+        var response = await service.Any(new GetPhrases {
+            Feature = Tags.CoffeeShop
+        });
         
         response.Results.PrintDump();
     }
@@ -87,6 +99,7 @@ public class GptTests
         var service = appHost.Resolve<GptServices>();
         var prompt = await service.Any(new GetPrompt
         {
+            Feature = Tags.CoffeeShop,
             UserMessage = request +
                           @"
 JSON validation failed: 'vanilla' is not a valid name for the type: Syrups
@@ -139,6 +152,7 @@ export interface Syrups {
         using var appHost = CreateAppHost();
 
         var service = appHost.Resolve<GptServices>();
+        service.Request = new MockHttpRequest();
         // var schema = (string) await service.Any(new CoffeeShopSchema());
         // schema.Print();
         var prompt = await service.Any(new CreateChat

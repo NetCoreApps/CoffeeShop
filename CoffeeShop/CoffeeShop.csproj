@@ -21,13 +21,14 @@
   </Target>
 
   <ItemGroup>
-    <PackageReference Include="Markdig" Version="0.30.*" />
     <PackageReference Include="ServiceStack" Version="6.*" />
     <PackageReference Include="ServiceStack.Mvc" Version="6.*" />
     <PackageReference Include="ServiceStack.Server" Version="6.*" />
     <PackageReference Include="ServiceStack.OrmLite.Sqlite.Data" Version="6.*" />
     <PackageReference Include="ServiceStack.AI" Version="6.*" />
     <PackageReference Include="ServiceStack.GoogleCloud" Version="6.*" />
+    <PackageReference Include="ServiceStack.Aws" Version="6.*" />
+    <PackageReference Include="ServiceStack.Azure" Version="6.*" />
     <PackageReference Include="Google.Cloud.Storage.V1" Version="4.6.0" />
     <PackageReference Include="Google.Cloud.Speech.V2" Version="1.0.0-beta06" />
     

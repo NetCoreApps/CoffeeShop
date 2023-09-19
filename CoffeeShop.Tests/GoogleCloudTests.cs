@@ -3,11 +3,13 @@ using Google.Cloud.Storage.V1;
 using Google.Protobuf;
 using NUnit.Framework;
 using ServiceStack;
+using ServiceStack.GoogleCloud;
+using ServiceStack.IO;
 using ServiceStack.Text;
 
 namespace CoffeeShop.Tests;
 
-[TestFixture, Explicit("Integration")]
+[TestFixture, Explicit, Category("Integration")]
 public class GoogleCloudTests
 {
     const string ServiceUrl = "https://australia-southeast1-speech.googleapis.com/v2";
@@ -20,15 +22,6 @@ public class GoogleCloudTests
     private string SimpleRecognizerAU = "simple-recognizer-au";
     private string SimpleRecognizerUS = "simple-recognizer-us";
     private string SimplePhraseSet = "simple-phrase-set";
-    private string[] SimplePhrases = { "hot", "cappuccino", "sugar", "cold", "chai", "latte", "bagel" };
-    private const string RecordingsPath = "../../../recordings/";
-
-    private string[] Recordings =
-    {
-        "hot-cappuccino-with-two-sugars-male.wav",
-        "hot-cappuccino-with-two-sugars-boy.wav",
-        "cold-chai-latte-and-bagel-female.wav",
-    };
 
     private async Task CreateSimplePhraseSet(SpeechClient client)
     {
@@ -53,7 +46,7 @@ public class GoogleCloudTests
             {
                 Phrases =
                 {
-                    SimplePhrases.Map(x => new PhraseSet.Types.Phrase { Value = x, Boost = 20 })
+                    TestConfig.SimplePhrases.Map(x => new PhraseSet.Types.Phrase { Value = x, Boost = 20 })
                 }
             }
         });
@@ -62,7 +55,7 @@ public class GoogleCloudTests
     private static async Task<RecognizeResponse> RecognizeWithRecognizer(string recognizerId, string recording)
     {
         var speech = await SpeechClient.CreateAsync();
-        await using var fileStream = File.OpenRead(RecordingsPath + recording);
+        await using var fileStream = File.OpenRead(TestConfig.RecordingsPath + recording);
         var response = await speech.RecognizeAsync(new RecognizeRequest
         {
             Recognizer = $"projects/servicestackdemo/locations/global/recognizers/{recognizerId}",
@@ -212,20 +205,20 @@ public class GoogleCloudTests
     [Test]
     public async Task Transcribe_with_Google_Cloud_with_SimpleRecognizerAU()
     {
-        var response = await RecognizeWithRecognizer(SimpleRecognizerAU, Recordings[0]);
+        var response = await RecognizeWithRecognizer(SimpleRecognizerAU, TestConfig.Recordings[0]);
         response.Results.PrintDump();
     }
 
     [Test]
     public async Task Transcribe_with_Google_Cloud_with_SimpleRecognizerUS()
     {
-        var response = await RecognizeWithRecognizer(SimpleRecognizerUS, Recordings[0]);
+        var response = await RecognizeWithRecognizer(SimpleRecognizerUS, TestConfig.Recordings[0]);
         response.Results.PrintDump();
         
-        response = await RecognizeWithRecognizer(SimpleRecognizerUS, Recordings[1]);
+        response = await RecognizeWithRecognizer(SimpleRecognizerUS, TestConfig.Recordings[1]);
         response.Results.PrintDump();
         
-        response = await RecognizeWithRecognizer(SimpleRecognizerUS, Recordings[2]);
+        response = await RecognizeWithRecognizer(SimpleRecognizerUS, TestConfig.Recordings[2]);
         response.Results.PrintDump();
     }
 
@@ -233,7 +226,7 @@ public class GoogleCloudTests
     public async Task Transcribe_with_Google_Cloud()
     {
         var client = await SpeechClient.CreateAsync();
-        await using var fileStream = File.OpenRead(RecordingsPath + Recordings[0]);
+        await using var fileStream = File.OpenRead(TestConfig.RecordingsPath + TestConfig.Recordings[0]);
 
         var response = await client.RecognizeAsync(new RecognizeRequest
         {
@@ -254,28 +247,56 @@ public class GoogleCloudTests
     public async Task Upload_recordings_to_GoogleStorage()
     {
         var storage = await StorageClient.CreateAsync();
-        await using var fs = File.OpenRead(RecordingsPath + Recordings[0]);
-        await storage.UploadObjectAsync("servicestack-coffeeshop", $"2023/08/16/{Recordings[0]}", null, fs);
+        await using var fs = File.OpenRead(TestConfig.RecordingsPath + TestConfig.Recordings[0]);
+        await storage.UploadObjectAsync("servicestack-coffeeshop", $"2023/08/16/{TestConfig.Recordings[0]}", null, fs);
     }
 
     [Test]
     public async Task Transcribe_GoogleCloud_recording()
     {
-        var recording = Recordings[2];
+        var recording = TestConfig.Recordings[2];
         var relativePath = $"2023/08/16/{recording}";
         var bucket = "servicestack-coffeeshop";
 
         var storage = await StorageClient.CreateAsync();
-        await using var fs = File.OpenRead(RecordingsPath + recording);
+        await using var fs = File.OpenRead(TestConfig.RecordingsPath + recording);
         await storage.UploadObjectAsync(bucket, relativePath, null, fs);
         
         var speech = await SpeechClient.CreateAsync();
-        await using var fileStream = File.OpenRead(RecordingsPath + recording);
+        await using var fileStream = File.OpenRead(TestConfig.RecordingsPath + recording);
         var response = await speech.RecognizeAsync(new RecognizeRequest
         {
             Recognizer = $"projects/servicestackdemo/locations/global/recognizers/{SimpleRecognizerUS}",
             Uri = $"gs://{bucket}/{relativePath}"
         });
         response.Results.PrintDump();
+    }
+
+    [Test]
+    public async Task Upload_Transcoding()
+    {
+        var config = new GoogleCloudSpeechConfig
+        {
+            Project = "servicestackdemo",
+            Location = "global",
+            Bucket = "servicestack-coffeeshop",
+        };
+        var virtualFiles = new FileSystemVirtualFiles(TestConfig.HostDir);
+        var speechClient = await SpeechClient.CreateAsync();
+        
+        var request = new RecognizeRequest {
+            Recognizer = $"projects/{config.Project}/locations/{config.Location}/recognizers/{config.RecognizerId ?? "_"}",
+            Config = config.RecognitionConfig,
+        };
+
+        var recordingPath = "/recordings/2023/09/17/62142005.9172.webm";
+        var file = virtualFiles.GetFile(recordingPath);
+        if (file == null)
+            throw new FileNotFoundException($"File not found {recordingPath}");
+        await using var fileStream = file.OpenRead();
+        request.Content = await ByteString.FromStreamAsync(fileStream);
+
+        var response = await speechClient.RecognizeAsync(request);
+        response.ToJson().Print();
     }
 }

@@ -43,9 +43,14 @@ public class Chat
     public string? Error { get; set; }
 }
 
+public interface IRequireFeature
+{
+    public string Feature { get; set; }
+}
+
 [Tag(Tags.Gpt)]
 [Route("/{Feature}/schema")]
-public class GetSchema : IReturn<string>
+public class GetSchema : IRequireFeature, IReturn<string>
 {
     [ValidateNotEmpty]
     public string Feature { get; set; }
@@ -53,7 +58,7 @@ public class GetSchema : IReturn<string>
 
 [Tag(Tags.Gpt)]
 [Route("/{Feature}/prompt")]
-public class GetPrompt : IReturn<string>
+public class GetPrompt : IRequireFeature, IReturn<string>
 {
     [ValidateNotEmpty]
     public string Feature { get; set; }
@@ -62,7 +67,7 @@ public class GetPrompt : IReturn<string>
 
 [Tag(Tags.Gpt)]
 [Route("/{Feature}/phrases")]
-public class GetPhrases : IReturn<StringsResponse>
+public class GetPhrases : IRequireFeature, IReturn<StringsResponse>
 {
     [ValidateNotEmpty]
     public string Feature { get; set; }
@@ -71,7 +76,7 @@ public class GetPhrases : IReturn<StringsResponse>
 [ValidateIsAdmin]
 [Tag(Tags.Gpt)]
 [Route("/{Feature}/speech/init")]
-public class InitSpeech : IReturnVoid
+public class InitSpeech : IRequireFeature, IReturnVoid
 {
     [ValidateNotEmpty]
     public string Feature { get; set; }
@@ -83,7 +88,7 @@ public class QueryRecordings : QueryDb<Recording> {}
 [Tag(Tags.Gpt)]
 [AutoPopulate(nameof(Recording.CreatedDate),  Eval = "utcNow")]
 [AutoPopulate(nameof(Recording.IpAddress),  Eval = "Request.RemoteIp")]
-public class CreateRecording : ICreateDb<Recording>, IReturn<Recording>
+public class CreateRecording : IRequireFeature, ICreateDb<Recording>, IReturn<Recording>
 {
     [ValidateNotEmpty]
     public string Feature { get; set; }
@@ -99,7 +104,7 @@ public class QueryChats : QueryDb<Chat>
 [Tag(Tags.Gpt)]
 [AutoPopulate(nameof(Recording.CreatedDate),  Eval = "utcNow")]
 [AutoPopulate(nameof(Recording.IpAddress),  Eval = "Request.RemoteIp")]
-public class CreateChat : ICreateDb<Chat>, IReturn<Chat>
+public class CreateChat : IRequireFeature, ICreateDb<Chat>, IReturn<Chat>
 {
     [ValidateNotEmpty]
     public string Feature { get; set; }

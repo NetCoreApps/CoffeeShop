@@ -2611,10 +2611,6 @@ select{
   color: rgb(161 98 7 / var(--tw-text-opacity));
 }
 
-.underline {
-  text-decoration-line: underline;
-}
-
 .placeholder-red-300::-moz-placeholder {
   --tw-placeholder-opacity: 1;
   color: rgb(252 165 165 / var(--tw-placeholder-opacity));
@@ -3119,16 +3115,6 @@ select{
   color: rgb(7 89 133 / var(--tw-text-opacity));
 }
 
-.hover\:text-slate-400:hover {
-  --tw-text-opacity: 1;
-  color: rgb(148 163 184 / var(--tw-text-opacity));
-}
-
-.hover\:text-success:hover {
-  --tw-text-opacity: 1;
-  color: rgb(0 112 243 / var(--tw-text-opacity));
-}
-
 .hover\:underline:hover {
   text-decoration-line: underline;
 }
@@ -3625,11 +3611,6 @@ select{
   color: rgb(148 163 184 / var(--tw-text-opacity));
 }
 
-:is(.dark .dark\:text-slate-600) {
-  --tw-text-opacity: 1;
-  color: rgb(71 85 105 / var(--tw-text-opacity));
-}
-
 :is(.dark .dark\:text-white) {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity));
@@ -3781,11 +3762,6 @@ select{
 :is(.dark .dark\:hover\:text-sky-400:hover) {
   --tw-text-opacity: 1;
   color: rgb(56 189 248 / var(--tw-text-opacity));
-}
-
-:is(.dark .dark\:hover\:text-slate-500:hover) {
-  --tw-text-opacity: 1;
-  color: rgb(100 116 139 / var(--tw-text-opacity));
 }
 
 :is(.dark .dark\:hover\:text-white:hover) {
