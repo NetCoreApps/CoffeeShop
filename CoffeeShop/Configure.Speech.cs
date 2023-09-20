@@ -40,11 +40,11 @@ public class ConfigureSpeech : IHostingStartup
             {
                 services.AddSingleton<ISpeechToText>(c => {
                     var config = c.Resolve<AppConfig>();
-                    var aws = config.AssertAwsConfig();
+                    var a = config.AssertAwsConfig();
                     return new AwsSpeechToText(new AmazonTranscribeServiceClient(
-                            aws.AccessKey, aws.SecretKey, RegionEndpoint.GetBySystemName(aws.Region)),
+                            a.AccessKey, a.SecretKey, RegionEndpoint.GetBySystemName(a.Region)),
                         new AwsSpeechToTextConfig {
-                            Bucket = aws.Bucket,
+                            Bucket = a.Bucket,
                             VocabularyName = config.CoffeeShop.VocabularyName,
                         });
                 });
@@ -52,10 +52,10 @@ public class ConfigureSpeech : IHostingStartup
             else if (speechProvider == nameof(AzureSpeechToText))
             {
                 services.AddSingleton<ISpeechToText>(c => {
-                    var azure = c.Resolve<AppConfig>().AssertAzureConfig();
-                    var speechConfig = SpeechConfig.FromSubscription(azure.SpeechKey, azure.SpeechRegion);
-                    speechConfig.SpeechRecognitionLanguage = "en-US";
-                    return new AzureSpeechToText(speechConfig);
+                    var az = c.Resolve<AppConfig>().AssertAzureConfig();
+                    var config = SpeechConfig.FromSubscription(az.SpeechKey, az.SpeechRegion);
+                    config.SpeechRecognitionLanguage = "en-US";
+                    return new AzureSpeechToText(config);
                 });
             }
             else if (speechProvider == nameof(WhisperApiSpeechToText))
