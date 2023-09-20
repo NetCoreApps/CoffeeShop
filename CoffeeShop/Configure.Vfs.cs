@@ -26,26 +26,22 @@ public class ConfigureVfs : IHostingStartup
             }
             else if (vfsProvider == nameof(S3VirtualFiles))
             {
-                var awsConfig = appHost.Resolve<AppConfig>().AssertAwsConfig();
-                appHost.VirtualFiles = new S3VirtualFiles(new AmazonS3Client(
-                    awsConfig.AccessKey,
-                    awsConfig.SecretKey,
-                    RegionEndpoint.GetBySystemName(awsConfig.Region)), awsConfig.Bucket);
-            }
-            else if (vfsProvider == nameof(R2VirtualFiles))
-            {
-                var r2Config = appHost.Resolve<AppConfig>().AssertR2Config();
-                appHost.VirtualFiles = new R2VirtualFiles(new AmazonS3Client(
-                    r2Config.AccessKey,
-                    r2Config.SecretKey,
-                    new AmazonS3Config {
-                        ServiceURL = $"https://{r2Config.AccountId}.r2.cloudflarestorage.com",
-                    }), r2Config.Bucket);
+                var aws = appHost.Resolve<AppConfig>().AssertAwsConfig();
+                appHost.VirtualFiles = new S3VirtualFiles(new AmazonS3Client(aws.AccessKey, aws.SecretKey,
+                    RegionEndpoint.GetBySystemName(aws.Region)), aws.Bucket);
             }
             else if (vfsProvider == nameof(AzureBlobVirtualFiles))
             {
-                var azureConfig = appHost.Resolve<AppConfig>().AssertAzureConfig();
-                appHost.VirtualFiles = new AzureBlobVirtualFiles(azureConfig.ConnectionString, azureConfig.ContainerName);
+                var az = appHost.Resolve<AppConfig>().AssertAzureConfig();
+                appHost.VirtualFiles = new AzureBlobVirtualFiles(az.ConnectionString, az.ContainerName);
+            }
+            else if (vfsProvider == nameof(R2VirtualFiles))
+            {
+                var r2 = appHost.Resolve<AppConfig>().AssertR2Config();
+                appHost.VirtualFiles = new R2VirtualFiles(new AmazonS3Client(r2.AccessKey, r2.SecretKey,
+                    new AmazonS3Config {
+                        ServiceURL = $"https://{r2.AccountId}.r2.cloudflarestorage.com",
+                    }), r2.Bucket);
             }
             //else uses default FileSystemVirtualFiles
         });
