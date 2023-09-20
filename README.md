@@ -1,18 +1,12 @@
-# vue-mjs
+# TypeScript CoffeeShop TypeChat Example in .NET
 
-.NET 6.0 Simple, modern Vue 3 App using JS modules
+TypeScript CoffeeShop TypeChat Example implemented in .NET
 
-[![](https://raw.githubusercontent.com/ServiceStack/Assets/master/csharp-templates/vue-mjs.png)](http://vue-mjs.web-templates.io/)
+[![](https://servicestack.net/img/posts/typescript-typechat-examples/coffeeshop.png)](https://typechat.netcore.io/coffeeshop)
 
-> Browse [source code](https://github.com/NetCoreTemplates/razor), view live demo [vue-mjs.web-templates.io](http://vue-mjs.web-templates.io) and install with [dotnet-new](https://docs.servicestack.net/dotnet-new):
+> Browse [source code](https://github.com/NetCoreApps/CoffeeShop) or view live demo [typechat.netcore.io](https://typechat.netcore.io/coffeeshop) 
 
-    $ dotnet tool install -g x
+## Blog Posts
 
-    $ x new vue-mjs ProjectName
-
-Alternatively write new project files directly into an empty repository, using the Directory Name as the ProjectName:
-
-    $ git clone https://github.com/<User>/<ProjectName>.git
-    $ cd <ProjectName>
-    $ x new vue-mjs
-
+ - [Modelling TypeChat's CoffeeShop in .NET](https://servicestack.net/posts/building-typechat-coffeeshop-modelling)
+ - [Creating a Voice Activated CoffeeShop in .NET](https://servicestack.net/posts/voice-activated-typechat-coffeeshop)
