@@ -24,16 +24,16 @@ public class ConfigureVfs : IHostingStartup
                 appHost.VirtualFiles = new GoogleCloudVirtualFiles(
                     StorageClient.Create(), appHost.Resolve<AppConfig>().AssertGcpConfig().Bucket);
             }
+            else if (vfsProvider == nameof(AzureBlobVirtualFiles))
+            {
+                var az = appHost.Resolve<AppConfig>().AssertAzureConfig();
+                appHost.VirtualFiles = new AzureBlobVirtualFiles(az.ConnectionString, az.ContainerName);
+            }
             else if (vfsProvider == nameof(S3VirtualFiles))
             {
                 var aws = appHost.Resolve<AppConfig>().AssertAwsConfig();
                 appHost.VirtualFiles = new S3VirtualFiles(new AmazonS3Client(aws.AccessKey, aws.SecretKey,
                     RegionEndpoint.GetBySystemName(aws.Region)), aws.Bucket);
-            }
-            else if (vfsProvider == nameof(AzureBlobVirtualFiles))
-            {
-                var az = appHost.Resolve<AppConfig>().AssertAzureConfig();
-                appHost.VirtualFiles = new AzureBlobVirtualFiles(az.ConnectionString, az.ContainerName);
             }
             else if (vfsProvider == nameof(R2VirtualFiles))
             {
