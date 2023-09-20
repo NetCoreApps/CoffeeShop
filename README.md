@@ -2,9 +2,9 @@
 
 TypeScript CoffeeShop TypeChat Example implemented in .NET
 
-[![](https://servicestack.net/img/posts/typescript-typechat-examples/coffeeshop.png)](https://typechat.netcore.io/coffeeshop)
+[![](https://servicestack.net/img/posts/typescript-typechat-examples/coffeeshop.png)](https://coffeeshop.netcore.io)
 
-> Browse [source code](https://github.com/NetCoreApps/CoffeeShop) or view live demo [typechat.netcore.io](https://typechat.netcore.io/coffeeshop) 
+> Browse [source code](https://github.com/NetCoreApps/CoffeeShop) or view live demo [coffeeshop.netcore.io](https://coffeeshop.netcore.io) 
 
 ## Blog Posts
 
