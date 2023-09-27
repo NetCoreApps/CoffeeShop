@@ -5,9 +5,9 @@ using ServiceStack.Configuration;
 using ServiceStack.Host;
 using ServiceStack.IO;
 using ServiceStack.Web;
+using ServiceStack.GoogleCloud;
 using CoffeeShop.ServiceInterface;
 using CoffeeShop.ServiceModel;
-using ServiceStack.GoogleCloud;
 
 [assembly: HostingStartup(typeof(CoffeeShop.AppHost))]
 
