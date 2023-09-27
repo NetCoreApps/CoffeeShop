@@ -275,18 +275,17 @@ public class GoogleCloudTests
     [Test]
     public async Task Upload_Transcoding()
     {
-        var config = new GoogleCloudSpeechConfig
-        {
+        var config = new GoogleCloudConfig {
             Project = "servicestackdemo",
             Location = "global",
-            Bucket = "servicestack-coffeeshop",
+            Bucket = "servicestack-typechat",
         };
         var virtualFiles = new FileSystemVirtualFiles(TestConfig.HostDir);
         var speechClient = await SpeechClient.CreateAsync();
         
         var request = new RecognizeRequest {
             Recognizer = $"projects/{config.Project}/locations/{config.Location}/recognizers/{config.RecognizerId ?? "_"}",
-            Config = config.RecognitionConfig,
+            Config = config.ToRecognitionConfig(),
         };
 
         var recordingPath = "/recordings/2023/09/17/62142005.9172.webm";

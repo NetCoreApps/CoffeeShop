@@ -1,4 +1,3 @@
-using Microsoft.SemanticKernel;
 using NUnit.Framework;
 using ServiceStack;
 using ServiceStack.Data;
@@ -7,6 +6,8 @@ using ServiceStack.IO;
 using ServiceStack.OrmLite;
 using ServiceStack.Testing;
 using ServiceStack.Text;
+using ServiceStack.GoogleCloud;
+using Microsoft.SemanticKernel;
 using CoffeeShop.ServiceInterface;
 using CoffeeShop.ServiceModel;
 
@@ -28,12 +29,6 @@ public class GptTests
                     host.Register(dbFactory);
                     var appConfig = new AppConfig
                     {
-                        GcpConfig = new()
-                        {
-                            Project = "servicestackdemo",
-                            Location = "global",
-                            Bucket = "servicestack-typechat",
-                        },
                         CoffeeShop = new()
                         {
                             GptPath = Path.GetFullPath("gpt/coffeeshop"),
@@ -42,6 +37,11 @@ public class GptTests
                         }
                     };
                     host.Register(appConfig);
+                    host.Register(new GoogleCloudConfig {
+                        Project = "servicestackdemo",
+                        Location = "global",
+                        Bucket = "servicestack-typechat",
+                    });
                     
                     host.LoadPlugin(new AutoQueryFeature());
                     
