@@ -34,7 +34,7 @@ public class ConfigureVfs : IHostingStartup
             }
             else if (vfsProvider == nameof(R2VirtualFiles))
             {
-                var r2 = appHost.Resolve<R2Config>();
+                var r2 = appHost.Resolve<CloudflareConfig>();
                 appHost.VirtualFiles = new R2VirtualFiles(new AmazonS3Client(
                     r2.AccessKey,
                     r2.SecretKey,

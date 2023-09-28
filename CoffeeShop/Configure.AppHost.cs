@@ -37,7 +37,7 @@ public class AppHost : AppHostBase, IHostingStartup
                 services.AddSingleton(aws);
             }
 
-            var r2 = context.Configuration.GetSection(nameof(R2Config))?.Get<R2Config>();
+            var r2 = context.Configuration.GetSection(nameof(CloudflareConfig))?.Get<CloudflareConfig>();
             if (r2 != null)
             {
                 r2.AccountId ??= Environment.GetEnvironmentVariable("R2_ACCOUNT_ID");
